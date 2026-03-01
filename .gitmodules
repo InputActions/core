@@ -1,0 +1,3 @@
+[submodule "lib/libevdev-cpp"]
+	path = lib/libevdev-cpp
+	url = https://github.com/InputActions/libevdev-cpp
