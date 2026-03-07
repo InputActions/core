@@ -445,7 +445,7 @@ void NodeParser<InputDeviceProperties>::parse(const Node *node, InputDevicePrope
     loadSetter(result, &InputDeviceProperties::setTouchpadButtonPad, node->at("buttonpad"));
     loadSetter(result, &InputDeviceProperties::setTouchpadClickTimeout, node->at("click_timeout"));
     loadSetter(result, &InputDeviceProperties::setTouchpadMotionThreshold2, node->at("motion_threshold_2"));
-    loadSetter(result, &InputDeviceProperties::setTouchpadMotionThreshold2, node->at("motion_threshold_3"));
+    loadSetter(result, &InputDeviceProperties::setTouchpadMotionThreshold3, node->at("motion_threshold_3"));
 
     if (const auto *pressureRangesNode = node->mapAt("pressure_ranges")) {
         loadSetter(result, &InputDeviceProperties::setFingerPressure, pressureRangesNode->at("finger"));
