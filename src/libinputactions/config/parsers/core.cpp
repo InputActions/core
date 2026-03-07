@@ -435,7 +435,8 @@ void NodeParser<InputDeviceProperties>::parse(const Node *node, InputDevicePrope
 {
     loadSetter(result, &InputDeviceProperties::setMultiTouch, node->at("__multiTouch"));
     loadSetter(result, &InputDeviceProperties::setGrab, node->at("grab"));
-    loadSetter(result, &InputDeviceProperties::setHandleLibevdevEvents, node->at("handle_libevdev_events"));
+    loadSetter(result, &InputDeviceProperties::setHandleEvdevEvents, node->at("handle_libevdev_events"));
+    loadSetter(result, &InputDeviceProperties::setHandleEvdevEvents, node->at("handle_evdev_events"));
     loadSetter(result, &InputDeviceProperties::setIgnore, node->at("ignore"));
     loadSetter(result, &InputDeviceProperties::setMotionThreshold, node->at("motion_threshold"));
     loadSetter(result, &InputDeviceProperties::setMouseMotionTimeout, node->at("motion_timeout"));

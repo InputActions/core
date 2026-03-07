@@ -121,7 +121,7 @@ void LibevdevComplementaryInputBackend::removeDevice(const InputDevice *device)
 
 void LibevdevComplementaryInputBackend::handleEvdevEvent(InputDevice *sender, const input_event &event)
 {
-    if (!m_devices.contains(sender) || !sender->properties().handleLibevdevEvents()) {
+    if (!m_devices.contains(sender) || !sender->properties().handleEvdevEvents()) {
         return;
     }
 
