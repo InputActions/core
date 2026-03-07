@@ -41,7 +41,7 @@ void InputDeviceProperties::apply(const InputDeviceProperties &other)
     apply(m_grab, other.m_grab);
     apply(m_ignore, other.m_ignore);
     apply(m_motionThreshold, other.m_motionThreshold);
-    apply(m_handleLibevdevEvents, other.m_handleLibevdevEvents);
+    apply(m_handleEvdevEvents, other.m_handleEvdevEvents);
     apply(m_multiTouch, other.m_multiTouch);
     apply(m_size, other.m_size);
     apply(m_fingerPressure, other.m_fingerPressure);
@@ -97,9 +97,9 @@ qreal InputDeviceProperties::motionThreshold() const
     return m_motionThreshold.value_or(defaultValue);
 }
 
-bool InputDeviceProperties::handleLibevdevEvents() const
+bool InputDeviceProperties::handleEvdevEvents() const
 {
-    return m_handleLibevdevEvents.value_or(true);
+    return m_handleEvdevEvents.value_or(true);
 }
 
 bool InputDeviceProperties::multiTouch() const

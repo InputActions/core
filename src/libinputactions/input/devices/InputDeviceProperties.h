@@ -34,7 +34,7 @@ class InputDeviceProperties
 
     Q_PROPERTY(uint32_t fingerPressure READ fingerPressure)
     Q_PROPERTY(bool grab READ grab)
-    Q_PROPERTY(bool handleLibevdevEvents READ handleLibevdevEvents)
+    Q_PROPERTY(bool handleEvdevEvents READ handleEvdevEvents)
     Q_PROPERTY(bool ignore READ ignore)
     Q_PROPERTY(bool multiTouch READ multiTouch)
     Q_PROPERTY(qreal motionThreshold READ motionThreshold)
@@ -74,10 +74,10 @@ public:
     void setIgnore(bool value) { m_ignore = value; }
 
     /**
-     * Whether to process libevdev events if available.
+     * Whether to process evdev events if available.
      */
-    bool handleLibevdevEvents() const;
-    void setHandleLibevdevEvents(bool value) { m_handleLibevdevEvents = value; }
+    bool handleEvdevEvents() const;
+    void setHandleEvdevEvents(bool value) { m_handleEvdevEvents = value; }
 
     /**
      * Amount of motion that cannot be performed accidentally.
@@ -176,7 +176,7 @@ private:
 
     std::optional<bool> m_grab;
     std::optional<bool> m_ignore;
-    std::optional<bool> m_handleLibevdevEvents;
+    std::optional<bool> m_handleEvdevEvents;
 
     std::optional<qreal> m_motionThreshold;
 
