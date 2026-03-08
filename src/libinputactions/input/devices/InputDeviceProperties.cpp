@@ -21,6 +21,7 @@
 #include <QStringList>
 #include <libinputactions/helpers/QVariant.h>
 #include <libinputactions/input/devices/InputDevice.h>
+#include <libinputactions/triggers/SwipeTrigger.h>
 
 namespace InputActions
 {
@@ -55,6 +56,7 @@ void InputDeviceProperties::apply(const InputDeviceProperties &other)
     apply(m_touchpadLmrTapButtonMap, other.m_touchpadLmrTapButtonMap);
     apply(m_touchpadMotionThreshold2, other.m_touchpadMotionThreshold2);
     apply(m_touchpadMotionThreshold3, other.m_touchpadMotionThreshold3);
+    apply(m_swipeAngleTolerance, other.m_swipeAngleTolerance);
 }
 
 QString InputDeviceProperties::toString() const
@@ -170,6 +172,11 @@ qreal InputDeviceProperties::touchpadMotionThreshold2() const
 qreal InputDeviceProperties::touchpadMotionThreshold3() const
 {
     return m_touchpadMotionThreshold3.value_or(10);
+}
+
+qreal InputDeviceProperties::swipeAngleTolerance() const
+{
+    return m_swipeAngleTolerance.value_or(DEFAULT_SWIPE_ANGLE_TOLERANGE);
 }
 
 }

@@ -52,6 +52,8 @@ class InputDeviceProperties
     Q_PROPERTY(qreal touchpadMotionThreshold2 READ touchpadMotionThreshold2)
     Q_PROPERTY(qreal touchpadMotionThreshold3 READ touchpadMotionThreshold3)
 
+    Q_PROPERTY(qreal swipeAngleTolerance READ swipeAngleTolerance)
+
 public:
     InputDeviceProperties() = default;
     InputDeviceProperties(const InputDevice *device);
@@ -169,6 +171,12 @@ public:
     qreal touchpadMotionThreshold3() const;
     void setTouchpadMotionThreshold3(qreal value) { m_touchpadMotionThreshold3 = value; }
 
+    /**
+     * Angle tolerance for left, right, up and down predefined directions. The remaining space is used for diagonals.
+     */
+    qreal swipeAngleTolerance() const;
+    void setSwipeAngleTolerance(qreal value) { m_swipeAngleTolerance = value; }
+
     QString toString() const;
 
 private:
@@ -196,6 +204,8 @@ private:
     std::optional<bool> m_touchpadLmrTapButtonMap;
     std::optional<qreal> m_touchpadMotionThreshold2;
     std::optional<qreal> m_touchpadMotionThreshold3;
+
+    std::optional<qreal> m_swipeAngleTolerance;
 
     friend class TestDeviceRuleNodeParser;
 };

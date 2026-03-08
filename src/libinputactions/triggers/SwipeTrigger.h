@@ -23,6 +23,13 @@
 namespace InputActions
 {
 
+/**
+ * Angle tolerance for left, right, up and down predefined directions. The remaining space is used for diagonals.
+ */
+static const qreal DEFAULT_SWIPE_ANGLE_TOLERANGE = 20;
+
+class InputDevice;
+
 class SwipeTriggerUpdateEvent : public MotionTriggerUpdateEvent
 {
 public:
@@ -40,9 +47,16 @@ public:
     qreal averageAngle() const { return m_averageAngle; }
     void setAverageAngle(qreal value) { m_averageAngle = value; }
 
+    /**
+     * May be nullptr.
+     */
+    const InputDevice *sender() const { return m_sender; }
+    void setSender(const InputDevice *value) { m_sender = value; }
+
 private:
     qreal m_angle{};
     qreal m_averageAngle{};
+    const InputDevice *m_sender;
 };
 
 /**
@@ -89,7 +103,7 @@ public:
      * If minAngle > maxAngle, the range includes all values where x >= minAngle || x <= maxAngle.
      */
     SwipeTrigger(qreal minAngle, qreal maxAngle);
-    SwipeTrigger(SwipeTriggerDirection swipeDirection);
+    SwipeTrigger(SwipeTriggerDirection direction);
 
     qreal minAngle() const { return m_minAngle; }
     qreal maxAngle() const { return m_maxAngle; }
@@ -106,11 +120,25 @@ protected:
     void updateActions(const TriggerUpdateEvent &event) override;
 
 private:
-    bool matchesAngleRange(qreal angle) const;
-    bool matchesOppositeAngleRange(qreal angle) const;
+    struct AngleRange
+    {
+        AngleRange(qreal min, qreal max);
 
-    qreal m_minAngle;
-    qreal m_maxAngle;
+        qreal min{};
+        qreal max{};
+    };
+    /**
+     * @param device Used for the angle tolerance. May be nullptr, in which case the default one is used.
+     */
+    AngleRange angleRange(const InputDevice *device) const;
+
+    static bool matchesAngleRange(qreal angle, qreal min, qreal max);
+    static bool matchesOppositeAngleRange(qreal angle, qreal min, qreal max);
+
+    std::optional<SwipeTriggerDirection> m_direction;
+
+    qreal m_minAngle{};
+    qreal m_maxAngle{};
     bool m_bidirectional{};
 
     friend class TestSwipeTrigger;
