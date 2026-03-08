@@ -452,6 +452,17 @@ void NodeParser<InputDeviceProperties>::parse(const Node *node, InputDevicePrope
         loadSetter(result, &InputDeviceProperties::setThumbPressure, pressureRangesNode->at("thumb"));
         loadSetter(result, &InputDeviceProperties::setPalmPressure, pressureRangesNode->at("palm"));
     }
+
+    if (const auto *swipeNode = node->mapAt("swipe")) {
+        if (const auto *angleToleranceNode = swipeNode->at("angle_tolerance")) {
+            const auto value = angleToleranceNode->as<qreal>();
+            if (value < 0 || value > 45) {
+                throw InvalidValueConfigException(angleToleranceNode, "Value must be between 0 and 45.");
+            }
+
+            result.setSwipeAngleTolerance(value);
+        }
+    }
 }
 
 template<>

@@ -138,9 +138,7 @@ void TestSwipeTrigger::matchesAngleRange()
     QFETCH(qreal, angle);
     QFETCH(bool, result);
 
-    SwipeTrigger trigger(a, b);
-
-    QCOMPARE(trigger.matchesAngleRange(angle), result);
+    QCOMPARE(SwipeTrigger::matchesAngleRange(angle, a, b), result);
 }
 
 void TestSwipeTrigger::matchesOppositeAngleRange_data()
@@ -175,9 +173,7 @@ void TestSwipeTrigger::matchesOppositeAngleRange()
     QFETCH(qreal, angle);
     QFETCH(bool, result);
 
-    SwipeTrigger trigger(a, b);
-
-    QCOMPARE(trigger.matchesOppositeAngleRange(angle), result);
+    QCOMPARE(SwipeTrigger::matchesOppositeAngleRange(angle, a, b), result);
 }
 
 }

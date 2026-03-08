@@ -24,33 +24,6 @@
 namespace InputActions
 {
 
-/**
- * Angle tolerance for left, up, right and down directions. Remaining space is used for diagonals.
- */
-static const qreal ANGLE_TOLERANCE = 20;
-// clang-format off
-static const std::unordered_map<SwipeTriggerDirection, std::tuple<qreal, qreal, bool>> ANGLES{
-    // direction                             // min angle            // max angle           // bidirectional
-    {SwipeTriggerDirection::Left,            {180 - ANGLE_TOLERANCE, 180 + ANGLE_TOLERANCE, false}},
-    {SwipeTriggerDirection::Right,           {360 - ANGLE_TOLERANCE, ANGLE_TOLERANCE,       false}},
-    {SwipeTriggerDirection::Up,              {90 - ANGLE_TOLERANCE,  90 + ANGLE_TOLERANCE,  false}},
-    {SwipeTriggerDirection::Down,            {270 - ANGLE_TOLERANCE, 270 + ANGLE_TOLERANCE, false}},
-
-    {SwipeTriggerDirection::LeftUp,          {90 + ANGLE_TOLERANCE,  180 - ANGLE_TOLERANCE, false}},
-    {SwipeTriggerDirection::LeftDown,        {180 + ANGLE_TOLERANCE, 270 - ANGLE_TOLERANCE, false}},
-    {SwipeTriggerDirection::RightUp,         {ANGLE_TOLERANCE,       90 - ANGLE_TOLERANCE,  false}},
-    {SwipeTriggerDirection::RightDown,       {270 + ANGLE_TOLERANCE, 360 - ANGLE_TOLERANCE, false}},
-
-    {SwipeTriggerDirection::LeftRight,       {360 - ANGLE_TOLERANCE, ANGLE_TOLERANCE,       true}},
-    {SwipeTriggerDirection::UpDown,          {270 - ANGLE_TOLERANCE, 270 + ANGLE_TOLERANCE, true}},
-
-    {SwipeTriggerDirection::LeftUpRightDown, {270 + ANGLE_TOLERANCE, 360 - ANGLE_TOLERANCE, true}},
-    {SwipeTriggerDirection::LeftDownRightUp, {ANGLE_TOLERANCE,       90 - ANGLE_TOLERANCE,  true}},
-
-    {SwipeTriggerDirection::Any,             {0,                     360,                   false}},
-};
-// clang-format on
-
 SwipeTrigger::SwipeTrigger(qreal minAngle, qreal maxAngle)
     : MotionTrigger(TriggerType::Swipe)
     , m_minAngle(minAngle)
@@ -60,11 +33,16 @@ SwipeTrigger::SwipeTrigger(qreal minAngle, qreal maxAngle)
 
 SwipeTrigger::SwipeTrigger(SwipeTriggerDirection direction)
     : MotionTrigger(TriggerType::Swipe)
+    , m_direction(direction)
 {
-    const auto &angles = ANGLES.at(direction);
-    m_minAngle = std::get<0>(angles);
-    m_maxAngle = std::get<1>(angles);
-    m_bidirectional = std::get<2>(angles);
+    switch (direction) {
+        case SwipeTriggerDirection::LeftRight:
+        case SwipeTriggerDirection::UpDown:
+        case SwipeTriggerDirection::LeftUpRightDown:
+        case SwipeTriggerDirection::LeftDownRightUp:
+            m_bidirectional = true;
+            break;
+    }
 }
 
 bool SwipeTrigger::canUpdate(const TriggerUpdateEvent &event) const
@@ -75,7 +53,9 @@ bool SwipeTrigger::canUpdate(const TriggerUpdateEvent &event) const
 
     const auto &castedEvent = dynamic_cast<const SwipeTriggerUpdateEvent &>(event);
     const auto angle = castedEvent.averageAngle(); // Use the average so that the trigger is not cancelled on jitter
-    return matchesAngleRange(angle) || (m_bidirectional && matchesOppositeAngleRange(angle));
+
+    const auto range = angleRange(castedEvent.sender());
+    return matchesAngleRange(angle, range.min, range.max) || (m_bidirectional && matchesOppositeAngleRange(angle, range.min, range.max));
 }
 
 void SwipeTrigger::updateActions(const TriggerUpdateEvent &event)
@@ -85,7 +65,8 @@ void SwipeTrigger::updateActions(const TriggerUpdateEvent &event)
 
     // Ensure delta is always positive for normal angle range, and negative for opposite. Normal range takes priority over the opposite one in case of
     // overlapping.
-    if (!matchesAngleRange(angle) && matchesOppositeAngleRange(angle)) {
+    const auto range = angleRange(newEvent.sender());
+    if (!matchesAngleRange(angle, range.min, range.max) && matchesOppositeAngleRange(angle, range.min, range.max)) {
         auto delta = event.delta();
         delta = {delta.accelerated() * -1, delta.unaccelerated() * -1};
         newEvent.setDelta(delta);
@@ -94,22 +75,66 @@ void SwipeTrigger::updateActions(const TriggerUpdateEvent &event)
     MotionTrigger::updateActions(newEvent);
 }
 
-bool SwipeTrigger::matchesAngleRange(qreal angle) const
+SwipeTrigger::AngleRange SwipeTrigger::angleRange(const InputDevice *device) const
 {
-    if (m_minAngle <= m_maxAngle) {
-        return angle >= m_minAngle && angle <= m_maxAngle;
+    if (!m_direction) {
+        return {m_minAngle, m_maxAngle};
     }
-    return angle >= m_minAngle || angle <= m_maxAngle;
+
+    const auto tolerance = device ? device->properties().swipeAngleTolerance() : DEFAULT_SWIPE_ANGLE_TOLERANGE;
+    switch (m_direction.value()) {
+        case SwipeTriggerDirection::Left:
+            return {180 - tolerance, 180 + tolerance};
+        case SwipeTriggerDirection::Right:
+            return {360 - tolerance, tolerance};
+        case SwipeTriggerDirection::Up:
+            return {90 - tolerance, 90 + tolerance};
+        case SwipeTriggerDirection::Down:
+            return {270 - tolerance, 270 + tolerance};
+
+        case SwipeTriggerDirection::LeftUp:
+            return {90 + tolerance, 180 - tolerance};
+        case SwipeTriggerDirection::LeftDown:
+            return {180 + tolerance, 270 - tolerance};
+        case SwipeTriggerDirection::RightUp:
+            return {tolerance, 90 - tolerance};
+        case SwipeTriggerDirection::RightDown:
+            return {270 + tolerance, 360 - tolerance};
+
+        case SwipeTriggerDirection::LeftRight:
+            return {360 - tolerance, tolerance};
+        case SwipeTriggerDirection::UpDown:
+            return {270 - tolerance, 270 + tolerance};
+
+        case SwipeTriggerDirection::LeftUpRightDown:
+            return {270 + tolerance, 360 - tolerance};
+        case SwipeTriggerDirection::LeftDownRightUp:
+            return {tolerance, 90 - tolerance};
+
+        case SwipeTriggerDirection::Any:
+            return {0, 360};
+
+        default:
+            return {0, 0};
+    }
 }
 
-bool SwipeTrigger::matchesOppositeAngleRange(qreal angle) const
+bool SwipeTrigger::matchesAngleRange(qreal angle, qreal min, qreal max)
 {
-    auto min = m_minAngle - 180;
+    if (min <= max) {
+        return angle >= min && angle <= max;
+    }
+    return angle >= min || angle <= max;
+}
+
+bool SwipeTrigger::matchesOppositeAngleRange(qreal angle, qreal min, qreal max)
+{
+    min -= 180;
     if (min < 0) {
         min += 360;
     }
 
-    auto max = m_maxAngle - 180;
+    max -= 180;
     if (max < 0) {
         max += 360;
     }
@@ -118,6 +143,12 @@ bool SwipeTrigger::matchesOppositeAngleRange(qreal angle) const
         return angle >= min && angle <= max;
     }
     return angle >= min || angle <= max;
+}
+
+SwipeTrigger::AngleRange::AngleRange(qreal min, qreal max)
+    : min(min)
+    , max(max)
+{
 }
 
 }

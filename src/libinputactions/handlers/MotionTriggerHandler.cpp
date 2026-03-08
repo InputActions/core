@@ -191,6 +191,7 @@ bool MotionTriggerHandler::handleMotion(const InputDevice *device, const PointDe
 
         swipeEvent.setAngle(Math::atan2deg360(currentDelta));
         swipeEvent.setAverageAngle(Math::atan2deg360(totalDelta / m_swipeDeltas.size()));
+        swipeEvent.setSender(device);
         swipeEvent.setDelta(Delta(delta.acceleratedHypot(), delta.unacceleratedHypot()));
         swipeEvent.setPointDelta({delta.accelerated() * m_swipeDeltaMultiplier, delta.unaccelerated() * m_swipeDeltaMultiplier});
         swipeEvent.setSpeed(speed);
