@@ -56,7 +56,7 @@ public:
 private:
     qreal m_angle{};
     qreal m_averageAngle{};
-    const InputDevice *m_sender;
+    const InputDevice *m_sender{};
 };
 
 /**
