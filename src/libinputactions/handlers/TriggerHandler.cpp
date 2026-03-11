@@ -56,7 +56,6 @@ TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes t
     TriggerManagementOperationResult result{};
     for (auto &trigger : triggers(types, event)) {
         Q_EMIT activatingTrigger(trigger);
-        Q_EMIT trigger->activated();
         m_activeTriggers.push_back(trigger);
         qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote() << QString("Trigger activated (id: %1)").arg(trigger->id());
 

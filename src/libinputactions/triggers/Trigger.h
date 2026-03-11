@@ -193,10 +193,6 @@ public:
 
     const TriggerType &type() const;
 
-signals:
-    void activated();
-    void ended();
-
 protected:
     /**
      * Called when an action is added. May be used to change default behavior.
