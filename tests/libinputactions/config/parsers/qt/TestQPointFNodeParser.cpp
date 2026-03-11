@@ -1,23 +1,30 @@
-#include "TestQPointFNodeParser.h"
+#include "Test.h"
 #include <libinputactions/config/Node.h>
 
 namespace InputActions
 {
 
-void TestQPointFNodeParser::valid__parsesNodeCorrectly()
+class TestQPointFNodeParser : public Test
 {
-    const auto node = Node::create("12.34,43.21");
-    const auto point = node->as<QPointF>();
+    Q_OBJECT
 
-    QCOMPARE(point, QPointF(12.34, 43.21));
-}
+private slots:
+    void valid__parsesNodeCorrectly()
+    {
+        const auto node = Node::create("12.34,43.21");
+        const auto point = node->as<QPointF>();
 
-void TestQPointFNodeParser::invalid__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create("12.34");
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<QPointF>(), InvalidValueConfigException, 0, 0);
-}
+        QCOMPARE(point, QPointF(12.34, 43.21));
+    }
+
+    void invalid__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create("12.34");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<QPointF>(), InvalidValueConfigException, 0, 0);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestQPointFNodeParser)
+#include "TestQPointFNodeParser.moc"

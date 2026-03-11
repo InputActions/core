@@ -1,69 +1,78 @@
-#include "TestTriggerHandler.h"
+#include "Test.h"
+#include "mocks/MockTrigger.h"
 #include <QSignalSpy>
+#include <libinputactions/handlers/TriggerHandler.h>
 
 using namespace ::testing;
 
 namespace InputActions
 {
 
-void TestTriggerHandler::init()
+class TestTriggerHandler : public Test
 {
-    m_handler = std::unique_ptr<TriggerHandler>(new TriggerHandler);
-}
+    Q_OBJECT
 
-void TestTriggerHandler::triggers_data()
-{
-    QTest::addColumn<TriggerType>("type");
-    QTest::addColumn<std::vector<Trigger *>>("triggers");
-    QTest::addColumn<int>("size");
+private slots:
+    void init() { m_handler = std::unique_ptr<TriggerHandler>(new TriggerHandler); }
 
-    QTest::newRow("not activatable") << TriggerType::Press << std::vector<Trigger *>({makeTrigger(TriggerType::Press, false)}) << 0;
-    QTest::newRow("activatable") << TriggerType::Press << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true)}) << 1;
-    QTest::newRow("activatable, wrong type") << TriggerType::Swipe << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true)}) << 0;
-    QTest::newRow("activatable, all") << TriggerType::All
-                                      << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true), makeTrigger(TriggerType::Swipe, true)}) << 2;
-}
+    void triggers_data()
+    {
+        QTest::addColumn<TriggerType>("type");
+        QTest::addColumn<std::vector<Trigger *>>("triggers");
+        QTest::addColumn<int>("size");
 
-void TestTriggerHandler::triggers()
-{
-    QFETCH(TriggerType, type);
-    QFETCH(std::vector<Trigger *>, triggers);
-    QFETCH(int, size);
-
-    for (auto trigger : triggers) {
-        m_handler->addTrigger(std::unique_ptr<Trigger>(trigger));
+        QTest::newRow("not activatable") << TriggerType::Press << std::vector<Trigger *>({makeTrigger(TriggerType::Press, false)}) << 0;
+        QTest::newRow("activatable") << TriggerType::Press << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true)}) << 1;
+        QTest::newRow("activatable, wrong type") << TriggerType::Swipe << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true)}) << 0;
+        QTest::newRow("activatable, all") << TriggerType::All
+                                          << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true), makeTrigger(TriggerType::Swipe, true)}) << 2;
     }
-    TriggerActivationEvent event;
 
-    QCOMPARE(m_handler->triggers(type, event).size(), size);
-    QCOMPARE(m_handler->activateTriggers(type, event).success, size != 0);
-    QCOMPARE(m_handler->activeTriggers(type).size(), size);
-}
+    void triggers()
+    {
+        QFETCH(TriggerType, type);
+        QFETCH(std::vector<Trigger *>, triggers);
+        QFETCH(int, size);
 
-void TestTriggerHandler::activateTriggers_cancelsAllTriggers()
-{
-    QSignalSpy spy(m_handler.get(), &TriggerHandler::cancellingTriggers);
+        for (auto trigger : triggers) {
+            m_handler->addTrigger(std::unique_ptr<Trigger>(trigger));
+        }
+        TriggerActivationEvent event;
 
-    m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
-    m_handler->activateTriggers(TriggerType::Swipe);
-    QCOMPARE(spy.count(), 0);
-    m_handler->activateTriggers(TriggerType::Swipe | TriggerType::Press);
-    QCOMPARE(spy.count(), 0);
-    m_handler->activateTriggers(TriggerType::All);
-    QCOMPARE(spy.count(), 1);
-
-    for (const auto &args : spy) {
-        QCOMPARE(args.at(0).value<TriggerTypes>(), TriggerType::All);
+        QCOMPARE(m_handler->triggers(type, event).size(), size);
+        QCOMPARE(m_handler->activateTriggers(type, event).success, size != 0);
+        QCOMPARE(m_handler->activeTriggers(type).size(), size);
     }
-}
 
-MockTrigger *TestTriggerHandler::makeTrigger(TriggerType type, bool activatable)
-{
-    auto *trigger = new MockTrigger(type);
-    ON_CALL(*trigger, canActivate(_)).WillByDefault(Return(activatable));
-    return trigger;
-}
+    void activateTriggers_cancelsAllTriggers()
+    {
+        QSignalSpy spy(m_handler.get(), &TriggerHandler::cancellingTriggers);
+
+        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
+        m_handler->activateTriggers(TriggerType::Swipe);
+        QCOMPARE(spy.count(), 0);
+        m_handler->activateTriggers(TriggerType::Swipe | TriggerType::Press);
+        QCOMPARE(spy.count(), 0);
+        m_handler->activateTriggers(TriggerType::All);
+        QCOMPARE(spy.count(), 1);
+
+        for (const auto &args : spy) {
+            QCOMPARE(args.at(0).value<TriggerTypes>(), TriggerType::All);
+        }
+    }
+
+private:
+    MockTrigger *makeTrigger(TriggerType type, bool activatable)
+    {
+        auto *trigger = new MockTrigger(type);
+        ON_CALL(*trigger, canActivate(_)).WillByDefault(Return(activatable));
+        return trigger;
+    }
+
+    std::unique_ptr<TriggerHandler> m_handler;
+};
 
 }
 
 QTEST_MAIN(InputActions::TestTriggerHandler)
+#include "TestTriggerHandler.moc"

@@ -1,4 +1,4 @@
-#include "TestTriggerNodeParser.h"
+#include "Test.h"
 #include <libinputactions/conditions/ConditionGroup.h>
 #include <libinputactions/conditions/VariableCondition.h>
 #include <libinputactions/config/ConfigIssue.h>
@@ -10,263 +10,270 @@
 namespace InputActions
 {
 
-void TestTriggerNodeParser::stroke_withConflictingBeginAction__throwsInvalidValueContextConfigException()
+class TestTriggerNodeParser : public Test
 {
-    const auto node = Node::create(R"(
-        type: stroke
-        strokes: [ 'MgAAMjJkZAA=' ]
+    Q_OBJECT
 
-        actions:
-          - on: begin
-            command: _
-    )");
+private slots:
+    void stroke_withConflictingBeginAction__throwsInvalidValueContextConfigException()
+    {
+        const auto node = Node::create(R"(
+            type: stroke
+            strokes: [ 'MgAAMjJkZAA=' ]
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueContextConfigException, 5, 12);
-}
+            actions:
+              - on: begin
+                command: _
+        )");
 
-void TestTriggerNodeParser::stroke_withNonConflictingBeginAction__doesNotThrow()
-{
-    const auto node = Node::create(R"(
-        type: stroke
-        strokes: [ 'MgAAMjJkZAA=' ]
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueContextConfigException, 5, 16);
+    }
 
-        actions:
-          - on: begin
-            conflicting: false
-            command: _
-    )");
+    void stroke_withNonConflictingBeginAction__doesNotThrow()
+    {
+        const auto node = Node::create(R"(
+            type: stroke
+            strokes: [ 'MgAAMjJkZAA=' ]
 
-    QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<Trigger>>());
-}
+            actions:
+              - on: begin
+                conflicting: false
+                command: _
+        )");
 
-void TestTriggerNodeParser::stroke_withEndAction__doesNotThrow()
-{
-    const auto node = Node::create(R"(
-        type: stroke
-        strokes: [ 'MgAAMjJkZAA=' ]
+        QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<Trigger>>());
+    }
 
-        actions:
-          - on: end
-            command: _
-    )");
+    void stroke_withEndAction__doesNotThrow()
+    {
+        const auto node = Node::create(R"(
+            type: stroke
+            strokes: [ 'MgAAMjJkZAA=' ]
 
-    QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<Trigger>>());
-}
+            actions:
+              - on: end
+                command: _
+        )");
 
-void TestTriggerNodeParser::stroke_invalidStroke__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create(R"(
-        type: stroke
-        strokes: [ 'MgAAMjJkZA=' ]
+        QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<Trigger>>());
+    }
 
-        actions:
-          - on: end
-            command: _
-    )");
+    void stroke_invalidStroke__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create(R"(
+            type: stroke
+            strokes: [ 'MgAAMjJkZA=' ]
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 2, 19);
-}
+            actions:
+              - on: end
+                command: _
+        )");
 
-void TestTriggerNodeParser::swipe_angle__parsesNodeCorrectly()
-{
-    const auto node = Node::create(R"(
-        type: swipe
-        angle: 30-60
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 2, 23);
+    }
 
-    const auto *swipeTrigger = dynamic_cast<const SwipeTrigger *>(trigger.get());
-    QVERIFY(swipeTrigger);
-    QCOMPARE(swipeTrigger->minAngle(), 30);
-    QCOMPARE(swipeTrigger->maxAngle(), 60);
-}
+    void swipe_angle__parsesNodeCorrectly()
+    {
+        const auto node = Node::create(R"(
+            type: swipe
+            angle: 30-60
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-void TestTriggerNodeParser::swipe_direction__doesNotThrow()
-{
-    const auto node = Node::create(R"(
-        type: swipe
-        direction: right
-    )");
+        const auto *swipeTrigger = dynamic_cast<const SwipeTrigger *>(trigger.get());
+        QVERIFY(swipeTrigger);
+        QCOMPARE(swipeTrigger->minAngle(), 30);
+        QCOMPARE(swipeTrigger->maxAngle(), 60);
+    }
 
-    QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<Trigger>>());
-}
+    void swipe_direction__doesNotThrow()
+    {
+        const auto node = Node::create(R"(
+            type: swipe
+            direction: right
+        )");
 
-void TestTriggerNodeParser::swipe_invalidAngle__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create(R"(
-        type: swipe
-        angle: 1-361
-    )");
+        QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<Trigger>>());
+    }
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 2, 15);
-}
+    void swipe_invalidAngle__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create(R"(
+            type: swipe
+            angle: 1-361
+        )");
 
-void TestTriggerNodeParser::fingers__parsesNodeCorrectly()
-{
-    const auto node = Node::create(R"(
-        type: press
-        fingers: 2
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 2, 19);
+    }
 
-    const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
-    QVERIFY(condition);
-    QCOMPARE(condition->negate(), false);
-    QCOMPARE(condition->variableName(), "fingers");
-    QCOMPARE(condition->comparisonOperator(), ComparisonOperator::EqualTo);
+    void fingers__parsesNodeCorrectly()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            fingers: 2
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-    const auto &values = condition->values();
-    QCOMPARE(values.size(), 1);
-    QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 2);
-}
+        const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
+        QVERIFY(condition);
+        QCOMPARE(condition->negate(), false);
+        QCOMPARE(condition->variableName(), "fingers");
+        QCOMPARE(condition->comparisonOperator(), ComparisonOperator::EqualTo);
 
-void TestTriggerNodeParser::fingers_range__parsesNodeCorrectly()
-{
-    const auto node = Node::create(R"(
-        type: press
-        fingers: 2-3
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        const auto &values = condition->values();
+        QCOMPARE(values.size(), 1);
+        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 2);
+    }
 
-    const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
-    QVERIFY(condition);
-    QCOMPARE(condition->negate(), false);
-    QCOMPARE(condition->variableName(), "fingers");
-    QCOMPARE(condition->comparisonOperator(), ComparisonOperator::Between);
+    void fingers_range__parsesNodeCorrectly()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            fingers: 2-3
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-    const auto &values = condition->values();
-    QCOMPARE(values.size(), 2);
-    QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 2);
-    QCOMPARE(std::any_cast<qreal>(values[1].get().value()), 3);
-}
+        const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
+        QVERIFY(condition);
+        QCOMPARE(condition->negate(), false);
+        QCOMPARE(condition->variableName(), "fingers");
+        QCOMPARE(condition->comparisonOperator(), ComparisonOperator::Between);
 
-void TestTriggerNodeParser::mouseButtons_duplicateItem__throwsDuplicateSetItemConfigException()
-{
-    const auto node = Node::create(R"(
-        type: press
-        mouse_buttons: [ left, left ]
-    )");
+        const auto &values = condition->values();
+        QCOMPARE(values.size(), 2);
+        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 2);
+        QCOMPARE(std::any_cast<qreal>(values[1].get().value()), 3);
+    }
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION_SAVE(node->as<std::unique_ptr<Trigger>>(), DuplicateSetItemConfigException, 2, 31, e);
-    QCOMPARE(e->index(), 1);
-}
+    void mouseButtons_duplicateItem__throwsDuplicateSetItemConfigException()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            mouse_buttons: [ left, left ]
+        )");
 
-void TestTriggerNodeParser::keyboardModifiers__addsDeprecatedFeatureConfigIssue()
-{
-    const auto node = Node::create(R"(
-        type: press
-        keyboard_modifiers: none
-    )");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION_SAVE(node->as<std::unique_ptr<Trigger>>(), DuplicateSetItemConfigException, 2, 35, e);
+        QCOMPARE(e->index(), 1);
+    }
 
-    INPUTACTIONS_VERIFY_ADDS_CONFIG_ISSUE_SAVE(node->as<std::unique_ptr<Trigger>>(), DeprecatedFeatureConfigIssue, 2, 28, e);
-    QCOMPARE(e->feature(), DeprecatedFeature::TriggerKeyboardModifiers);
-}
+    void keyboardModifiers__addsDeprecatedFeatureConfigIssue()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            keyboard_modifiers: none
+        )");
 
-void TestTriggerNodeParser::keyboardModifiers_any__doesNotAddCondition()
-{
-    const auto node = Node::create(R"(
-        type: press
-        keyboard_modifiers: any
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        INPUTACTIONS_VERIFY_ADDS_CONFIG_ISSUE_SAVE(node->as<std::unique_ptr<Trigger>>(), DeprecatedFeatureConfigIssue, 2, 32, e);
+        QCOMPARE(e->feature(), DeprecatedFeature::TriggerKeyboardModifiers);
+    }
 
-    QVERIFY(!trigger->activationCondition());
-}
+    void keyboardModifiers_any__doesNotAddCondition()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            keyboard_modifiers: any
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-void TestTriggerNodeParser::keyboardModifiers_metaAlt__parsesNodeCorrectly()
-{
-    const auto node = Node::create(R"(
-        type: press
-        keyboard_modifiers: [ meta, alt ]
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        QVERIFY(!trigger->activationCondition());
+    }
 
-    const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
-    QVERIFY(condition);
-    QCOMPARE(condition->negate(), false);
-    QCOMPARE(condition->variableName(), "keyboard_modifiers");
-    QCOMPARE(condition->comparisonOperator(), ComparisonOperator::EqualTo);
+    void keyboardModifiers_metaAlt__parsesNodeCorrectly()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            keyboard_modifiers: [ meta, alt ]
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-    const auto &values = condition->values();
-    QCOMPARE(values.size(), 1);
-    QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::MetaModifier | Qt::KeyboardModifier::AltModifier);
-}
+        const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
+        QVERIFY(condition);
+        QCOMPARE(condition->negate(), false);
+        QCOMPARE(condition->variableName(), "keyboard_modifiers");
+        QCOMPARE(condition->comparisonOperator(), ComparisonOperator::EqualTo);
 
-void TestTriggerNodeParser::keyboardModifiers_none__parsesNodeCorrectly()
-{
-    const auto node = Node::create(R"(
-        type: press
-        keyboard_modifiers: none
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        const auto &values = condition->values();
+        QCOMPARE(values.size(), 1);
+        QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::MetaModifier | Qt::KeyboardModifier::AltModifier);
+    }
 
-    const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
-    QVERIFY(condition);
-    QCOMPARE(condition->negate(), false);
-    QCOMPARE(condition->variableName(), "keyboard_modifiers");
-    QCOMPARE(condition->comparisonOperator(), ComparisonOperator::EqualTo);
+    void keyboardModifiers_none__parsesNodeCorrectly()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            keyboard_modifiers: none
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-    const auto &values = condition->values();
-    QCOMPARE(values.size(), 1);
-    QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::NoModifier);
-}
+        const auto condition = std::dynamic_pointer_cast<VariableCondition>(trigger->activationCondition());
+        QVERIFY(condition);
+        QCOMPARE(condition->negate(), false);
+        QCOMPARE(condition->variableName(), "keyboard_modifiers");
+        QCOMPARE(condition->comparisonOperator(), ComparisonOperator::EqualTo);
 
-void TestTriggerNodeParser::keyboardModifiers_invalid__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create(R"(
-        type: press
-        keyboard_modifiers: e
-    )");
+        const auto &values = condition->values();
+        QCOMPARE(values.size(), 1);
+        QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::NoModifier);
+    }
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 2, 28);
-}
+    void keyboardModifiers_invalid__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            keyboard_modifiers: e
+        )");
 
-void TestTriggerNodeParser::fingers_keyboardModifiers_triggerCondition__mergedIntoAllGroup()
-{
-    const auto node = Node::create(R"(
-        type: press
-        fingers: 2-3
-        conditions: $window_maximized
-        keyboard_modifiers: none
-    )");
-    const auto trigger = node->as<std::unique_ptr<Trigger>>();
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 2, 32);
+    }
 
-    const auto condition = std::dynamic_pointer_cast<ConditionGroup>(trigger->activationCondition());
-    QVERIFY(condition);
-    QCOMPARE(condition->negate(), false);
-    QCOMPARE(condition->mode(), ConditionGroupMode::All);
-    QCOMPARE(condition->conditions().size(), 3);
+    void fingers_keyboardModifiers_triggerCondition__mergedIntoAllGroup()
+    {
+        const auto node = Node::create(R"(
+            type: press
+            fingers: 2-3
+            conditions: $window_maximized
+            keyboard_modifiers: none
+        )");
+        const auto trigger = node->as<std::unique_ptr<Trigger>>();
 
-    const auto fingersCondition = std::dynamic_pointer_cast<VariableCondition>(condition->conditions()[0]);
-    QVERIFY(fingersCondition);
-    QCOMPARE(fingersCondition->negate(), false);
-    QCOMPARE(fingersCondition->variableName(), "fingers");
+        const auto condition = std::dynamic_pointer_cast<ConditionGroup>(trigger->activationCondition());
+        QVERIFY(condition);
+        QCOMPARE(condition->negate(), false);
+        QCOMPARE(condition->mode(), ConditionGroupMode::All);
+        QCOMPARE(condition->conditions().size(), 3);
 
-    const auto keyboardModifiersCondition = std::dynamic_pointer_cast<VariableCondition>(condition->conditions()[1]);
-    QVERIFY(keyboardModifiersCondition);
-    QCOMPARE(keyboardModifiersCondition->negate(), false);
-    QCOMPARE(keyboardModifiersCondition->variableName(), "keyboard_modifiers");
+        const auto fingersCondition = std::dynamic_pointer_cast<VariableCondition>(condition->conditions()[0]);
+        QVERIFY(fingersCondition);
+        QCOMPARE(fingersCondition->negate(), false);
+        QCOMPARE(fingersCondition->variableName(), "fingers");
 
-    const auto windowMaximizedCondition = std::dynamic_pointer_cast<VariableCondition>(condition->conditions()[2]);
-    QVERIFY(windowMaximizedCondition);
-    QCOMPARE(windowMaximizedCondition->negate(), false);
-    QCOMPARE(windowMaximizedCondition->variableName(), "window_maximized");
-}
+        const auto keyboardModifiersCondition = std::dynamic_pointer_cast<VariableCondition>(condition->conditions()[1]);
+        QVERIFY(keyboardModifiersCondition);
+        QCOMPARE(keyboardModifiersCondition->negate(), false);
+        QCOMPARE(keyboardModifiersCondition->variableName(), "keyboard_modifiers");
 
-void TestTriggerNodeParser::invalid_noType__throwsMissingRequiredPropertyConfigException()
-{
-    const auto node = Node::create("_: _");
+        const auto windowMaximizedCondition = std::dynamic_pointer_cast<VariableCondition>(condition->conditions()[2]);
+        QVERIFY(windowMaximizedCondition);
+        QCOMPARE(windowMaximizedCondition->negate(), false);
+        QCOMPARE(windowMaximizedCondition->variableName(), "window_maximized");
+    }
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION_SAVE(node->as<std::unique_ptr<Trigger>>(), MissingRequiredPropertyConfigException, 0, 0, e);
-    QCOMPARE(e->property(), "type");
-}
+    void invalid_noType__throwsMissingRequiredPropertyConfigException()
+    {
+        const auto node = Node::create("_: _");
 
-void TestTriggerNodeParser::invalid_invalidType__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create("type: _");
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 0, 6);
-}
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION_SAVE(node->as<std::unique_ptr<Trigger>>(), MissingRequiredPropertyConfigException, 0, 0, e);
+        QCOMPARE(e->property(), "type");
+    }
+
+    void invalid_invalidType__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create("type: _");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<Trigger>>(), InvalidValueConfigException, 0, 6);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestTriggerNodeParser)
+#include "TestTriggerNodeParser.moc"

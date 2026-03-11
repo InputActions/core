@@ -1,34 +1,41 @@
-#include "TestAction.h"
+#include "Test.h"
 #include <libinputactions/actions/Action.h>
 #include <libinputactions/actions/ActionExecutor.h>
 
 namespace InputActions
 {
 
-void TestAction::canExecute_noLimit()
+class TestAction : public Test
 {
-    Action action;
+    Q_OBJECT
 
-    QVERIFY(action.canExecute());
-    g_actionExecutor->execute(action);
-    QVERIFY(action.canExecute());
-}
+private slots:
+    void canExecute_noLimit()
+    {
+        Action action;
 
-void TestAction::canExecute_withLimit()
-{
-    Action action;
-    action.setExecutionLimit(1);
+        QVERIFY(action.canExecute());
+        g_actionExecutor->execute(action);
+        QVERIFY(action.canExecute());
+    }
 
-    QVERIFY(action.canExecute());
-    g_actionExecutor->execute(action);
-    QVERIFY(!action.canExecute());
+    void canExecute_withLimit()
+    {
+        Action action;
+        action.setExecutionLimit(1);
 
-    action.reset();
-    QVERIFY(action.canExecute());
-    g_actionExecutor->execute(action);
-    QVERIFY(!action.canExecute());
-}
+        QVERIFY(action.canExecute());
+        g_actionExecutor->execute(action);
+        QVERIFY(!action.canExecute());
+
+        action.reset();
+        QVERIFY(action.canExecute());
+        g_actionExecutor->execute(action);
+        QVERIFY(!action.canExecute());
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestAction)
+#include "TestAction.moc"

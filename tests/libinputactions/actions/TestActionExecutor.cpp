@@ -1,101 +1,106 @@
-#include "TestActionExecutor.h"
+#include "Test.h"
+#include <libinputactions/actions/ActionExecutor.h>
 #include <libinputactions/actions/CustomAction.h>
 #include <libinputactions/actions/SleepAction.h>
 
 namespace InputActions
 {
 
-void TestActionExecutor::init()
+class TestActionExecutor : public Test
 {
-    m_executor = std::make_unique<ActionExecutor>();
-}
+    Q_OBJECT
 
-void TestActionExecutor::execute_syncAction_executedOnMainThread()
-{
-    CustomAction assertAction([](auto) {
-        QCOMPARE(isMainThread(), true);
-    });
+private slots:
+    void init() { m_executor = std::make_unique<ActionExecutor>(); }
 
-    m_executor->execute(assertAction);
+    void execute_syncAction_executedOnMainThread()
+    {
+        CustomAction assertAction([](auto) {
+            QCOMPARE(isMainThread(), true);
+        });
 
-    QCOMPARE(assertAction.executions(), 1);
-}
+        m_executor->execute(assertAction);
 
-void TestActionExecutor::execute_asyncAction_executedOnActionThread()
-{
-    CustomAction assertAction(
-        [](auto) {
+        QCOMPARE(assertAction.executions(), 1);
+    }
+
+    void execute_asyncAction_executedOnActionThread()
+    {
+        CustomAction assertAction(
+            [](auto) {
+                QCOMPARE(isMainThread(), false);
+            },
+            true);
+
+        m_executor->execute(assertAction);
+        m_executor->waitForDone();
+
+        QCOMPARE(assertAction.executions(), 1);
+    }
+
+    void execute_syncActionWhileActionThreadIsBusy_executedOnActionThread()
+    {
+        SleepAction sleepAction(std::chrono::milliseconds(100U));
+        CustomAction assertAction([](auto) {
             QCOMPARE(isMainThread(), false);
-        },
-        true);
+        });
 
-    m_executor->execute(assertAction);
-    m_executor->waitForDone();
+        m_executor->execute(sleepAction);
+        m_executor->execute(assertAction);
+        m_executor->waitForDone();
 
-    QCOMPARE(assertAction.executions(), 1);
-}
+        QCOMPARE(sleepAction.executions(), 1);
+        QCOMPARE(assertAction.executions(), 1);
+    }
 
-void TestActionExecutor::execute_syncActionWhileActionThreadIsBusy_executedOnActionThread()
-{
-    SleepAction sleepAction(std::chrono::milliseconds(100U));
-    CustomAction assertAction([](auto) {
-        QCOMPARE(isMainThread(), false);
-    });
+    void execute_syncAndAsyncActions_orderPreserved()
+    {
+        std::vector<uint8_t> results;
 
-    m_executor->execute(sleepAction);
-    m_executor->execute(assertAction);
-    m_executor->waitForDone();
+        CustomAction action1([&results](auto) {
+            results.push_back(1);
+        });
+        CustomAction action2(
+            [&results](auto) {
+                QTest::qWait(20);
+                results.push_back(2);
+            },
+            true);
+        CustomAction action3([&results](auto) {
+            results.push_back(3);
+        });
+        CustomAction action4(
+            [&results](auto) {
+                QTest::qWait(10);
+                results.push_back(4);
+            },
+            true);
+        CustomAction action5([&results](auto) {
+            results.push_back(5);
+        });
 
-    QCOMPARE(sleepAction.executions(), 1);
-    QCOMPARE(assertAction.executions(), 1);
-}
+        m_executor->execute(action1);
+        m_executor->execute(action2);
+        m_executor->execute(action3);
+        m_executor->execute(action4);
+        m_executor->execute(action5);
+        m_executor->waitForDone();
 
-void TestActionExecutor::execute_syncAndAsyncActions_orderPreserved()
-{
-    std::vector<uint8_t> results;
+        QCOMPARE(action1.executions(), 1);
+        QCOMPARE(action2.executions(), 1);
+        QCOMPARE(action3.executions(), 1);
+        QCOMPARE(action4.executions(), 1);
+        QCOMPARE(action5.executions(), 1);
+        QVERIFY((results == std::vector<uint8_t>{1, 2, 3, 4, 5}));
+    }
 
-    CustomAction action1([&results](auto) {
-        results.push_back(1);
-    });
-    CustomAction action2(
-        [&results](auto) {
-            QTest::qWait(20);
-            results.push_back(2);
-        },
-        true);
-    CustomAction action3([&results](auto) {
-        results.push_back(3);
-    });
-    CustomAction action4(
-        [&results](auto) {
-            QTest::qWait(10);
-            results.push_back(4);
-        },
-        true);
-    CustomAction action5([&results](auto) {
-        results.push_back(5);
-    });
+private:
+    static bool isMainThread() { return QThread::currentThread() == QCoreApplication::instance()->thread(); }
 
-    m_executor->execute(action1);
-    m_executor->execute(action2);
-    m_executor->execute(action3);
-    m_executor->execute(action4);
-    m_executor->execute(action5);
-    m_executor->waitForDone();
-
-    QCOMPARE(action1.executions(), 1);
-    QCOMPARE(action2.executions(), 1);
-    QCOMPARE(action3.executions(), 1);
-    QCOMPARE(action4.executions(), 1);
-    QCOMPARE(action5.executions(), 1);
-    QVERIFY((results == std::vector<uint8_t>{1, 2, 3, 4, 5}));
-}
-
-bool TestActionExecutor::isMainThread()
-{
-    return QThread::currentThread() == QCoreApplication::instance()->thread();
-}
+    std::unique_ptr<ActionExecutor> m_executor;
+};
 
 }
 
 QTEST_MAIN(InputActions::TestActionExecutor)
+#include "TestActionExecutor.moc"

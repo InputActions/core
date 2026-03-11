@@ -1,4 +1,4 @@
-#include "TestQRegularExpressionNodeParser.h"
+#include "Test.h"
 #include <QRegularExpression>
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/Node.h>
@@ -6,21 +6,28 @@
 namespace InputActions
 {
 
-void TestQRegularExpressionNodeParser::valid__parsesNodeCorrectly()
+class TestQRegularExpressionNodeParser : public Test
 {
-    const auto node = Node::create("\"[a]\"");
-    const auto regex = node->as<QRegularExpression>();
+    Q_OBJECT
 
-    QVERIFY(regex.isValid());
-    QCOMPARE(regex.pattern(), "[a]");
-}
+private slots:
+    void valid__parsesNodeCorrectly()
+    {
+        const auto node = Node::create("\"[a]\"");
+        const auto regex = node->as<QRegularExpression>();
 
-void TestQRegularExpressionNodeParser::invalid__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create("\"[a\"");
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<QRegularExpression>(), InvalidValueConfigException, 0, 0);
-}
+        QVERIFY(regex.isValid());
+        QCOMPARE(regex.pattern(), "[a]");
+    }
+
+    void invalid__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create("\"[a\"");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<QRegularExpression>(), InvalidValueConfigException, 0, 0);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestQRegularExpressionNodeParser)
+#include "TestQRegularExpressionNodeParser.moc"
