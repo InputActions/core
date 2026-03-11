@@ -1,4 +1,4 @@
-#include "TestTriggerActionNodeParser.h"
+#include "Test.h"
 #include <libinputactions/actions/TriggerAction.h>
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/Node.h>
@@ -6,98 +6,105 @@
 namespace InputActions
 {
 
-void TestTriggerActionNodeParser::interval_validOn__doesNotThrow_data()
+class TestTriggerActionNodeParser : public Test
 {
-    QTest::addColumn<QString>("on");
+    Q_OBJECT
 
-    QTest::addRow("tick") << "tick";
-    QTest::addRow("update") << "update";
-}
+private slots:
+    void interval_validOn__doesNotThrow_data()
+    {
+        QTest::addColumn<QString>("on");
 
-void TestTriggerActionNodeParser::interval_validOn__doesNotThrow()
-{
-    QFETCH(QString, on);
+        QTest::addRow("tick") << "tick";
+        QTest::addRow("update") << "update";
+    }
 
-    const auto node = Node::create(QString(R"(
-        on: %1
-        interval: 1
-        command: _
-    )")
-                                       .arg(on));
+    void interval_validOn__doesNotThrow()
+    {
+        QFETCH(QString, on);
 
-    QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>());
-}
+        const auto node = Node::create(QString(R"(
+            on: %1
+            interval: 1
+            command: _
+        )")
+                                           .arg(on));
 
-void TestTriggerActionNodeParser::interval_invalidOn__throwsInvalidValueConfigException_data()
-{
-    QTest::addColumn<QString>("on");
+        QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>());
+    }
 
-    QTest::addRow("begin") << "begin";
-    QTest::addRow("cancel") << "cancel";
-    QTest::addRow("end") << "end";
-    QTest::addRow("end_cancel") << "end_cancel";
-}
+    void interval_invalidOn__throwsInvalidValueConfigException_data()
+    {
+        QTest::addColumn<QString>("on");
 
-void TestTriggerActionNodeParser::interval_invalidOn__throwsInvalidValueConfigException()
-{
-    QFETCH(QString, on);
+        QTest::addRow("begin") << "begin";
+        QTest::addRow("cancel") << "cancel";
+        QTest::addRow("end") << "end";
+        QTest::addRow("end_cancel") << "end_cancel";
+    }
 
-    const auto node = Node::create(QString(R"(
-        on: %1
-        interval: 1
-        command: _
-    )")
-                                       .arg(on));
+    void interval_invalidOn__throwsInvalidValueConfigException()
+    {
+        QFETCH(QString, on);
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>(), InvalidValueContextConfigException, 2, 18);
-}
+        const auto node = Node::create(QString(R"(
+            on: %1
+            interval: 1
+            command: _
+        )")
+                                           .arg(on));
 
-void TestTriggerActionNodeParser::threshold_validOn__doesNotThrow_data()
-{
-    QTest::addColumn<QString>("on");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>(), InvalidValueContextConfigException, 2, 22);
+    }
 
-    QTest::addRow("cancel") << "cancel";
-    QTest::addRow("end") << "end";
-    QTest::addRow("end_cancel") << "end_cancel";
-    QTest::addRow("tick") << "tick";
-    QTest::addRow("update") << "update";
-}
+    void threshold_validOn__doesNotThrow_data()
+    {
+        QTest::addColumn<QString>("on");
 
-void TestTriggerActionNodeParser::threshold_validOn__doesNotThrow()
-{
-    QFETCH(QString, on);
+        QTest::addRow("cancel") << "cancel";
+        QTest::addRow("end") << "end";
+        QTest::addRow("end_cancel") << "end_cancel";
+        QTest::addRow("tick") << "tick";
+        QTest::addRow("update") << "update";
+    }
 
-    const auto node = Node::create(QString(R"(
-        on: %1
-        threshold: 1
-        command: _
-    )")
-                                       .arg(on));
+    void threshold_validOn__doesNotThrow()
+    {
+        QFETCH(QString, on);
 
-    QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>());
-}
+        const auto node = Node::create(QString(R"(
+            on: %1
+            threshold: 1
+            command: _
+        )")
+                                           .arg(on));
 
-void TestTriggerActionNodeParser::threshold_invalidOn__throwsInvalidValueConfigException_data()
-{
-    QTest::addColumn<QString>("on");
+        QVERIFY_THROWS_NO_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>());
+    }
 
-    QTest::addRow("begin") << "begin";
-}
+    void threshold_invalidOn__throwsInvalidValueConfigException_data()
+    {
+        QTest::addColumn<QString>("on");
 
-void TestTriggerActionNodeParser::threshold_invalidOn__throwsInvalidValueConfigException()
-{
-    QFETCH(QString, on);
+        QTest::addRow("begin") << "begin";
+    }
 
-    const auto node = Node::create(QString(R"(
-        on: %1
-        threshold: 1
-        command: _
-    )")
-                                       .arg(on));
+    void threshold_invalidOn__throwsInvalidValueConfigException()
+    {
+        QFETCH(QString, on);
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>(), InvalidValueContextConfigException, 2, 19);
-}
+        const auto node = Node::create(QString(R"(
+            on: %1
+            threshold: 1
+            command: _
+        )")
+                                           .arg(on));
+
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<TriggerAction>>(), InvalidValueContextConfigException, 2, 23);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestTriggerActionNodeParser)
+#include "TestTriggerActionNodeParser.moc"

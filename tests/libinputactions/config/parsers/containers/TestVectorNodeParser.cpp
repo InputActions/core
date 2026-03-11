@@ -1,35 +1,42 @@
-#include "TestVectorNodeParser.h"
+#include "Test.h"
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/parsers/containers.h>
 
 namespace InputActions
 {
 
-void TestVectorNodeParser::valid__parsesNodeCorrectly()
+class TestVectorNodeParser : public Test
 {
-    const auto node = Node::create("[ 1, 2, 3 ]");
-    const auto vector = node->as<std::vector<uint32_t>>();
+    Q_OBJECT
 
-    QCOMPARE(vector, (std::vector<uint32_t>{1, 2, 3}));
-}
+private slots:
+    void valid__parsesNodeCorrectly()
+    {
+        const auto node = Node::create("[ 1, 2, 3 ]");
+        const auto vector = node->as<std::vector<uint32_t>>();
 
-void TestVectorNodeParser::duplicateItem__parsesNodeCorrectly()
-{
-    const auto node = Node::create("[ 1, 1 ]");
-    const auto vector = node->as<std::vector<uint32_t>>();
+        QCOMPARE(vector, (std::vector<uint32_t>{1, 2, 3}));
+    }
 
-    QCOMPARE(vector, (std::vector<uint32_t>{1, 1}));
-}
+    void duplicateItem__parsesNodeCorrectly()
+    {
+        const auto node = Node::create("[ 1, 1 ]");
+        const auto vector = node->as<std::vector<uint32_t>>();
 
-void TestVectorNodeParser::invalid_scalar__throwsInvalidNodeTypeConfigException()
-{
-    const auto node = Node::create("1");
+        QCOMPARE(vector, (std::vector<uint32_t>{1, 1}));
+    }
 
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION_SAVE(node->as<std::vector<uint32_t>>(), InvalidNodeTypeConfigException, 0, 0, e);
-    QCOMPARE(e->expected(), NodeType::Sequence);
-    QCOMPARE(e->actual(), NodeType::Scalar);
-}
+    void invalid_scalar__throwsInvalidNodeTypeConfigException()
+    {
+        const auto node = Node::create("1");
+
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION_SAVE(node->as<std::vector<uint32_t>>(), InvalidNodeTypeConfigException, 0, 0, e);
+        QCOMPARE(e->expected(), NodeType::Sequence);
+        QCOMPARE(e->actual(), NodeType::Scalar);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestVectorNodeParser)
+#include "TestVectorNodeParser.moc"

@@ -1,4 +1,4 @@
-#include "TestTriggerAction.h"
+#include "Test.h"
 #include <libinputactions/actions/Action.h>
 #include <libinputactions/actions/CustomAction.h>
 #include <libinputactions/actions/TriggerAction.h>
@@ -8,103 +8,110 @@
 namespace InputActions
 {
 
-void TestTriggerAction::triggerUpdated_intervals_data()
+class TestTriggerAction : public Test
 {
-    QTest::addColumn<std::vector<qreal>>("deltas");
-    QTest::addColumn<ActionInterval>("interval");
-    QTest::addColumn<int>("executions");
+    Q_OBJECT
 
-    ActionInterval interval{};
-    QTest::newRow("zeroes") << std::vector<qreal>{0, 0, 0} << interval << 3;
-    interval.setValue(2);
-    QTest::newRow("accumulation") << std::vector<qreal>{1, 1, 1, 1} << interval << 2;
-    QTest::newRow("multiple executions") << std::vector<qreal>{4, 4} << interval << 4;
-    QTest::newRow("direction change (any)") << std::vector<qreal>{-4, 1, -4, 1} << interval << 4;
-    interval.setDirection(IntervalDirection::Positive);
-    QTest::newRow("direction change (positive)") << std::vector<qreal>{-4, 1, -4, 1} << interval << 0;
-    interval.setDirection(IntervalDirection::Negative);
-    QTest::newRow("direction change (negative)") << std::vector<qreal>{4, -1, 4, -1} << interval << 0;
+private slots:
+    void triggerUpdated_intervals_data()
+    {
+        QTest::addColumn<std::vector<qreal>>("deltas");
+        QTest::addColumn<ActionInterval>("interval");
+        QTest::addColumn<int>("executions");
 
-    interval.setValue(0);
-    interval.setDirection(IntervalDirection::Positive);
-    QTest::newRow("no infinite loop") << std::vector<qreal>{1, 0} << interval << 1;
-}
+        ActionInterval interval{};
+        QTest::newRow("zeroes") << std::vector<qreal>{0, 0, 0} << interval << 3;
+        interval.setValue(2);
+        QTest::newRow("accumulation") << std::vector<qreal>{1, 1, 1, 1} << interval << 2;
+        QTest::newRow("multiple executions") << std::vector<qreal>{4, 4} << interval << 4;
+        QTest::newRow("direction change (any)") << std::vector<qreal>{-4, 1, -4, 1} << interval << 4;
+        interval.setDirection(IntervalDirection::Positive);
+        QTest::newRow("direction change (positive)") << std::vector<qreal>{-4, 1, -4, 1} << interval << 0;
+        interval.setDirection(IntervalDirection::Negative);
+        QTest::newRow("direction change (negative)") << std::vector<qreal>{4, -1, 4, -1} << interval << 0;
 
-void TestTriggerAction::triggerUpdated_intervals()
-{
-    QFETCH(std::vector<qreal>, deltas);
-    QFETCH(ActionInterval, interval);
-    QFETCH(int, executions);
-
-    auto action = std::make_unique<TriggerAction>();
-    action->setOn(On::Update);
-    action->setInterval(interval);
-    for (const auto &delta : deltas) {
-        TriggerUpdateEvent event;
-        event.setDelta(delta);
-        action->triggerUpdated(event);
+        interval.setValue(0);
+        interval.setDirection(IntervalDirection::Positive);
+        QTest::newRow("no infinite loop") << std::vector<qreal>{1, 0} << interval << 1;
     }
 
-    QCOMPARE(action->action()->executions(), executions);
-}
+    void triggerUpdated_intervals()
+    {
+        QFETCH(std::vector<qreal>, deltas);
+        QFETCH(ActionInterval, interval);
+        QFETCH(int, executions);
 
-void TestTriggerAction::triggerUpdated_mergeable()
-{
-    uint32_t actualExecutions{};
-    auto action = std::make_unique<TriggerAction>(std::make_unique<CustomAction>(
-        [&actualExecutions](const auto &args) {
-            actualExecutions = args.executions;
-        },
-        false,
-        true));
+        auto action = std::make_unique<TriggerAction>();
+        action->setOn(On::Update);
+        action->setInterval(interval);
+        for (const auto &delta : deltas) {
+            TriggerUpdateEvent event;
+            event.setDelta(delta);
+            action->triggerUpdated(event);
+        }
 
-    ActionInterval interval{};
-    interval.setValue(1);
-    action->setOn(On::Update);
-    action->setInterval(interval);
+        QCOMPARE(action->action()->executions(), executions);
+    }
 
-    TriggerUpdateEvent event;
-    event.setDelta(10);
-    action->triggerUpdated(event);
+    void triggerUpdated_mergeable()
+    {
+        uint32_t actualExecutions{};
+        auto action = std::make_unique<TriggerAction>(std::make_unique<CustomAction>(
+            [&actualExecutions](const auto &args) {
+                actualExecutions = args.executions;
+            },
+            false,
+            true));
 
-    QCOMPARE(actualExecutions, 10);
-}
+        ActionInterval interval{};
+        interval.setValue(1);
+        action->setOn(On::Update);
+        action->setInterval(interval);
 
-void TestTriggerAction::tryExecute_motion_accelerated__passesMotionPointDeltaToAction()
-{
-    auto *assertAction = new CustomAction([](const auto &args) {
-        QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(20, 20));
-    });
+        TriggerUpdateEvent event;
+        event.setDelta(10);
+        action->triggerUpdated(event);
 
-    TriggerAction action{std::unique_ptr<Action>(assertAction)};
-    action.setAccelerated(true);
+        QCOMPARE(actualExecutions, 10);
+    }
 
-    action.triggerStarted();
-    MotionTriggerUpdateEvent event;
-    event.setPointDelta({{20, 20}, {10, 10}});
-    action.triggerUpdated(event);
+    void tryExecute_motion_accelerated__passesMotionPointDeltaToAction()
+    {
+        auto *assertAction = new CustomAction([](const auto &args) {
+            QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(20, 20));
+        });
 
-    action.tryExecute();
-    QCOMPARE(assertAction->executions(), 1);
-}
+        TriggerAction action{std::unique_ptr<Action>(assertAction)};
+        action.setAccelerated(true);
 
-void TestTriggerAction::tryExecute_motion_unaccelerated__passesMotionPointDeltaToAction()
-{
-    auto *assertAction = new CustomAction([](const auto &args) {
-        QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(10, 10));
-    });
+        action.triggerStarted();
+        MotionTriggerUpdateEvent event;
+        event.setPointDelta({{20, 20}, {10, 10}});
+        action.triggerUpdated(event);
 
-    TriggerAction action{std::unique_ptr<Action>(assertAction)};
+        action.tryExecute();
+        QCOMPARE(assertAction->executions(), 1);
+    }
 
-    action.triggerStarted();
-    MotionTriggerUpdateEvent event;
-    event.setPointDelta({{20, 20}, {10, 10}});
-    action.triggerUpdated(event);
+    void tryExecute_motion_unaccelerated__passesMotionPointDeltaToAction()
+    {
+        auto *assertAction = new CustomAction([](const auto &args) {
+            QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(10, 10));
+        });
 
-    action.tryExecute();
-    QCOMPARE(assertAction->executions(), 1);
-}
+        TriggerAction action{std::unique_ptr<Action>(assertAction)};
+
+        action.triggerStarted();
+        MotionTriggerUpdateEvent event;
+        event.setPointDelta({{20, 20}, {10, 10}});
+        action.triggerUpdated(event);
+
+        action.tryExecute();
+        QCOMPARE(assertAction->executions(), 1);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestTriggerAction)
+#include "TestTriggerAction.moc"

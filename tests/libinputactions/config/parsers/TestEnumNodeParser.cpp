@@ -1,4 +1,4 @@
-#include "TestEnumNodeParser.h"
+#include "Test.h"
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/config/parsers/enums.h>
@@ -16,24 +16,31 @@ NODEPARSER_ENUM(TestEnum, "",
                     {"a", TestEnum::A},
                 }))
 
-void TestEnumNodeParser::valid__parsesNodeCorrectly()
+class TestEnumNodeParser : public Test
 {
-    const auto node = Node::create("a");
-    QCOMPARE(node->as<TestEnum>(), TestEnum::A);
-}
+    Q_OBJECT
 
-void TestEnumNodeParser::invalid_differentCase__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create("A");
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<TestEnum>(), InvalidValueConfigException, 0, 0);
-}
+private slots:
+    void valid__parsesNodeCorrectly()
+    {
+        const auto node = Node::create("a");
+        QCOMPARE(node->as<TestEnum>(), TestEnum::A);
+    }
 
-void TestEnumNodeParser::invalid__throwsInvalidValueConfigException()
-{
-    const auto node = Node::create("d");
-    INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<TestEnum>(), InvalidValueConfigException, 0, 0);
-}
+    void invalid_differentCase__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create("A");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<TestEnum>(), InvalidValueConfigException, 0, 0);
+    }
+
+    void invalid__throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create("d");
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<TestEnum>(), InvalidValueConfigException, 0, 0);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestEnumNodeParser)
+#include "TestEnumNodeParser.moc"

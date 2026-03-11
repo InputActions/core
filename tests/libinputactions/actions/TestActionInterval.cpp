@@ -1,38 +1,45 @@
-#include "TestActionInterval.h"
+#include "Test.h"
 #include <libinputactions/actions/TriggerAction.h>
 
 namespace InputActions
 {
 
-void TestActionInterval::matches_data()
+class TestActionInterval : public Test
 {
-    QTest::addColumn<IntervalDirection>("direction");
-    QTest::addColumn<int>("value");
-    QTest::addColumn<bool>("result");
+    Q_OBJECT
 
-    QTest::addRow("any, positive") << IntervalDirection::Any << 1 << true;
-    QTest::addRow("any, negative") << IntervalDirection::Any << -1 << true;
-    QTest::addRow("any, zero") << IntervalDirection::Any << 0 << true;
-    QTest::addRow("positive, positive") << IntervalDirection::Positive << 1 << true;
-    QTest::addRow("positive, negative") << IntervalDirection::Positive << -1 << false;
-    QTest::addRow("positive, zero") << IntervalDirection::Positive << 0 << false;
-    QTest::addRow("negative, positive") << IntervalDirection::Negative << 1 << false;
-    QTest::addRow("negative, negative") << IntervalDirection::Negative << -1 << true;
-    QTest::addRow("negative, zero") << IntervalDirection::Negative << 0 << false;
-}
+private slots:
+    void matches_data()
+    {
+        QTest::addColumn<IntervalDirection>("direction");
+        QTest::addColumn<int>("value");
+        QTest::addColumn<bool>("result");
 
-void TestActionInterval::matches()
-{
-    QFETCH(IntervalDirection, direction);
-    QFETCH(int, value);
-    QFETCH(bool, result);
+        QTest::addRow("any, positive") << IntervalDirection::Any << 1 << true;
+        QTest::addRow("any, negative") << IntervalDirection::Any << -1 << true;
+        QTest::addRow("any, zero") << IntervalDirection::Any << 0 << true;
+        QTest::addRow("positive, positive") << IntervalDirection::Positive << 1 << true;
+        QTest::addRow("positive, negative") << IntervalDirection::Positive << -1 << false;
+        QTest::addRow("positive, zero") << IntervalDirection::Positive << 0 << false;
+        QTest::addRow("negative, positive") << IntervalDirection::Negative << 1 << false;
+        QTest::addRow("negative, negative") << IntervalDirection::Negative << -1 << true;
+        QTest::addRow("negative, zero") << IntervalDirection::Negative << 0 << false;
+    }
 
-    ActionInterval actionInterval;
-    actionInterval.setDirection(direction);
+    void matches()
+    {
+        QFETCH(IntervalDirection, direction);
+        QFETCH(int, value);
+        QFETCH(bool, result);
 
-    QCOMPARE(actionInterval.matches(value), result);
-}
+        ActionInterval actionInterval;
+        actionInterval.setDirection(direction);
+
+        QCOMPARE(actionInterval.matches(value), result);
+    }
+};
 
 }
 
 QTEST_MAIN(InputActions::TestActionInterval)
+#include "TestActionInterval.moc"
