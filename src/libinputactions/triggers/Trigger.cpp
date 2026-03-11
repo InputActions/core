@@ -127,7 +127,6 @@ void Trigger::end(bool allowResuming)
     for (const auto &action : m_actions) {
         action->triggerEnded();
     }
-    Q_EMIT ended();
     reset();
 }
 
