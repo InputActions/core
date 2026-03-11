@@ -107,6 +107,34 @@ target_link_libraries(libinputactions PUBLIC
 target_compile_definitions(libinputactions PUBLIC TEST_VIRTUAL=$<IF:$<BOOL:${BUILD_TESTS}>,virtual,>)
 target_include_directories(libinputactions PRIVATE libinputactions libinputactions/. ${LIBEVDEV_INCLUDE_DIRS})
 set_target_properties(libinputactions PROPERTIES PREFIX "")
-
 target_link_libraries(libinputactions PRIVATE yaml-cpp)
 target_compile_options(libinputactions PUBLIC -fexceptions -fPIC)
+target_precompile_headers(libinputactions
+    PUBLIC
+        "$<$<COMPILE_LANGUAGE:CXX>:<QDebug$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QLoggingCategory$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QObject$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QPoint$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QPointF$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QRegularExpression$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QSize$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QSizeF$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QString$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QStringList$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QTimer$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QThread$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QVariant$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QVector$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<chrono$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<cstdint$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<functional$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<map$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<memory$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<optional$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<ranges$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<set$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<unordered_map$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<unordered_set$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<vector$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<yaml-cpp/yaml.h$<ANGLE-R>>"
+)

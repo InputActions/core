@@ -8,6 +8,13 @@ target_link_libraries(inputactions-test PUBLIC
     libinputactions
     Qt::Test
 )
+target_precompile_headers(inputactions-test
+    PUBLIC
+        <QSignalSpy>
+        <QTest>
+        Test.h
+        utils.h
+)
 
 macro(libinputactions_add_test TARGET_NAME)
     set(options)
@@ -21,6 +28,7 @@ macro(libinputactions_add_test TARGET_NAME)
         inputactions-test
         GTest::gmock_main
     )
+    target_precompile_headers(${TARGET_NAME} REUSE_FROM inputactions-test)
 endmacro()
 
 libinputactions_add_test(TestAction SOURCES actions/TestAction.cpp)
