@@ -1,7 +1,7 @@
 #pragma once
 
-#include <gmock/gmock.h>
 #include <libinputactions/triggers/Trigger.h>
+#include <libinputactions/triggers/core/TriggerCore.h>
 
 namespace InputActions
 {
@@ -9,12 +9,10 @@ namespace InputActions
 class MockTrigger : public Trigger
 {
 public:
-    MockTrigger(TriggerType type = TriggerType::None)
-        : Trigger(type)
+    MockTrigger()
+        : Trigger(TriggerType::None, std::make_unique<TriggerCore>())
     {
     }
-
-    MOCK_METHOD(bool, canActivate, (const TriggerActivationEvent &event), (const, override));
 };
 
 }

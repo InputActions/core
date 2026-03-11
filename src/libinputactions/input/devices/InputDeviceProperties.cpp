@@ -21,7 +21,7 @@
 #include <QStringList>
 #include <libinputactions/helpers/QVariant.h>
 #include <libinputactions/input/devices/InputDevice.h>
-#include <libinputactions/triggers/SwipeTrigger.h>
+#include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
 namespace InputActions
 {

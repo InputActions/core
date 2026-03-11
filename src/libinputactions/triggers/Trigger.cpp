@@ -17,6 +17,7 @@
 */
 
 #include "Trigger.h"
+#include "core/TriggerCore.h"
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/variables/VariableManager.h>
@@ -28,8 +29,9 @@ namespace InputActions
 
 static const std::chrono::milliseconds TICK_INTERVAL{5L};
 
-Trigger::Trigger(TriggerType type)
+Trigger::Trigger(TriggerType type, std::unique_ptr<TriggerCore> core)
     : m_type(type)
+    , m_core(std::move(core))
 {
     m_tickTimer.setTimerType(Qt::TimerType::PreciseTimer);
     connect(&m_tickTimer, &QTimer::timeout, this, &Trigger::onTick);
@@ -39,6 +41,8 @@ Trigger::Trigger(TriggerType type)
     connect(&m_resumeTimeoutTimer, &QTimer::timeout, this, &Trigger::onResumeTimeoutTimerTimeout);
 }
 
+Trigger::~Trigger() = default;
+
 void Trigger::addAction(std::unique_ptr<TriggerAction> action)
 {
     actionAdded(action.get());
@@ -47,22 +51,12 @@ void Trigger::addAction(std::unique_ptr<TriggerAction> action)
 
 bool Trigger::canActivate(const TriggerActivationEvent &event) const
 {
-    if (!m_mouseButtons.empty() && event.mouseButtons().has_value()) {
-        if (m_mouseButtons.size() != event.mouseButtons()->size()
-            || (m_mouseButtonsExactOrder && !std::ranges::equal(m_mouseButtons, event.mouseButtons().value()))
-            || (!m_mouseButtonsExactOrder && !std::ranges::all_of(m_mouseButtons, [event](auto &button) {
-                   return std::ranges::contains(event.mouseButtons().value(), button);
-               }))) {
-            return false;
-        }
-    }
-
     return !m_activationCondition || m_activationCondition->satisfied();
 }
 
 bool Trigger::canUpdate(const TriggerUpdateEvent &event) const
 {
-    return true;
+    return m_core->canUpdate(event);
 }
 
 bool Trigger::endIfCannotUpdate() const
@@ -102,7 +96,7 @@ void Trigger::update(const TriggerUpdateEvent &event)
     }
 
     setLastTrigger();
-    updateActions(event);
+    m_core->updateActions(m_actions, event);
 }
 
 bool Trigger::canEnd() const
@@ -185,23 +179,6 @@ void Trigger::actionAdded(TriggerAction *action)
     }
 }
 
-void Trigger::updateActions(const TriggerUpdateEvent &event)
-{
-    doUpdateActions(event);
-}
-
-void Trigger::doUpdateActions(const TriggerUpdateEvent &event)
-{
-    for (const auto &action : m_actions) {
-        action->triggerUpdated(event);
-    }
-}
-
-const TriggerType &Trigger::type() const
-{
-    return m_type;
-}
-
 void Trigger::onTick()
 {
     if (!m_withinThreshold) {
@@ -237,6 +214,16 @@ void Trigger::reset()
     m_absoluteAccumulatedDelta = 0;
     m_withinThreshold = false;
     m_tickTimer.stop();
+}
+
+const TriggerCore &Trigger::core() const
+{
+    return *m_core;
+}
+
+TriggerCore &Trigger::core()
+{
+    return *m_core;
 }
 
 }

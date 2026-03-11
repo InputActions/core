@@ -34,10 +34,6 @@ enum class PinchType
     Rotate
 };
 
-/**
- * Handles multi-touch triggers: pinch, tap, rotate.
- * In the future this will also be able to recognize triggers based on touch points.
- */
 class MultiTouchMotionTriggerHandler : public MotionTriggerHandler
 {
 protected:

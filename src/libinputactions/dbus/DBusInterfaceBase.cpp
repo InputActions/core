@@ -22,7 +22,7 @@
 #include <libinputactions/config/GlobalConfig.h>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDevice.h>
-#include <libinputactions/triggers/StrokeTrigger.h>
+#include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/variables/VariableManager.h>
 
 namespace InputActions

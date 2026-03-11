@@ -21,6 +21,7 @@
 #include "flags.h"
 #include "globals.h"
 #include "separated-string.h"
+#include "triggers.h"
 #include "utils.h"
 #include <QPointF>
 #include <QRegularExpression>
@@ -48,12 +49,12 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
-#include <libinputactions/triggers/HoverTrigger.h>
-#include <libinputactions/triggers/KeyboardShortcutTrigger.h>
-#include <libinputactions/triggers/PressTrigger.h>
-#include <libinputactions/triggers/StrokeTrigger.h>
-#include <libinputactions/triggers/SwipeTrigger.h>
-#include <libinputactions/triggers/WheelTrigger.h>
+#include <libinputactions/triggers/core/StrokeTriggerCore.h>
+#include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
+#include <libinputactions/triggers/mouse/MouseTrigger.h>
+#include <libinputactions/triggers/pointer/PointerTrigger.h>
+#include <libinputactions/triggers/touchpad/TouchpadTrigger.h>
+#include <libinputactions/triggers/touchscreen/TouchscreenTrigger.h>
 #include <libinputactions/variables/Variable.h>
 #include <libinputactions/variables/VariableManager.h>
 
@@ -576,180 +577,6 @@ struct NodeParser<Range<T>>
 template struct NodeParser<Range<qreal>>;
 
 template<>
-void NodeParser<std::unique_ptr<Trigger>>::parse(const Node *node, std::unique_ptr<Trigger> &result)
-{
-    const auto *typeNode = node->at("type", true);
-    auto type = typeNode->as<QString>();
-
-    if (type == "circle") {
-        result = std::make_unique<DirectionalMotionTrigger>(TriggerType::Circle,
-                                                            static_cast<TriggerDirection>(node->at("direction", true)->as<RotateDirection>()));
-    } else if (type == "click") {
-        result = std::make_unique<Trigger>(TriggerType::Click);
-    } else if (type == "hold" || type == "press") {
-        auto pressTrigger = std::make_unique<PressTrigger>();
-        loadSetter(pressTrigger.get(), &PressTrigger::setInstant, node->at("instant"));
-        result = std::move(pressTrigger);
-    } else if (type == "hover") {
-        result = std::make_unique<HoverTrigger>();
-    } else if (type == "pinch") {
-        result = std::make_unique<DirectionalMotionTrigger>(TriggerType::Pinch,
-                                                            static_cast<TriggerDirection>(node->at("direction", true)->as<PinchDirection>()));
-    } else if (type == "rotate") {
-        result = std::make_unique<DirectionalMotionTrigger>(TriggerType::Rotate,
-                                                            static_cast<TriggerDirection>(node->at("direction", true)->as<RotateDirection>()));
-    } else if (type == "shortcut") {
-        result = std::make_unique<KeyboardShortcutTrigger>(node->at("shortcut", true)->as<KeyboardShortcut>());
-    } else if (type == "stroke") {
-        result = std::make_unique<StrokeTrigger>(node->at("strokes", true)->as<std::vector<Stroke>>(true));
-    } else if (type == "swipe") {
-        if (const auto *directionNode = node->at("direction")) {
-            result = std::make_unique<SwipeTrigger>(directionNode->as<SwipeTriggerDirection>());
-        } else {
-            const auto *angleNode = node->at("angle", true);
-            const auto angles = parseSeparatedString2<qreal>(angleNode, '-');
-            if (angles.first > 360 || angles.second > 360) {
-                throw InvalidValueConfigException(angleNode, "The angle may not be greater than 360.");
-            }
-
-            auto swipeTrigger = std::make_unique<SwipeTrigger>(angles.first, angles.second);
-            loadSetter(swipeTrigger.get(), &SwipeTrigger::setBidirectional, node->at("bidirectional"));
-            result = std::move(swipeTrigger);
-        }
-
-    } else if (type == "tap") {
-        result = std::make_unique<Trigger>(TriggerType::Tap);
-    } else if (type == "wheel") {
-        result = std::make_unique<WheelTrigger>(static_cast<TriggerDirection>(node->at("direction", true)->as<SwipeDirection>()));
-    } else {
-        throw InvalidValueConfigException(typeNode, QString("Invalid trigger type '%1'.").arg(type));
-    }
-
-    loadSetter(result, &Trigger::setBlockEvents, node->at("block_events"));
-    loadSetter(result, &Trigger::setClearModifiers, node->at("clear_modifiers"));
-    loadSetter(result, &Trigger::setEndCondition, node->at("end_conditions"));
-    loadSetter(result, &Trigger::setId, node->at("id"));
-    loadSetter(result, &Trigger::setMouseButtonsExactOrder, node->at("mouse_buttons_exact_order"));
-    loadSetter(result, &Trigger::setResumeTimeout, node->at("resume_timeout"));
-    loadSetter(result, &Trigger::setSetLastTrigger, node->at("set_last_trigger"));
-    loadSetter(result, &Trigger::setThreshold, node->at("threshold"));
-    if (const auto *mouseButtonsNode = node->at("mouse_buttons")) {
-        mouseButtonsNode->as<std::set<MouseButton>>(); // Ensure no duplicates, Trigger::setMouseButtons accepts a vector
-        loadSetter(result, &Trigger::setMouseButtons, mouseButtonsNode);
-    }
-    if (auto *motionTrigger = dynamic_cast<MotionTrigger *>(result.get())) {
-        loadSetter(motionTrigger, &MotionTrigger::setLockPointer, node->at("lock_pointer"));
-        loadSetter(motionTrigger, &MotionTrigger::setSpeed, node->at("speed"));
-    }
-
-    auto conditionGroup = std::make_shared<ConditionGroup>();
-    if (const auto *fingersNode = node->at("fingers")) {
-        auto range = fingersNode->as<Range<qreal>>();
-        if (!range.max()) {
-            conditionGroup->append(std::make_shared<VariableCondition>(BuiltinVariables::Fingers,
-                                                                       Value<qreal>(range.min().value()),
-                                                                       ComparisonOperator::EqualTo));
-        } else {
-            conditionGroup->append(std::make_shared<VariableCondition>(BuiltinVariables::Fingers,
-                                                                       std::vector<Value<std::any>>{
-                                                                           Value<qreal>(range.min().value()), Value<qreal>(range.max().value())},
-                                                                       ComparisonOperator::Between));
-        }
-    }
-    if (const auto *modifiersNode = node->at("keyboard_modifiers")) {
-        g_configIssueManager->addIssue(DeprecatedFeatureConfigIssue(modifiersNode, DeprecatedFeature::TriggerKeyboardModifiers));
-
-        std::optional<Qt::KeyboardModifiers> modifiers;
-        if (modifiersNode->isSequence()) {
-            modifiers = modifiersNode->as<Qt::KeyboardModifiers>();
-        } else {
-            const auto modifierMatchingMode = modifiersNode->as<QString>();
-            if (modifierMatchingMode == "none") {
-                modifiers = Qt::KeyboardModifier::NoModifier;
-            } else if (modifierMatchingMode != "any") {
-                throw InvalidValueConfigException(modifiersNode, "Invalid keyboard modifier.");
-            }
-        }
-
-        if (modifiers) {
-            conditionGroup->append(std::make_shared<VariableCondition>(BuiltinVariables::KeyboardModifiers,
-                                                                       Value<Qt::KeyboardModifiers>(modifiers.value()),
-                                                                       ComparisonOperator::EqualTo));
-        }
-    }
-    if (const auto *conditionsNode = node->at("conditions")) {
-        conditionGroup->append(conditionsNode->as<std::shared_ptr<Condition>>());
-    }
-
-    if (conditionGroup->conditions().size() == 1) {
-        result->setActivationCondition(conditionGroup->conditions()[0]);
-    } else if (conditionGroup->conditions().size()) {
-        result->setActivationCondition(conditionGroup);
-    }
-
-    bool accelerated{};
-    loadMember(accelerated, node->at("accelerated"));
-
-    if (const auto *actionsNode = node->at("actions")) {
-        for (const auto *actionNode : actionsNode->sequenceItems()) {
-            auto action = actionNode->as<std::unique_ptr<TriggerAction>>();
-            if (dynamic_cast<StrokeTrigger *>(result.get()) && action->on() != On::End && action->conflicting()) {
-                throw InvalidValueContextConfigException(actionNode, "Stroke triggers only support 'on: end' conflicting actions.");
-            }
-
-            action->setAccelerated(accelerated);
-            result->addAction(std::move(action));
-        }
-    }
-}
-
-// Trigger list, handles triggers groups as well
-template<>
-void NodeParser<std::vector<std::unique_ptr<Trigger>>>::parse(const Node *node, std::vector<std::unique_ptr<Trigger>> &result)
-{
-    for (const auto *triggerNode : node->sequenceItems()) {
-        if (const auto *subTriggersNode = triggerNode->at("gestures")) {
-            // Trigger group
-            for (const auto *subTriggerNode : subTriggersNode->sequenceItems()) {
-                const auto mergedNode = std::make_shared<Node>(*subTriggerNode);
-
-                std::shared_ptr<Condition> groupCondition;
-                for (const auto &[key, value] : triggerNode->mapItemsRawKeys()) {
-                    const auto keyStr = key->as<QString>();
-                    if (keyStr == "conditions") {
-                        groupCondition = triggerNode->at("conditions")->as<std::shared_ptr<Condition>>();
-                    } else if (keyStr != "gestures") {
-                        mergedNode->addMapItem(key->shared_from_this(), value->shared_from_this());
-                    }
-                }
-                for (auto &trigger : mergedNode->as<std::vector<std::unique_ptr<Trigger>>>(true)) {
-                    if (groupCondition) {
-                        if (const auto triggerCondition = trigger->activationCondition()) {
-                            if (const auto triggerConditionGroup = std::dynamic_pointer_cast<ConditionGroup>(triggerCondition);
-                                triggerConditionGroup && triggerConditionGroup->mode() == ConditionGroupMode::All) {
-                                triggerConditionGroup->prepend(groupCondition);
-                            } else {
-                                auto conditionGroup = std::make_shared<ConditionGroup>();
-                                conditionGroup->append(groupCondition);
-                                conditionGroup->append(trigger->activationCondition());
-                                trigger->setActivationCondition(conditionGroup);
-                            }
-                        } else {
-                            trigger->setActivationCondition(groupCondition);
-                        }
-                    }
-
-                    result.push_back(std::move(trigger));
-                }
-            }
-            continue;
-        }
-
-        result.push_back(triggerNode->as<std::unique_ptr<Trigger>>());
-    }
-}
-
-template<>
 void NodeParser<std::unique_ptr<TriggerAction>>::parse(const Node *node, std::unique_ptr<TriggerAction> &result)
 {
     result = std::make_unique<TriggerAction>(node->as<std::unique_ptr<Action>>());
@@ -815,9 +642,6 @@ struct NodeParser<Value<T>>
 
 inline void parseTriggerHandler(const Node *node, TriggerHandler *handler)
 {
-    for (auto &trigger : node->at("gestures", true)->as<std::vector<std::unique_ptr<Trigger>>>()) {
-        handler->addTrigger(std::move(trigger));
-    }
     loadSetter(handler, &TriggerHandler::setTimedTriggerUpdateDelta, node->at("__time_delta"));
 }
 
@@ -854,6 +678,9 @@ inline void parseMultiTouchMotionTriggerHandler(const Node *node, MultiTouchMoti
 std::unique_ptr<TouchpadTriggerHandler> parseTouchpadTriggerHandler(const Node *node, InputDevice *device)
 {
     auto handler = std::make_unique<TouchpadTriggerHandler>(device);
+    for (auto &trigger : parseTriggerList<TouchpadTrigger>(node->at("gestures", true))) {
+        handler->addTrigger(std::move(trigger));
+    }
     parseMultiTouchMotionTriggerHandler(node, handler.get());
     loadSetter(static_cast<MotionTriggerHandler *>(handler.get()), &MotionTriggerHandler::setSwipeDeltaMultiplier, node->at("delta_multiplier"));
     return handler;
@@ -862,6 +689,9 @@ std::unique_ptr<TouchpadTriggerHandler> parseTouchpadTriggerHandler(const Node *
 std::unique_ptr<TouchscreenTriggerHandler> parseTouchscreenTriggerHandler(const Node *node, InputDevice *device)
 {
     auto handler = std::make_unique<TouchscreenTriggerHandler>(device);
+    for (auto &trigger : parseTriggerList<TouchscreenTrigger>(node->at("gestures", true))) {
+        handler->addTrigger(std::move(trigger));
+    }
     parseMultiTouchMotionTriggerHandler(node, handler.get());
     return handler;
 }
@@ -870,6 +700,9 @@ template<>
 void NodeParser<std::unique_ptr<KeyboardTriggerHandler>>::parse(const Node *node, std::unique_ptr<KeyboardTriggerHandler> &result)
 {
     result = std::make_unique<KeyboardTriggerHandler>();
+    for (auto &trigger : parseTriggerList<KeyboardTrigger>(node->at("gestures", true))) {
+        result->addTrigger(std::move(trigger));
+    }
     parseTriggerHandler(node, result.get());
 }
 
@@ -877,6 +710,9 @@ template<>
 void NodeParser<std::unique_ptr<MouseTriggerHandler>>::parse(const Node *node, std::unique_ptr<MouseTriggerHandler> &result)
 {
     result = std::make_unique<MouseTriggerHandler>();
+    for (auto &trigger : parseTriggerList<MouseTrigger>(node->at("gestures", true))) {
+        result->addTrigger(std::move(trigger));
+    }
     parseMotionTriggerHandler(node, node->mapAt("speed"), result.get());
 }
 
@@ -884,6 +720,9 @@ template<>
 void NodeParser<std::unique_ptr<PointerTriggerHandler>>::parse(const Node *node, std::unique_ptr<PointerTriggerHandler> &result)
 {
     result = std::make_unique<PointerTriggerHandler>();
+    for (auto &trigger : parseTriggerList<PointerTrigger>(node->at("gestures", true))) {
+        result->addTrigger(std::move(trigger));
+    }
     parseTriggerHandler(node, result.get());
 }
 

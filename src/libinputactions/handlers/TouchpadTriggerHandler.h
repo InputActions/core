@@ -24,15 +24,17 @@
 namespace InputActions
 {
 
+class TouchpadTrigger;
+
 /**
- * Handles touchpad triggers: click, pinch, press, rotate, stroke, swipe, tap.
- *
  * Can handle one device. Each device has its own instance.
  */
 class TouchpadTriggerHandler : public MultiTouchMotionTriggerHandler
 {
 public:
     TouchpadTriggerHandler(InputDevice *device);
+
+    void addTrigger(std::unique_ptr<TouchpadTrigger> trigger);
 
 protected:
     /**

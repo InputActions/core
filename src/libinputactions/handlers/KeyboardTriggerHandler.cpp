@@ -19,6 +19,7 @@
 #include "KeyboardTriggerHandler.h"
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/events.h>
+#include <libinputactions/triggers/keyboard/KeyboardTrigger.h>
 
 namespace InputActions
 {
@@ -26,6 +27,11 @@ namespace InputActions
 KeyboardTriggerHandler::KeyboardTriggerHandler()
 {
     setDeviceTypes(InputDeviceType::Keyboard);
+}
+
+void KeyboardTriggerHandler::addTrigger(std::unique_ptr<KeyboardTrigger> trigger)
+{
+    TriggerHandler::addTrigger(std::move(trigger));
 }
 
 bool KeyboardTriggerHandler::keyboardKey(const KeyboardKeyEvent &event)

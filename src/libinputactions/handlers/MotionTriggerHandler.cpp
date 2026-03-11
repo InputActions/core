@@ -27,8 +27,8 @@
 #include <libinputactions/helpers/Math.h>
 #include <libinputactions/input/Delta.h>
 #include <libinputactions/input/devices/InputDevice.h>
-#include <libinputactions/triggers/StrokeTrigger.h>
-#include <libinputactions/triggers/SwipeTrigger.h>
+#include <libinputactions/triggers/core/StrokeTriggerCore.h>
+#include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOTION, "inputactions.handler.motion", QtWarningMsg)
 
@@ -290,8 +290,8 @@ void MotionTriggerHandler::onCircleCoastingTimerTick()
 
 void MotionTriggerHandler::onActivatingTrigger(const Trigger *trigger)
 {
-    if (const auto motionTrigger = dynamic_cast<const MotionTrigger *>(trigger)) {
-        if (!m_isDeterminingSpeed && motionTrigger->hasSpeed()) {
+    if (const auto *motionTriggerCore = dynamic_cast<const MotionTriggerCore *>(&trigger->core())) {
+        if (!m_isDeterminingSpeed && motionTriggerCore->hasSpeed()) {
             qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Trigger has speed (id: %1)").arg(trigger->id());
             m_isDeterminingSpeed = true;
         }
@@ -315,7 +315,7 @@ void MotionTriggerHandler::onEndingTriggers(TriggerTypes types)
             continue;
         }
 
-        for (const auto &triggerStroke : dynamic_cast<StrokeTrigger *>(trigger)->strokes()) {
+        for (const auto &triggerStroke : dynamic_cast<const StrokeTriggerCore &>(trigger->core()).strokes()) {
             const auto score = stroke.compare(triggerStroke);
             if (score > bestScore && score > Stroke::min_matching_score()) {
                 best = trigger;

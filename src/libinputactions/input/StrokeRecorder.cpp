@@ -19,7 +19,7 @@
 #include "StrokeRecorder.h"
 #include "events.h"
 #include <libinputactions/input/devices/InputDevice.h>
-#include <libinputactions/triggers/StrokeTrigger.h>
+#include <libinputactions/triggers/core/StrokeTriggerCore.h>
 
 namespace InputActions
 {

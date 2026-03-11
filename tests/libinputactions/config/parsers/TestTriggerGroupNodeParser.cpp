@@ -4,7 +4,8 @@
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/ConfigIssueManager.h>
 #include <libinputactions/config/Node.h>
-#include <libinputactions/triggers/Trigger.h>
+#include <libinputactions/config/parsers/triggers.h>
+#include <libinputactions/triggers/mouse/MouseTrigger.h>
 #include <libinputactions/variables/VariableManager.h>
 
 namespace InputActions
@@ -31,7 +32,7 @@ private slots:
               gestures:
                 - type: press
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
         QCOMPARE(triggers[0]->id(), "test");
@@ -45,7 +46,7 @@ private slots:
                 - type: press
                 - type: press
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 2);
         QCOMPARE(triggers[0]->id(), "test");
@@ -60,7 +61,7 @@ private slots:
                 - gestures:
                     - type: press
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
         QCOMPARE(triggers[0]->id(), "test");
@@ -74,7 +75,7 @@ private slots:
                   gestures:
                     - type: press
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
         QCOMPARE(triggers[0]->id(), "test");
@@ -87,7 +88,7 @@ private slots:
               gestures:
                 - type: press
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
         QVERIFY(dynamic_pointer_cast<VariableCondition>(triggers[0]->activationCondition()));
@@ -101,7 +102,7 @@ private slots:
                 - type: press
                   conditions: $b
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
 
@@ -132,7 +133,7 @@ private slots:
                     - type: press
                       conditions: $c
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
 
@@ -167,7 +168,7 @@ private slots:
                     - $b
                     - $c
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
 
@@ -203,7 +204,7 @@ private slots:
                       - $b
                       - $c
         )");
-        const auto triggers = node->as<std::vector<std::unique_ptr<Trigger>>>();
+        const auto triggers = parseTriggerList<MouseTrigger>(node.get());
 
         QCOMPARE(triggers.size(), 1);
 
@@ -244,7 +245,7 @@ private slots:
                 - type: press
         )");
 
-        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::vector<std::unique_ptr<Trigger>>>(), InvalidValueConfigException, 1, 23);
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(parseTriggerList<MouseTrigger>(node.get()), InvalidValueConfigException, 1, 23);
     }
 
     void unusedProperty__addsConfigIssueAtCorrectPosition()
@@ -255,7 +256,7 @@ private slots:
                 - type: press
         )");
 
-        node->as<std::vector<std::unique_ptr<Trigger>>>();
+        parseTriggerList<MouseTrigger>(node.get());
         INPUTACTIONS_VERIFY_ADDS_CONFIG_ISSUE_SAVE(node->addUnusedMapPropertyIssues(), UnusedPropertyConfigIssue, 1, 14, issue);
         QCOMPARE(issue->property(), "_");
     }

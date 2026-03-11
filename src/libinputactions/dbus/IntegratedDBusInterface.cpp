@@ -23,7 +23,7 @@
 #include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/input/StrokeRecorder.h>
 #include <libinputactions/interfaces/OnScreenMessageManager.h>
-#include <libinputactions/triggers/StrokeTrigger.h>
+#include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/variables/VariableManager.h>
 
 namespace InputActions

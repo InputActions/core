@@ -25,21 +25,17 @@ Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOUSE)
 namespace InputActions
 {
 
+class MouseTrigger;
+
 /**
- * Handles mouse triggers: press, stroke, swipe, wheel.
- *
- * Press triggers activate after a small delay in order to allow for normal clicks and dragging. This behavior can be
- * changed by making a press trigger instant, however any activated instant trigger will make all other activated
- * triggers instant as well.
- * @see setMotionTimeout
- * @see PressTrigger::setInstant
- *
  * Can handle multiple devices simultaneously. A single instance is shared by all devices.
  */
 class MouseTriggerHandler : public MotionTriggerHandler
 {
 public:
     MouseTriggerHandler();
+
+    void addTrigger(std::unique_ptr<MouseTrigger> trigger);
 
 protected:
     bool keyboardKey(const KeyboardKeyEvent &event) override;

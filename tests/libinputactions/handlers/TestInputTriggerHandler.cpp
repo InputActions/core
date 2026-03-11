@@ -5,6 +5,7 @@
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/events.h>
 #include <libinputactions/triggers/Trigger.h>
+#include <libinputactions/triggers/mouse/MousePressTrigger.h>
 #include <linux/input-event-codes.h>
 
 namespace InputActions
@@ -29,7 +30,7 @@ private slots:
     void keyboardKey__modifierReleased_pressedBeforeTriggerActivation__triggersEnded()
     {
         QSignalSpy spy(m_handler.get(), &TriggerHandler::endingTriggers);
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
+        m_handler->addTrigger(std::make_unique<MousePressTrigger>());
 
         g_inputBackend->handleEvent(KeyboardKeyEvent(m_keyboard.get(), KEY_LEFTCTRL, true));
         m_handler->handleEvent(KeyboardKeyEvent(m_keyboard.get(), KEY_LEFTCTRL, true));
@@ -45,7 +46,7 @@ private slots:
     void keyboardKey__modifierReleased_pressedAfterTriggerActivation__triggersNotEnded()
     {
         QSignalSpy spy(m_handler.get(), &TriggerHandler::endingTriggers);
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
+        m_handler->addTrigger(std::make_unique<MousePressTrigger>());
 
         m_handler->activateTriggers(TriggerType::Press);
 

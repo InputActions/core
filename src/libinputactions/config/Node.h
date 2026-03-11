@@ -135,7 +135,7 @@ public:
      * @return Items of this sequence node.
      * @throws InvalidNodeTypeConfigException The node is not a sequence.
      */
-    std::vector<const Node *> sequenceItems() const;
+    std::vector<const Node *> sequenceItems(bool allowImplicitConversionToSequence = false) const;
 
     /**
      * @return String keys and node values of this map node. Returned nodes are not marked as used.

@@ -3,7 +3,7 @@
 #include <libinputactions/handlers/KeyboardTriggerHandler.h>
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/events.h>
-#include <libinputactions/triggers/KeyboardShortcutTrigger.h>
+#include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
 #include <linux/input-event-codes.h>
 
 namespace InputActions

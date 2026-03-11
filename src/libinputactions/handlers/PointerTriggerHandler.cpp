@@ -17,9 +17,15 @@
 */
 
 #include "PointerTriggerHandler.h"
+#include <libinputactions/triggers/pointer/PointerTrigger.h>
 
 namespace InputActions
 {
+
+void PointerTriggerHandler::addTrigger(std::unique_ptr<PointerTrigger> trigger)
+{
+    TriggerHandler::addTrigger(std::move(trigger));
+}
 
 bool PointerTriggerHandler::pointerMotion(const MotionEvent &event)
 {

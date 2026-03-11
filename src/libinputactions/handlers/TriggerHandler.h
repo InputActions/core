@@ -46,8 +46,6 @@ class TriggerHandler : public QObject
     Q_OBJECT
 
 public:
-    void addTrigger(std::unique_ptr<Trigger> trigger);
-
     /**
      * @param value The interval (in milliseconds) and delta used for updating time-based triggers.
      */
@@ -55,6 +53,8 @@ public:
 
 protected:
     TriggerHandler();
+
+    void addTrigger(std::unique_ptr<Trigger> trigger);
 
     /**
      * Cancels all active triggers and activates triggers of the specified types eligible for activation.

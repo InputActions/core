@@ -52,6 +52,7 @@
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/devices/InputDeviceState.h>
 #include <libinputactions/input/events.h>
+#include <libinputactions/triggers/touchscreen/TouchscreenTrigger.h>
 
 namespace InputActions
 {
@@ -77,6 +78,11 @@ TouchscreenTriggerHandler::TouchscreenTriggerHandler(InputDevice *device)
     m_touchUpTimer.setTimerType(Qt::PreciseTimer);
     m_touchUpTimer.setSingleShot(true);
     connect(&m_touchUpTimer, &QTimer::timeout, this, &TouchscreenTriggerHandler::handleTouchUp);
+}
+
+void TouchscreenTriggerHandler::addTrigger(std::unique_ptr<TouchscreenTrigger> trigger)
+{
+    TriggerHandler::addTrigger(std::move(trigger));
 }
 
 bool TouchscreenTriggerHandler::evdevFrame(const EvdevFrameEvent &event)

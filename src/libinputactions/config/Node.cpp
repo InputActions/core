@@ -204,10 +204,10 @@ std::map<const Node *, const Node *> Node::mapItemsRawKeys() const
     return result;
 }
 
-std::vector<const Node *> Node::sequenceItems() const
+std::vector<const Node *> Node::sequenceItems(bool allowImplicitConversionToSequence) const
 {
     if (!isSequence()) {
-        if (m_allowImplicitConversionToSequence) {
+        if (m_allowImplicitConversionToSequence || allowImplicitConversionToSequence) {
             return {this};
         }
         throw InvalidNodeTypeConfigException(this, NodeType::Sequence);

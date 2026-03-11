@@ -33,6 +33,11 @@ namespace InputActions
 #define INPUTACTIONS_VERIFY_ADDS_CONFIG_ISSUE(action, issueType, line, column)          \
     INPUTACTIONS_VERIFY_ADDS_CONFIG_ISSUE_SAVE(action, issueType, line, column, issue_)
 
+#define INPUTACTIONS_VERIFY_ADDS_NO_CONFIG_ISSUE(action)           \
+    g_configIssueManager = std::make_shared<ConfigIssueManager>(); \
+    action;                                                        \
+    QCOMPARE(g_configIssueManager->issues().size(), 0);
+
 class Test : public QObject
 {
     Q_OBJECT

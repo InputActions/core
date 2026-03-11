@@ -34,6 +34,8 @@ Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_TRIGGER)
 namespace InputActions
 {
 
+class TriggerCore;
+
 /**
  * Unset optional fields are not checked by triggers.
  */
@@ -74,8 +76,8 @@ class Trigger : public QObject
     Q_OBJECT
 
 public:
-    Trigger(TriggerType type = TriggerType::None);
-    virtual ~Trigger() = default;
+    Trigger(TriggerType type, std::unique_ptr<TriggerCore> core);
+    ~Trigger() override;
 
     void addAction(std::unique_ptr<TriggerAction> action);
     /**
@@ -170,28 +172,14 @@ public:
     void setThreshold(Range<qreal> value) { m_threshold = std::move(value); }
 
     /**
-     * Mouse buttons that must be pressed before and during the trigger.
-     *
-     * Only applies to mouse triggers.
-     */
-    const std::vector<MouseButton> &mouseButtons() const { return m_mouseButtons; }
-    void setMouseButtons(std::vector<MouseButton> value) { m_mouseButtons = std::move(value); }
-
-    /**
-     * Whether mouse buttons must be pressed in order as specified.
-     *
-     * Only applies to mouse triggers.
-     */
-    bool mouseButtonsExactOrder() const { return m_mouseButtonsExactOrder; }
-    void setMouseButtonsExactOrder(bool value) { m_mouseButtonsExactOrder = value; }
-
-    /**
      * The amount of time after a trigger ends, during which the trigger can be performed again is if it never actually ended. Performing any action that does
      * not activate this trigger causes it to be cancelled immediately.
      */
     void setResumeTimeout(std::chrono::milliseconds value) { m_resumeTimeout = std::move(value); }
 
-    const TriggerType &type() const;
+    const TriggerCore &core() const;
+    TriggerCore &core();
+    TriggerType type() const { return m_type; }
 
 protected:
     /**
@@ -199,21 +187,17 @@ protected:
      */
     virtual void actionAdded(TriggerAction *action);
 
-    /**
-     * Override to modify the event before passing it to actions. Must be called by the overriding method.
-     */
-    virtual void updateActions(const TriggerUpdateEvent &event);
-
 private slots:
     void onTick();
     void onResumeTimeoutTimerTimeout();
 
 private:
-    TEST_VIRTUAL void doUpdateActions(const TriggerUpdateEvent &event);
     void setLastTrigger();
     void reset();
 
-    TriggerType m_type{0};
+    TriggerType m_type;
+    std::unique_ptr<TriggerCore> m_core;
+
     std::vector<std::unique_ptr<TriggerAction>> m_actions;
     bool m_started = false;
     QTimer m_tickTimer;
@@ -230,8 +214,6 @@ private:
     QString m_id;
     bool m_setLastTrigger = true;
     std::optional<Range<qreal>> m_threshold;
-    std::vector<MouseButton> m_mouseButtons;
-    bool m_mouseButtonsExactOrder{};
     std::chrono::milliseconds m_resumeTimeout{};
 
     friend class MockSwipeTrigger;

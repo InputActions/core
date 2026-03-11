@@ -19,6 +19,7 @@ set(libinputactions_SRCS
     libinputactions/config/parsers/qt.cpp
     libinputactions/config/parsers/separated-string.h
     libinputactions/config/parsers/std.cpp
+    libinputactions/config/parsers/triggers.cpp
     libinputactions/config/parsers/utils.h
     libinputactions/config/ConfigIssue.cpp
     libinputactions/config/ConfigIssueManager.cpp
@@ -76,15 +77,41 @@ set(libinputactions_SRCS
     libinputactions/interfaces/SessionLock.h
     libinputactions/interfaces/Window.h
     libinputactions/interfaces/WindowProvider.cpp
-    libinputactions/triggers/DirectionalMotionTrigger.cpp
-    libinputactions/triggers/HoverTrigger.cpp
-    libinputactions/triggers/KeyboardShortcutTrigger.cpp
-    libinputactions/triggers/MotionTrigger.cpp
-    libinputactions/triggers/PressTrigger.cpp
-    libinputactions/triggers/StrokeTrigger.cpp
-    libinputactions/triggers/SwipeTrigger.cpp
+    libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp
+    libinputactions/triggers/core/MotionTriggerCore.cpp
+    libinputactions/triggers/core/StrokeTriggerCore.cpp
+    libinputactions/triggers/core/SwipeTriggerCore.cpp
+    libinputactions/triggers/core/TimeTriggerCore.cpp
+    libinputactions/triggers/core/TriggerCore.cpp
+    libinputactions/triggers/keyboard/KeyboardShortcutTrigger.cpp
+    libinputactions/triggers/keyboard/KeyboardTrigger.cpp
+    libinputactions/triggers/mouse/MouseCircleTrigger.cpp
+    libinputactions/triggers/mouse/MouseMotionTrigger.cpp
+    libinputactions/triggers/mouse/MousePressTrigger.cpp
+    libinputactions/triggers/mouse/MouseStrokeTrigger.cpp
+    libinputactions/triggers/mouse/MouseSwipeTrigger.cpp
+    libinputactions/triggers/mouse/MouseTrigger.cpp
+    libinputactions/triggers/mouse/MouseWheelTrigger.cpp
+    libinputactions/triggers/pointer/PointerHoverTrigger.cpp
+    libinputactions/triggers/pointer/PointerTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadCircleTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadClickTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadHoldTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadPinchTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadRotateTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadStrokeTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadSwipeTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadTapTrigger.cpp
+    libinputactions/triggers/touchpad/TouchpadTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenCircleTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenHoldTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenPinchTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenRotateTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenStrokeTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenSwipeTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenTapTrigger.cpp
+    libinputactions/triggers/touchscreen/TouchscreenTrigger.cpp
     libinputactions/triggers/Trigger.cpp
-    libinputactions/triggers/WheelTrigger.cpp
     libinputactions/variables/LocalVariable.cpp
     libinputactions/variables/RemoteVariable.cpp
     libinputactions/variables/VariableManager.cpp
