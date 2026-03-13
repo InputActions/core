@@ -1,9 +1,9 @@
 #include "Test.h"
-#include "mocks/MockTrigger.h"
 #include <QSignalSpy>
+#include <libinputactions/conditions/CustomCondition.h>
 #include <libinputactions/handlers/TriggerHandler.h>
-
-using namespace ::testing;
+#include <libinputactions/triggers/touchpad/TouchpadClickTrigger.h>
+#include <libinputactions/triggers/touchpad/TouchpadHoldTrigger.h>
 
 namespace InputActions
 {
@@ -21,11 +21,11 @@ private slots:
         QTest::addColumn<std::vector<Trigger *>>("triggers");
         QTest::addColumn<int>("size");
 
-        QTest::newRow("not activatable") << TriggerType::Press << std::vector<Trigger *>({makeTrigger(TriggerType::Press, false)}) << 0;
-        QTest::newRow("activatable") << TriggerType::Press << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true)}) << 1;
-        QTest::newRow("activatable, wrong type") << TriggerType::Swipe << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true)}) << 0;
+        QTest::newRow("not activatable") << TriggerType::Click << std::vector<Trigger *>({makeTrigger<TouchpadClickTrigger>(false)}) << 0;
+        QTest::newRow("activatable") << TriggerType::Click << std::vector<Trigger *>({makeTrigger<TouchpadClickTrigger>(true)}) << 1;
+        QTest::newRow("activatable, wrong type") << TriggerType::Press << std::vector<Trigger *>({makeTrigger<TouchpadClickTrigger>(true)}) << 0;
         QTest::newRow("activatable, all") << TriggerType::All
-                                          << std::vector<Trigger *>({makeTrigger(TriggerType::Press, true), makeTrigger(TriggerType::Swipe, true)}) << 2;
+                                          << std::vector<Trigger *>({makeTrigger<TouchpadClickTrigger>(true), makeTrigger<TouchpadHoldTrigger>(true)}) << 2;
     }
 
     void triggers()
@@ -48,10 +48,10 @@ private slots:
     {
         QSignalSpy spy(m_handler.get(), &TriggerHandler::cancellingTriggers);
 
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
-        m_handler->activateTriggers(TriggerType::Swipe);
+        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
+        m_handler->activateTriggers(TriggerType::Press);
         QCOMPARE(spy.count(), 0);
-        m_handler->activateTriggers(TriggerType::Swipe | TriggerType::Press);
+        m_handler->activateTriggers(TriggerType::Press | TriggerType::Click);
         QCOMPARE(spy.count(), 0);
         m_handler->activateTriggers(TriggerType::All);
         QCOMPARE(spy.count(), 1);
@@ -62,10 +62,13 @@ private slots:
     }
 
 private:
-    MockTrigger *makeTrigger(TriggerType type, bool activatable)
+    template<typename T>
+    T *makeTrigger(bool activatable)
     {
-        auto *trigger = new MockTrigger(type);
-        ON_CALL(*trigger, canActivate(_)).WillByDefault(Return(activatable));
+        auto *trigger = new T();
+        trigger->setActivationCondition(std::make_unique<CustomCondition>([activatable](const auto &arguments) {
+            return activatable;
+        }));
         return trigger;
     }
 

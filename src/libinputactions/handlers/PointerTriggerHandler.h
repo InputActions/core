@@ -23,6 +23,8 @@
 namespace InputActions
 {
 
+class PointerTrigger;
+
 /**
  * Can handle multiple devices simultaneously. A single instance is shared by all devices.
  */
@@ -30,6 +32,8 @@ class PointerTriggerHandler : public InputTriggerHandler
 {
 public:
     PointerTriggerHandler() = default;
+
+    void addTrigger(std::unique_ptr<PointerTrigger> trigger);
 
 protected:
     bool pointerMotion(const MotionEvent &event) override;

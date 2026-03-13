@@ -24,6 +24,8 @@
 namespace InputActions
 {
 
+class KeyboardTrigger;
+
 /**
  * Can handle multiple devices simultaneously. A single instance is shared by all devices.
  */
@@ -31,6 +33,8 @@ class KeyboardTriggerHandler : public InputTriggerHandler
 {
 public:
     KeyboardTriggerHandler();
+
+    void addTrigger(std::unique_ptr<KeyboardTrigger> trigger);
 
 protected:
     bool keyboardKey(const KeyboardKeyEvent &event) override;

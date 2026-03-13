@@ -19,7 +19,7 @@
 #include "TriggerAction.h"
 #include "ActionExecutor.h"
 #include <libinputactions/input/Delta.h>
-#include <libinputactions/triggers/MotionTrigger.h>
+#include <libinputactions/triggers/core/MotionTriggerCore.h>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_ACTION, "inputactions.action", QtWarningMsg)
 

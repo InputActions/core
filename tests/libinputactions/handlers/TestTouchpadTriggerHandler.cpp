@@ -9,6 +9,11 @@
 #include <libinputactions/input/devices/InputDeviceProperties.h>
 #include <libinputactions/input/devices/InputDeviceState.h>
 #include <libinputactions/input/events.h>
+#include <libinputactions/triggers/core/SwipeTriggerCore.h>
+#include <libinputactions/triggers/touchpad/TouchpadClickTrigger.h>
+#include <libinputactions/triggers/touchpad/TouchpadHoldTrigger.h>
+#include <libinputactions/triggers/touchpad/TouchpadSwipeTrigger.h>
+#include <libinputactions/triggers/touchpad/TouchpadTapTrigger.h>
 #include <libinputactions/variables/VariableManager.h>
 #include <linux/input-event-codes.h>
 #include <ranges>
@@ -45,7 +50,7 @@ private slots:
 
     void click_withoutLibinputButton()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Click));
+        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
 
         g_inputBackend->handleEvent(TouchpadClickEvent(m_touchpad.get(), true));
         QCOMPARE(m_activatingTriggersSpy->count(), 1);
@@ -71,7 +76,7 @@ private slots:
     {
         QFETCH(int, button);
 
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Click));
+        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
 
         g_inputBackend->handleEvent(TouchpadClickEvent(m_touchpad.get(), true));
         QCOMPARE(g_inputBackend->handleEvent(PointerButtonEvent(m_touchpad.get(), button, true)), true);
@@ -88,7 +93,7 @@ private slots:
 
     void press1_notDelayedOrBlocked()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
+        m_handler->addTrigger(std::make_unique<TouchpadHoldTrigger>());
 
         QCOMPARE(g_inputBackend->handleEvent(TouchpadGestureLifecyclePhaseEvent(m_touchpad.get(), TouchpadGestureLifecyclePhase::Begin, TriggerType::Press, 1)),
                  false);
@@ -104,8 +109,8 @@ private slots:
 
     void press1_hasClickTrigger_delayed()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Click));
+        m_handler->addTrigger(std::make_unique<TouchpadHoldTrigger>());
+        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
 
         g_inputBackend->handleEvent(TouchpadGestureLifecyclePhaseEvent(m_touchpad.get(), TouchpadGestureLifecyclePhase::Begin, TriggerType::Press));
         QCOMPARE(m_activatingTriggersSpy->count(), 0);
@@ -120,8 +125,8 @@ private slots:
 
     void press1_hasTapTrigger_delayed()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadHoldTrigger>());
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         g_inputBackend->handleEvent(TouchpadGestureLifecyclePhaseEvent(m_touchpad.get(), TouchpadGestureLifecyclePhase::Begin, TriggerType::Press));
         QCOMPARE(m_activatingTriggersSpy->count(), 0);
@@ -136,8 +141,8 @@ private slots:
 
     void press1_clickedDuringPress_pressCancelledAndClickActivated()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Click));
+        m_handler->addTrigger(std::make_unique<TouchpadHoldTrigger>());
+        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
 
         g_inputBackend->handleEvent(TouchpadGestureLifecyclePhaseEvent(m_touchpad.get(), TouchpadGestureLifecyclePhase::Begin, TriggerType::Press));
         QTest::qWait(500);
@@ -160,7 +165,7 @@ private slots:
 
     void press2_notDelayedOrBlocked()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
+        m_handler->addTrigger(std::make_unique<TouchpadHoldTrigger>());
 
         QCOMPARE(g_inputBackend->handleEvent(TouchpadGestureLifecyclePhaseEvent(m_touchpad.get(), TouchpadGestureLifecyclePhase::Begin, TriggerType::Press, 2)),
                  false);
@@ -176,7 +181,7 @@ private slots:
 
     void press3_blocked()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Press));
+        m_handler->addTrigger(std::make_unique<TouchpadHoldTrigger>());
 
         QCOMPARE(g_inputBackend->handleEvent(TouchpadGestureLifecyclePhaseEvent(m_touchpad.get(), TouchpadGestureLifecyclePhase::Begin, TriggerType::Press, 3)),
                  true);
@@ -188,7 +193,7 @@ private slots:
 
     void swipe1()
     {
-        auto trigger = std::make_unique<Trigger>(TriggerType::Swipe);
+        auto trigger = std::make_unique<TouchpadSwipeTrigger>(std::make_unique<SwipeTriggerCore>(SwipeDirection::Any));
         trigger->setActivationCondition(std::make_shared<VariableCondition>("fingers", InputActions::Value<qreal>(1), ComparisonOperator::EqualTo));
         m_handler->addTrigger(std::move(trigger));
 
@@ -206,7 +211,7 @@ private slots:
 
     void swipe2()
     {
-        auto trigger = std::make_unique<Trigger>(TriggerType::Swipe);
+        auto trigger = std::make_unique<TouchpadSwipeTrigger>(std::make_unique<SwipeTriggerCore>(SwipeDirection::Any));
         trigger->setActivationCondition(std::make_shared<VariableCondition>("fingers", InputActions::Value<qreal>(2), ComparisonOperator::EqualTo));
         m_handler->addTrigger(std::move(trigger));
 
@@ -226,7 +231,7 @@ private slots:
 
     void tap1()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoint();
         removePoints();
@@ -250,7 +255,7 @@ private slots:
 
     void tap1_noPointerButtonEvent_stateReset()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoint();
         removePoints();
@@ -262,7 +267,7 @@ private slots:
 
     void tap1_tappedAgainBeforeLibinputButtonReleased()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoint();
         removePoints();
@@ -291,7 +296,7 @@ private slots:
 
     void tap2_variablesSetDuringActivation()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         const QPointF first(10, 10);
         const QPointF second(20, 20);
@@ -321,7 +326,7 @@ private slots:
 
     void tap4()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoints(4);
         removePoints();
@@ -336,7 +341,7 @@ private slots:
 
     void tap4_moved()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoints(4);
         movePoints({10, 10});
@@ -349,7 +354,7 @@ private slots:
 
     void tap4_slow()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoints(4);
         QTest::qWait(500);
@@ -362,8 +367,8 @@ private slots:
 
     void tap4_clicked()
     {
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Click));
-        m_handler->addTrigger(std::make_unique<Trigger>(TriggerType::Tap));
+        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
+        m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
         addPoints(4);
         g_inputBackend->handleEvent(TouchpadClickEvent(m_touchpad.get(), true));
@@ -405,7 +410,7 @@ private slots:
         QFETCH(bool, lmrTapButtonMap);
         QFETCH(bool, activated);
 
-        auto trigger = std::make_unique<Trigger>(TriggerType::Tap);
+        auto trigger = std::make_unique<TouchpadTapTrigger>();
         trigger->setActivationCondition(std::make_shared<VariableCondition>("fingers",
                                                                             InputActions::Value<qreal>(triggerFingers),
                                                                             ComparisonOperator::EqualTo));

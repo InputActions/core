@@ -3,7 +3,7 @@
 #include <libinputactions/handlers/TriggerHandler.h>
 #include <libinputactions/helpers/Math.h>
 #include <libinputactions/input/devices/InputDevice.h>
-#include <libinputactions/triggers/SwipeTrigger.h>
+#include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
 using namespace ::testing;
 

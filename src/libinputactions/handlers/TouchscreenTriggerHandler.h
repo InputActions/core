@@ -24,6 +24,8 @@
 namespace InputActions
 {
 
+class TouchscreenTrigger;
+
 struct PinchInfo
 {
     qreal angle;
@@ -31,8 +33,6 @@ struct PinchInfo
 };
 
 /**
- * Handles touchscreen triggers: hold, pinch, rotate, single-point motion, tap.
- *
  * Event filtering requires blocking events by default until a gesture is recognized. The device's virtual state is managed by this handler. The input backend
  * must not do anything else other than blocking individual events.
  *
@@ -42,6 +42,8 @@ class TouchscreenTriggerHandler : public MultiTouchMotionTriggerHandler
 {
 public:
     TouchscreenTriggerHandler(InputDevice *device);
+
+    void addTrigger(std::unique_ptr<TouchscreenTrigger> trigger);
 
 protected:
     bool evdevFrame(const EvdevFrameEvent &event) override;

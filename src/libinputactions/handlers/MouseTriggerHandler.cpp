@@ -20,8 +20,8 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/events.h>
-#include <libinputactions/triggers/PressTrigger.h>
-#include <libinputactions/triggers/WheelTrigger.h>
+#include <libinputactions/triggers/mouse/MousePressTrigger.h>
+#include <libinputactions/triggers/mouse/MouseWheelTrigger.h>
 #include <ranges>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOUSE, "inputactions.handler.mouse", QtWarningMsg)
@@ -40,6 +40,11 @@ MouseTriggerHandler::MouseTriggerHandler()
 
     m_motionTimeoutTimer.setTimerType(Qt::TimerType::PreciseTimer);
     m_motionTimeoutTimer.setSingleShot(true);
+}
+
+void MouseTriggerHandler::addTrigger(std::unique_ptr<MouseTrigger> trigger)
+{
+    TriggerHandler::addTrigger(std::move(trigger));
 }
 
 bool MouseTriggerHandler::keyboardKey(const KeyboardKeyEvent &event)
@@ -63,13 +68,13 @@ bool MouseTriggerHandler::pointerAxis(const MotionEvent &event)
         return false;
     }
 
-    SwipeDirection direction = SwipeDirection::Left;
+    SimpleSwipeDirection direction = SimpleSwipeDirection::Left;
     if (delta.x() > 0) {
-        direction = SwipeDirection::Right;
+        direction = SimpleSwipeDirection::Right;
     } else if (delta.y() > 0) {
-        direction = SwipeDirection::Down;
+        direction = SimpleSwipeDirection::Down;
     } else if (delta.y() < 0) {
-        direction = SwipeDirection::Up;
+        direction = SimpleSwipeDirection::Up;
     }
     DirectionalMotionTriggerUpdateEvent updateEvent;
     updateEvent.setDelta(delta.x() != 0 ? delta.x() : delta.y());
@@ -78,7 +83,7 @@ bool MouseTriggerHandler::pointerAxis(const MotionEvent &event)
     const auto result = updateTriggers(TriggerType::Wheel, updateEvent);
     bool continuous = false;
     for (const auto &trigger : activeTriggers(TriggerType::Wheel)) {
-        if (static_cast<WheelTrigger *>(trigger)->continuous()) {
+        if (static_cast<const MouseWheelTrigger *>(trigger)->continuous()) {
             continuous = true;
         }
     }
@@ -111,7 +116,7 @@ bool MouseTriggerHandler::pointerButton(const PointerButtonEvent &event)
         // This should be per-gesture instead of global, but it's good enough
         m_instantPress = false;
         for (const auto &trigger : triggers(TriggerType::Press, *m_activationEvent)) {
-            if (dynamic_cast<PressTrigger *>(trigger)->instant()) {
+            if (dynamic_cast<const MousePressTrigger *>(trigger)->instant()) {
                 qCDebug(INPUTACTIONS_HANDLER_MOUSE, "Press gesture is instant");
                 m_instantPress = true;
                 break;
@@ -228,7 +233,7 @@ bool MouseTriggerHandler::pointerMotion(const MotionEvent &event)
         pressBlockedMouseButtons(event.sender());
     }
     const auto lockPointer = std::ranges::any_of(activeTriggers(TriggerType::SinglePointMotion), [](const auto *trigger) {
-        return dynamic_cast<const MotionTrigger *>(trigger)->lockPointer();
+        return dynamic_cast<const MouseMotionTrigger *>(trigger)->lockPointer();
     });
     return block && lockPointer;
 }
@@ -251,10 +256,11 @@ bool MouseTriggerHandler::shouldBlockMouseButton(MouseButton button)
     // A partial match is required, not an exact one
     event->setMouseButtons({});
     for (const auto &trigger : triggers(TriggerType::All, *event.get())) {
-        const auto buttons = trigger->mouseButtons();
+        const auto *castedTrigger = dynamic_cast<const MouseTrigger *>(trigger);
+        const auto buttons = castedTrigger->mouseButtons();
         if (trigger->blockEvents()
-            && ((trigger->mouseButtonsExactOrder() && std::ranges::equal(m_buttons, buttons | std::views::take(m_buttons.size())))
-                || (!trigger->mouseButtonsExactOrder() && std::ranges::contains(buttons, button)))) {
+            && ((castedTrigger->mouseButtonsExactOrder() && std::ranges::equal(m_buttons, buttons | std::views::take(m_buttons.size())))
+                || (!castedTrigger->mouseButtonsExactOrder() && std::ranges::contains(buttons, button)))) {
             qCDebug(INPUTACTIONS_HANDLER_MOUSE).noquote().nospace()
                 << "Mouse button blocked (button: " << button.scanCode() << ", trigger: " << trigger->id() << ")";
             return true;

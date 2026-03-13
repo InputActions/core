@@ -21,6 +21,7 @@
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/devices/InputDeviceProperties.h>
 #include <libinputactions/input/events.h>
+#include <libinputactions/triggers/touchpad/TouchpadTrigger.h>
 #include <libinputactions/variables/VariableManager.h>
 #include <linux/input-event-codes.h>
 
@@ -40,6 +41,11 @@ TouchpadTriggerHandler::TouchpadTriggerHandler(InputDevice *device)
     m_libinputTapTimeoutTimer.setTimerType(Qt::TimerType::PreciseTimer);
     m_libinputTapTimeoutTimer.setSingleShot(true);
     connect(&m_libinputTapTimeoutTimer, &QTimer::timeout, this, &TouchpadTriggerHandler::onLibinputTapTimeout);
+}
+
+void TouchpadTriggerHandler::addTrigger(std::unique_ptr<TouchpadTrigger> trigger)
+{
+    TriggerHandler::addTrigger(std::move(trigger));
 }
 
 bool TouchpadTriggerHandler::pointerAxis(const MotionEvent &event)

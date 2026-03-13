@@ -3,7 +3,7 @@
 #include <libinputactions/actions/CustomAction.h>
 #include <libinputactions/actions/TriggerAction.h>
 #include <libinputactions/input/Delta.h>
-#include <libinputactions/triggers/MotionTrigger.h>
+#include <libinputactions/triggers/core/MotionTriggerCore.h>
 
 namespace InputActions
 {

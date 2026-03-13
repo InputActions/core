@@ -1,0 +1,45 @@
+/*
+    Input Actions - Input handler that executes user-defined actions
+    Copyright (C) 2024-2026 Marcin Woźniak
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include "PointerHoverTrigger.h"
+#include <libinputactions/triggers/core/TimeTriggerCore.h>
+
+namespace InputActions
+{
+
+PointerHoverTrigger::PointerHoverTrigger()
+    : PointerTrigger(TriggerType::Hover, std::make_unique<TimeTriggerCore>())
+{
+}
+
+PointerHoverTrigger::PointerHoverTrigger(std::unique_ptr<TimeTriggerCore> core)
+    : PointerTrigger(TriggerType::Hover, std::move(core))
+{
+}
+
+bool PointerHoverTrigger::canUpdate(const TriggerUpdateEvent &event) const
+{
+    return Trigger::canUpdate(event) && (!activationCondition() || activationCondition()->satisfied());
+}
+
+bool PointerHoverTrigger::endIfCannotUpdate() const
+{
+    return true;
+}
+
+}

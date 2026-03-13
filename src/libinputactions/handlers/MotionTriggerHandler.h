@@ -19,7 +19,7 @@
 #pragma once
 
 #include "InputTriggerHandler.h"
-#include <libinputactions/triggers/DirectionalMotionTrigger.h>
+#include <libinputactions/triggers/core/DirectionalMotionTriggerCore.h>
 
 Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOTION)
 
@@ -42,9 +42,6 @@ struct TriggerSpeedThreshold
     uint32_t directions;
 };
 
-/**
- * Handles motion triggers: stroke, swipe.
- */
 class MotionTriggerHandler : public InputTriggerHandler
 {
 public:
