@@ -105,7 +105,7 @@ void MultiTouchMotionTriggerHandler::updateVariables(const InputDevice *sender)
     bool hasThumb{};
 
     const auto touchPoints = sender ? sender->physicalState().validTouchPoints() : std::vector<const TouchPoint *>();
-    for (size_t i = 0; i < s_fingerVariableCount; i++) {
+    for (size_t i = 0; i < FINGER_VARIABLE_COUNT; i++) {
         const auto fingerVariableNumber = i + 1;
         auto initialPosition = g_variableManager->getVariable<QPointF>(QString("finger_%1_initial_position_percentage").arg(fingerVariableNumber));
         auto position = g_variableManager->getVariable<QPointF>(QString("finger_%1_position_percentage").arg(fingerVariableNumber));

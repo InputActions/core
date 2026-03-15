@@ -31,8 +31,10 @@
 #include <libinputactions/actions/CommandAction.h>
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/actions/PlasmaGlobalShortcutAction.h>
+#include <libinputactions/actions/ReplaceTextAction.h>
 #include <libinputactions/actions/SleepAction.h>
 #include <libinputactions/actions/TriggerAction.h>
+#include <libinputactions/conditions/CanReplaceTextCondition.h>
 #include <libinputactions/conditions/ConditionGroup.h>
 #include <libinputactions/conditions/VariableCondition.h>
 #include <libinputactions/config/ConfigIssue.h>
@@ -154,6 +156,8 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
     } else if (const auto *plasmaShortcutNode = node->at("plasma_shortcut")) {
         const auto shortcut = parseSeparatedString2<QString>(plasmaShortcutNode, ',');
         result = std::make_unique<PlasmaGlobalShortcutAction>(shortcut.first, shortcut.second);
+    } else if (const auto *replaceTextNode = node->at("replace_text")) {
+        result = std::make_unique<ReplaceTextAction>(replaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
     } else if (const auto *sleepActionNode = node->at("sleep")) {
         result = std::make_unique<SleepAction>(sleepActionNode->as<std::chrono::milliseconds>());
     } else if (const auto *oneNode = node->at("one")) {
@@ -216,6 +220,10 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableManage
                 group->append(parseCondition(item, variableManager));
             }
             return group;
+        }
+
+        if (const auto *canReplaceTextNode = node->at("can_replace_text")) {
+            return std::make_shared<CanReplaceTextCondition>(canReplaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
         }
 
         if (isLegacy(node)) {
@@ -575,6 +583,14 @@ struct NodeParser<Range<T>>
     }
 };
 template struct NodeParser<Range<qreal>>;
+
+template<>
+void NodeParser<TextSubstitutionRule>::parse(const Node *node, TextSubstitutionRule &result)
+{
+    const auto regex = node->at("regex", true)->as<QRegularExpression>();
+    const auto newText = node->at("replace", true)->as<Value<QString>>();
+    result = {regex, newText};
+}
 
 template<>
 void NodeParser<std::unique_ptr<TriggerAction>>::parse(const Node *node, std::unique_ptr<TriggerAction> &result)

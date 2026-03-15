@@ -32,7 +32,8 @@ Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_MANAGER)
 namespace InputActions
 {
 
-const static uint8_t s_fingerVariableCount = 5;
+static const uint8_t FINGER_VARIABLE_COUNT = 5;
+static const uint8_t REGEX_MATCH_VARIABLE_COUNT = 5;
 
 class PointerPositionGetter;
 class Variable;

@@ -8,6 +8,7 @@ set(libinputactions_SRCS
     libinputactions/actions/CustomAction.cpp
     libinputactions/actions/InputAction.cpp
     libinputactions/actions/PlasmaGlobalShortcutAction.cpp
+    libinputactions/actions/ReplaceTextAction.cpp
     libinputactions/actions/SleepAction.cpp
     libinputactions/actions/TriggerAction.cpp
     libinputactions/config/parsers/base.cpp
@@ -27,6 +28,7 @@ set(libinputactions_SRCS
     libinputactions/config/GlobalConfig.cpp
     libinputactions/config/Node.cpp
     libinputactions/config/TextPosition.cpp
+    libinputactions/conditions/CanReplaceTextCondition.cpp
     libinputactions/conditions/Condition.cpp
     libinputactions/conditions/ConditionGroup.cpp
     libinputactions/conditions/CustomCondition.cpp
@@ -75,7 +77,7 @@ set(libinputactions_SRCS
     libinputactions/interfaces/PointerPositionSetter.h
     libinputactions/interfaces/ProcessRunner.cpp
     libinputactions/interfaces/SessionLock.h
-    libinputactions/interfaces/TextInput.h
+    libinputactions/interfaces/TextInput.cpp
     libinputactions/interfaces/Window.h
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp
