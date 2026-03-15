@@ -33,8 +33,6 @@ MouseTriggerHandler::MouseTriggerHandler()
 {
     setDeviceTypes(InputDeviceType::Mouse);
 
-    connect(this, &TriggerHandler::activatingTrigger, this, &MouseTriggerHandler::onActivatingTrigger);
-
     m_pressTimeoutTimer.setTimerType(Qt::TimerType::PreciseTimer);
     m_pressTimeoutTimer.setSingleShot(true);
 
@@ -238,9 +236,10 @@ bool MouseTriggerHandler::pointerMotion(const MotionEvent &event)
     return block && lockPointer;
 }
 
-void MouseTriggerHandler::onActivatingTrigger(const Trigger *trigger)
+void MouseTriggerHandler::triggerActivated(const Trigger *trigger)
 {
     m_hadTriggerSincePress = true;
+    MotionTriggerHandler::triggerActivated(trigger);
 }
 
 std::unique_ptr<TriggerActivationEvent> MouseTriggerHandler::createActivationEvent() const

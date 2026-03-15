@@ -50,8 +50,7 @@ protected:
      */
     std::unique_ptr<TriggerActivationEvent> createActivationEvent() const override;
 
-private slots:
-    void onActivatingTrigger(const Trigger *trigger);
+    void triggerActivated(const Trigger *trigger) override;
 
 private:
     /**

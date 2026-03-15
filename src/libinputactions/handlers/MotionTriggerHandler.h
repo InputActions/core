@@ -81,13 +81,13 @@ protected:
 
     virtual qreal currentMotionThreshold(const InputDevice *device) const;
 
+    void triggerActivated(const Trigger *trigger) override;
+    TriggerManagementOperationResult endTriggersCustom(TriggerTypes types) override;
+
     void reset() override;
 
 private slots:
     void onCircleCoastingTimerTick();
-
-    void onActivatingTrigger(const Trigger *trigger);
-    void onEndingTriggers(TriggerTypes types);
 
 private:
     /**

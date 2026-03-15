@@ -118,6 +118,10 @@ protected:
      */
     virtual std::unique_ptr<TriggerActivationEvent> createActivationEvent() const;
 
+    virtual void triggerActivated(const Trigger *trigger) {}
+    virtual void activatingTriggers(TriggerTypes types) {}
+    virtual TriggerManagementOperationResult endTriggersCustom(TriggerTypes types) { return {}; }
+
     /**
      * Resets member variables that hold information about the performed input action.
      */
@@ -125,13 +129,16 @@ protected:
 
     void updateTimedTriggers();
 
-signals:
-    void activatingTrigger(const Trigger *trigger);
-    void activatingTriggers(TriggerTypes types);
-    void cancellingTriggers(TriggerTypes types);
-    void endingTriggers(TriggerTypes types);
-
 private:
+    /**
+     * Called by endTriggers when there actually are triggers to end.
+     */
+    TEST_VIRTUAL TriggerManagementOperationResult doEndTriggers(TriggerTypes types);
+    /**
+     * Called by cancelTriggers when there actually are triggers to cancel.
+     */
+    TEST_VIRTUAL TriggerManagementOperationResult doCancelTriggers(TriggerTypes types);
+
     /**
      * Updates timed triggers. Stops itself if no triggers are active.
      */
@@ -141,6 +148,10 @@ private:
     std::vector<std::unique_ptr<Trigger>> m_triggers;
     std::vector<Trigger *> m_activeTriggers;
 
+    friend class MockInputTriggerHandler;
+    friend class MockKeyboardTriggerHandler;
+    friend class MockTouchpadTriggerHandler;
+    friend class MockTriggerHandler;
     friend class TestTriggerHandler;
 };
 

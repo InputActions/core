@@ -24,11 +24,6 @@
 namespace InputActions
 {
 
-InputTriggerHandler::InputTriggerHandler()
-{
-    connect(this, &TriggerHandler::activatingTriggers, this, &InputTriggerHandler::onActivatingTriggers);
-}
-
 void InputTriggerHandler::setDevice(InputDevice *device)
 {
     m_device = device;
@@ -55,9 +50,10 @@ bool InputTriggerHandler::keyboardKey(const KeyboardKeyEvent &event)
     return false;
 }
 
-void InputTriggerHandler::onActivatingTriggers(TriggerTypes types)
+void InputTriggerHandler::activatingTriggers(TriggerTypes types)
 {
     m_modifiersAtActivation = g_inputBackend->keyboardModifiers();
+    TriggerHandler::activatingTriggers(types);
 }
 
 }
