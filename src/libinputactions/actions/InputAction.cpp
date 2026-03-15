@@ -23,6 +23,7 @@
 #include <libinputactions/input/devices/VirtualKeyboard.h>
 #include <libinputactions/input/devices/VirtualMouse.h>
 #include <libinputactions/interfaces/PointerPositionSetter.h>
+#include <libinputactions/interfaces/TextInput.h>
 
 namespace InputActions
 {
@@ -50,7 +51,7 @@ void InputAction::executeImpl(const ActionExecutionArguments &args)
             } else if (item.keyboardRelease.isValid()) {
                 g_inputBackend->virtualKeyboard()->keyboardKey(item.keyboardRelease, false);
             } else if (keyboardText) {
-                g_inputBackend->virtualKeyboard()->keyboardText(keyboardText.value());
+                g_textInput->writeText(keyboardText.value());
             } else if (item.mousePress.isValid()) {
                 g_inputBackend->virtualMouse()->mouseButton(item.mousePress, true);
             } else if (item.mouseRelease.isValid()) {
