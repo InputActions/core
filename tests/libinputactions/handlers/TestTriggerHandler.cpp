@@ -1,9 +1,11 @@
 #include "Test.h"
-#include <QSignalSpy>
+#include "mocks/MockTriggerHandler.h"
 #include <libinputactions/conditions/CustomCondition.h>
 #include <libinputactions/handlers/TriggerHandler.h>
 #include <libinputactions/triggers/touchpad/TouchpadClickTrigger.h>
 #include <libinputactions/triggers/touchpad/TouchpadHoldTrigger.h>
+
+using namespace ::testing;
 
 namespace InputActions
 {
@@ -13,8 +15,6 @@ class TestTriggerHandler : public Test
     Q_OBJECT
 
 private slots:
-    void init() { m_handler = std::unique_ptr<TriggerHandler>(new TriggerHandler); }
-
     void triggers_data()
     {
         QTest::addColumn<TriggerType>("type");
@@ -34,31 +34,30 @@ private slots:
         QFETCH(std::vector<Trigger *>, triggers);
         QFETCH(int, size);
 
-        for (auto trigger : triggers) {
-            m_handler->addTrigger(std::unique_ptr<Trigger>(trigger));
+        TriggerHandler handler;
+        for (auto *trigger : triggers) {
+            handler.addTrigger(std::unique_ptr<Trigger>(trigger));
         }
         TriggerActivationEvent event;
 
-        QCOMPARE(m_handler->triggers(type, event).size(), size);
-        QCOMPARE(m_handler->activateTriggers(type, event).success, size != 0);
-        QCOMPARE(m_handler->activeTriggers(type).size(), size);
+        QCOMPARE(handler.triggers(type, event).size(), size);
+        QCOMPARE(handler.activateTriggers(type, event).success, size != 0);
+        QCOMPARE(handler.activeTriggers(type).size(), size);
     }
 
     void activateTriggers_cancelsAllTriggers()
     {
-        QSignalSpy spy(m_handler.get(), &TriggerHandler::cancellingTriggers);
+        MockTriggerHandler handler;
+        handler.addTrigger(std::make_unique<TouchpadClickTrigger>());
 
-        m_handler->addTrigger(std::make_unique<TouchpadClickTrigger>());
-        m_handler->activateTriggers(TriggerType::Press);
-        QCOMPARE(spy.count(), 0);
-        m_handler->activateTriggers(TriggerType::Press | TriggerType::Click);
-        QCOMPARE(spy.count(), 0);
-        m_handler->activateTriggers(TriggerType::All);
-        QCOMPARE(spy.count(), 1);
+        EXPECT_CALL(handler, doCancelTriggers(_)).Times(0);
+        handler.activateTriggers(TriggerType::Press);
+        handler.activateTriggers(TriggerType::Press | TriggerType::Click);
+        QVERIFY(Mock::VerifyAndClearExpectations(&handler));
 
-        for (const auto &args : spy) {
-            QCOMPARE(args.at(0).value<TriggerTypes>(), TriggerType::All);
-        }
+        EXPECT_CALL(handler, doCancelTriggers(static_cast<TriggerTypes>(TriggerType::All))).Times(1);
+        handler.activateTriggers(TriggerType::All);
+        QVERIFY(Mock::VerifyAndClearExpectations(&handler));
     }
 
 private:
@@ -71,8 +70,6 @@ private:
         }));
         return trigger;
     }
-
-    std::unique_ptr<TriggerHandler> m_handler;
 };
 
 }

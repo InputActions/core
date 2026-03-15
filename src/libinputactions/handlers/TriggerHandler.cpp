@@ -51,11 +51,11 @@ TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes t
     cancelTriggers(TriggerType::All);
     reset();
 
-    Q_EMIT activatingTriggers(types);
+    activatingTriggers(types);
 
     TriggerManagementOperationResult result{};
     for (auto &trigger : triggers(types, event)) {
-        Q_EMIT activatingTrigger(trigger);
+        triggerActivated(trigger);
         m_activeTriggers.push_back(trigger);
         qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote() << QString("Trigger activated (id: %1)").arg(trigger->id());
 
@@ -146,9 +146,12 @@ TriggerManagementOperationResult TriggerHandler::endTriggers(TriggerTypes types)
         return result;
     }
 
-    qCDebug(INPUTACTIONS_HANDLER_TRIGGER).nospace() << "Ending gestures (types: " << types << ")";
+    return doEndTriggers(types);
+}
 
-    Q_EMIT endingTriggers(types);
+TriggerManagementOperationResult TriggerHandler::doEndTriggers(TriggerTypes types)
+{
+    auto result = endTriggersCustom(types);
 
     for (auto it = m_activeTriggers.begin(); it != m_activeTriggers.end();) {
         auto trigger = *it;
@@ -185,7 +188,15 @@ TriggerManagementOperationResult TriggerHandler::cancelTriggers(TriggerTypes typ
         return result;
     }
 
-    Q_EMIT cancellingTriggers(types);
+    return doCancelTriggers(types);
+}
+
+TriggerManagementOperationResult TriggerHandler::doCancelTriggers(TriggerTypes types)
+{
+    TriggerManagementOperationResult result{};
+    if (!hasActiveTriggers(types)) {
+        return result;
+    }
 
     qCDebug(INPUTACTIONS_HANDLER_TRIGGER).nospace() << "Cancelling triggers (types: " << types << ")";
     for (auto it = m_activeTriggers.begin(); it != m_activeTriggers.end();) {

@@ -41,9 +41,6 @@ static const qreal PI_2 = M_PI * 2;
 
 MotionTriggerHandler::MotionTriggerHandler()
 {
-    connect(this, &TriggerHandler::activatingTrigger, this, &MotionTriggerHandler::onActivatingTrigger);
-    connect(this, &TriggerHandler::endingTriggers, this, &MotionTriggerHandler::onEndingTriggers);
-
     setSpeedThreshold(TriggerType::Pinch, 0.04, static_cast<TriggerDirection>(PinchDirection::In));
     setSpeedThreshold(TriggerType::Pinch, 0.08, static_cast<TriggerDirection>(PinchDirection::Out));
     setSpeedThreshold(TriggerType::Rotate, 5);
@@ -257,6 +254,56 @@ qreal MotionTriggerHandler::currentMotionThreshold(const InputDevice *device) co
     return device->properties().motionThreshold();
 }
 
+void MotionTriggerHandler::triggerActivated(const Trigger *trigger)
+{
+    if (const auto *motionTriggerCore = dynamic_cast<const MotionTriggerCore *>(&trigger->core())) {
+        if (!m_isDeterminingSpeed && motionTriggerCore->hasSpeed()) {
+            qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Trigger has speed (id: %1)").arg(trigger->id());
+            m_isDeterminingSpeed = true;
+        }
+    }
+    InputTriggerHandler::triggerActivated(trigger);
+}
+
+TriggerManagementOperationResult MotionTriggerHandler::endTriggersCustom(TriggerTypes types)
+{
+    TriggerManagementOperationResult result = TriggerHandler::endTriggersCustom(types);
+    if (m_deltas.empty() || !(types & TriggerType::Stroke)) {
+        return result;
+    }
+
+    const Stroke stroke(m_deltas);
+    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote()
+        << QString("Stroke constructed (points: %1, deltas: %2)").arg(QString::number(stroke.points().size()), QString::number(m_deltas.size()));
+
+    Trigger *best = nullptr;
+    double bestScore = 0;
+    for (const auto &trigger : activeTriggers(TriggerType::Stroke)) {
+        result.success = true;
+        result.block = result.block || trigger->blockEvents();
+
+        if (!trigger->canEnd()) {
+            continue;
+        }
+
+        for (const auto &triggerStroke : dynamic_cast<const StrokeTriggerCore &>(trigger->core()).strokes()) {
+            const auto score = stroke.compare(triggerStroke);
+            if (score > bestScore && score > Stroke::min_matching_score()) {
+                best = trigger;
+                bestScore = score;
+            }
+        }
+    }
+    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Stroke compared (bestScore: %2)").arg(QString::number(bestScore));
+
+    if (best) {
+        cancelTriggers(best);
+        best->end();
+    }
+    cancelTriggers(TriggerType::Stroke); // TODO Double cancellation
+    return result;
+}
+
 void MotionTriggerHandler::reset()
 {
     TriggerHandler::reset();
@@ -286,50 +333,6 @@ void MotionTriggerHandler::onCircleCoastingTimerTick()
         m_circleCoastingTimer.stop();
     }
     m_circleFilterDelta = 0;
-}
-
-void MotionTriggerHandler::onActivatingTrigger(const Trigger *trigger)
-{
-    if (const auto *motionTriggerCore = dynamic_cast<const MotionTriggerCore *>(&trigger->core())) {
-        if (!m_isDeterminingSpeed && motionTriggerCore->hasSpeed()) {
-            qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Trigger has speed (id: %1)").arg(trigger->id());
-            m_isDeterminingSpeed = true;
-        }
-    }
-}
-
-void MotionTriggerHandler::onEndingTriggers(TriggerTypes types)
-{
-    if (m_deltas.empty() || !(types & TriggerType::Stroke)) {
-        return;
-    }
-
-    const Stroke stroke(m_deltas);
-    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote()
-        << QString("Stroke constructed (points: %1, deltas: %2)").arg(QString::number(stroke.points().size()), QString::number(m_deltas.size()));
-
-    Trigger *best = nullptr;
-    double bestScore = 0;
-    for (const auto &trigger : activeTriggers(TriggerType::Stroke)) {
-        if (!trigger->canEnd()) {
-            continue;
-        }
-
-        for (const auto &triggerStroke : dynamic_cast<const StrokeTriggerCore &>(trigger->core()).strokes()) {
-            const auto score = stroke.compare(triggerStroke);
-            if (score > bestScore && score > Stroke::min_matching_score()) {
-                best = trigger;
-                bestScore = score;
-            }
-        }
-    }
-    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Stroke compared (bestScore: %2)").arg(QString::number(bestScore));
-
-    if (best) {
-        cancelTriggers(best);
-        best->end();
-    }
-    cancelTriggers(TriggerType::Stroke); // TODO Double cancellation
 }
 
 }

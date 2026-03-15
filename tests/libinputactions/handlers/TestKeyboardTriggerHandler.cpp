@@ -1,10 +1,11 @@
 #include "Test.h"
-#include <QSignalSpy>
-#include <libinputactions/handlers/KeyboardTriggerHandler.h>
+#include "mocks/MockKeyboardTriggerHandler.h"
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/events.h>
 #include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
 #include <linux/input-event-codes.h>
+
+using namespace ::testing;
 
 namespace InputActions
 {
@@ -16,29 +17,33 @@ class TestKeyboardTriggerHandler : public Test
 private slots:
     void handleEvent_keyboardKey()
     {
-        auto handler = std::make_unique<KeyboardTriggerHandler>();
-        QSignalSpy activatingSpy(handler.get(), &TriggerHandler::activatingTrigger);
-        QSignalSpy endingSpy(handler.get(), &TriggerHandler::endingTriggers);
-        handler->addTrigger(std::make_unique<KeyboardShortcutTrigger>(KeyboardShortcut{.keys = {KEY_LEFTCTRL, KEY_A}}));
-
+        MockKeyboardTriggerHandler handler;
         InputDevice device(InputDeviceType::Keyboard);
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_A, true)), false);
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, true)), false);
-        QCOMPARE(activatingSpy.count(), 0);
+        handler.addTrigger(std::make_unique<KeyboardShortcutTrigger>(KeyboardShortcut{.keys = {KEY_LEFTCTRL, KEY_A}}));
 
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, false)), false);
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_A, false)), false);
+        EXPECT_CALL(handler, triggerActivated(_)).Times(0);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_A, true)), false);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, true)), false);
 
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, true)), false);
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_A, true)), true);
-        QCOMPARE(activatingSpy.count(), 1);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, false)), false);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_A, false)), false);
+        QVERIFY(Mock::VerifyAndClearExpectations(&handler));
 
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_A, false)), true);
-        QCOMPARE(endingSpy.count(), 1);
-        QCOMPARE(handler->handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, false)), false);
+        EXPECT_CALL(handler, triggerActivated(_)).Times(1);
+        EXPECT_CALL(handler, doEndTriggers(_)).Times(0);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, true)), false);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_A, true)), true);
+        QVERIFY(Mock::VerifyAndClearExpectations(&handler));
 
-        QCOMPARE(activatingSpy.count(), 1);
-        QCOMPARE(endingSpy.count(), 1);
+        EXPECT_CALL(handler, triggerActivated(_)).Times(0);
+        EXPECT_CALL(handler, doEndTriggers(_)).Times(1);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_A, false)), true);
+        QVERIFY(Mock::VerifyAndClearExpectations(&handler));
+
+        EXPECT_CALL(handler, triggerActivated(_)).Times(0);
+        EXPECT_CALL(handler, doEndTriggers(_)).Times(0);
+        QCOMPARE(handler.handleEvent(KeyboardKeyEvent(&device, KEY_LEFTCTRL, false)), false);
+        QVERIFY(Mock::VerifyAndClearExpectations(&handler));
     }
 };
 
