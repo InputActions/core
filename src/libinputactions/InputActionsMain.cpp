@@ -114,7 +114,7 @@ void InputActionsMain::registerGlobalVariables(VariableManager *variableManager,
         value = g_cursorShapeProvider->cursorShape();
     });
     variableManager->registerLocalVariable(BuiltinVariables::DeviceName);
-    for (auto i = 1; i <= s_fingerVariableCount; i++) {
+    for (auto i = 1; i <= FINGER_VARIABLE_COUNT; i++) {
         variableManager->registerLocalVariable<QPointF>(QString("finger_%1_initial_position_percentage").arg(i));
         variableManager->registerLocalVariable<QPointF>(QString("finger_%1_position_percentage").arg(i));
         variableManager->registerLocalVariable<qreal>(QString("finger_%1_pressure").arg(i));
@@ -123,6 +123,9 @@ void InputActionsMain::registerGlobalVariables(VariableManager *variableManager,
     variableManager->registerRemoteVariable<Qt::KeyboardModifiers>(BuiltinVariables::KeyboardModifiers, [](auto &value) {
         value = g_inputBackend->keyboardModifiers();
     });
+    for (auto i = 0; i < REGEX_MATCH_VARIABLE_COUNT; i++) {
+        variableManager->registerLocalVariable<QString>(QString("match_%1").arg(i));
+    }
     variableManager->registerLocalVariable(BuiltinVariables::LastTriggerId);
     variableManager->registerLocalVariable(BuiltinVariables::LastTriggerTimestamp, true);
     variableManager->registerRemoteVariable<QPointF>("pointer_position_screen_percentage", [pointerPositionGetter](auto &value) {

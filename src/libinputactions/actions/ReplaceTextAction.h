@@ -18,34 +18,42 @@
 
 #pragma once
 
+#include "Action.h"
 #include <QString>
 #include <libinputactions/Value.h>
+#include <qregularexpression.h>
 
 namespace InputActions
 {
 
-class TextInput
+class TextSubstitutionRule
 {
 public:
-    TextInput() = default;
-    virtual ~TextInput() = default;
+    TextSubstitutionRule() = default;
+    TextSubstitutionRule(QRegularExpression regex, Value<QString> newText);
 
-    bool canReplaceSurroundingText(const QRegularExpression &regex);
-    /**
-     * May be called from any thread.
-     */
-    void replaceSurroundingText(const QRegularExpression &regex, const Value<QString> &newText);
+    const QRegularExpression &regex() const { return m_regex; }
+    const Value<QString> &newText() const { return m_newText; }
 
-    /**
-     * @param beforeLength Number of characters before the cursor to delete.
-     * @param afterLength Number of characters after the cursor to delete.
-     */
-    virtual void deleteSurroundingText(uint32_t beforeLength, uint32_t afterLength) {}
-    virtual std::optional<QString> surroundingText() { return {}; }
-    virtual std::optional<uint32_t> surroundingTextCursorPosition() { return {}; }
-    virtual void writeText(const QString &text) {}
+private:
+    QRegularExpression m_regex;
+    Value<QString> m_newText;
 };
 
-inline std::shared_ptr<TextInput> g_textInput;
+class ReplaceTextAction : public Action
+{
+public:
+    ReplaceTextAction(std::vector<TextSubstitutionRule> rules);
+
+    const std::vector<TextSubstitutionRule> &rules() const { return m_rules; }
+
+    bool async() const override;
+
+protected:
+    void executeImpl(const ActionExecutionArguments &args) override;
+
+private:
+    std::vector<TextSubstitutionRule> m_rules;
+};
 
 }
