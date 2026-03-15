@@ -19,36 +19,19 @@
 #pragma once
 
 #include <QString>
-#include <libinputactions/input/KeyboardKey.h>
-#include <set>
 
 namespace InputActions
 {
 
-/**
- * Virtual device for emitting anonymous keyboard events.
- *
- * All keys that will be used must be registered using InputBackend::addVirtualKeyboardKey() prior to initializing the input backend. The implementation can
- * then obtain them using InputBackend::virtualKeyboardKeys().
- */
-class VirtualKeyboard
+class TextInput
 {
 public:
-    virtual ~VirtualKeyboard() = default;
+    TextInput() = default;
+    virtual ~TextInput() = default;
 
-    /**
-     * Must be called by the overriding method in order to track pressed keys.
-     */
-    virtual void keyboardKey(KeyboardKey key, bool state);
-
-protected:
-    /**
-     * Puts the device in a neutral state. Call in the deriving class' destructor.
-     */
-    void reset();
-
-private:
-    std::set<KeyboardKey> m_pressedKeys;
+    virtual void writeText(const QString &text) {}
 };
+
+inline std::shared_ptr<TextInput> g_textInput;
 
 }

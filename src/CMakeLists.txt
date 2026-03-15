@@ -75,6 +75,7 @@ set(libinputactions_SRCS
     libinputactions/interfaces/PointerPositionSetter.h
     libinputactions/interfaces/ProcessRunner.cpp
     libinputactions/interfaces/SessionLock.h
+    libinputactions/interfaces/TextInput.h
     libinputactions/interfaces/Window.h
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp

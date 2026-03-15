@@ -13,6 +13,7 @@
 #include "interfaces/PointerPositionSetter.h"
 #include "interfaces/ProcessRunner.h"
 #include "interfaces/SessionLock.h"
+#include "interfaces/TextInput.h"
 #include "interfaces/Window.h"
 #include "interfaces/WindowProvider.h"
 #include "interfaces/implementations/DBusNotificationManager.h"
@@ -40,6 +41,7 @@ InputActionsMain::~InputActionsMain()
     g_pointerPositionGetter.reset();
     g_pointerPositionSetter.reset();
     g_processRunner.reset();
+    g_textInput.reset();
     g_sessionLock.reset();
     g_windowProvider.reset();
 
@@ -85,6 +87,7 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_pointerPositionSetter);
     setMissingImplementation<PlasmaGlobalShortcutInvoker, DBusPlasmaGlobalShortcutInvoker>(g_plasmaGlobalShortcutInvoker);
     setMissingImplementation<ProcessRunner, ProcessRunnerImpl>(g_processRunner);
+    setMissingImplementation(g_textInput);
     setMissingImplementation(g_sessionLock);
     setMissingImplementation(g_windowProvider);
 
