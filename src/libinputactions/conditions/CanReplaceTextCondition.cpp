@@ -30,7 +30,7 @@ CanReplaceTextCondition::CanReplaceTextCondition(std::vector<TextSubstitutionRul
 
 CanReplaceTextCondition::~CanReplaceTextCondition() = default;
 
-bool CanReplaceTextCondition::evaluateImpl(const ConditionEvaluationArguments &arguments)
+bool CanReplaceTextCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
     return std::ranges::any_of(m_rules, [](const auto &rule) {
         return g_textInput->canReplaceSurroundingText(rule.regex());

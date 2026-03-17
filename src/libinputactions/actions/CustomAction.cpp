@@ -38,7 +38,7 @@ bool CustomAction::mergeable() const
     return m_mergeable;
 }
 
-void CustomAction::executeImpl(const ActionExecutionArguments &args)
+void CustomAction::doExecute(const ActionExecutionArguments &args)
 {
     m_function(args);
 }

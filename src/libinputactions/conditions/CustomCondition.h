@@ -30,7 +30,7 @@ public:
     CustomCondition(std::function<bool(const ConditionEvaluationArguments &arguments)> function);
 
 protected:
-    bool evaluateImpl(const ConditionEvaluationArguments &arguments) override;
+    bool doEvaluate(const ConditionEvaluationArguments &arguments) override;
 
 private:
     std::function<bool(const ConditionEvaluationArguments &arguments)> m_function;

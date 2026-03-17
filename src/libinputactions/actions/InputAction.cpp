@@ -41,7 +41,7 @@ InputAction::InputAction(std::vector<InputActionItem> sequence)
     }
 }
 
-void InputAction::executeImpl(const ActionExecutionArguments &args)
+void InputAction::doExecute(const ActionExecutionArguments &args)
 {
     for (const auto &item : m_sequence) {
         const auto keyboardText = item.keyboardText.get();

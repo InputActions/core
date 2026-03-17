@@ -60,7 +60,7 @@ public:
     void aboutToExecute();
     /**
      * Do not call directly, use ActionExecutor instead.
-     * @see executeImpl
+     * @see doExecute
      */
     void execute(const ActionExecutionArguments &args);
     /**
@@ -101,7 +101,7 @@ protected:
     /**
      * This method is not guaranteed to be called from the main thread.
      */
-    virtual void executeImpl(const ActionExecutionArguments &args) {}
+    virtual void doExecute(const ActionExecutionArguments &args) {}
 
 private:
     std::shared_ptr<Condition> m_condition;

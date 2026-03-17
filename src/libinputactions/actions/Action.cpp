@@ -39,7 +39,7 @@ void Action::aboutToExecute()
 void Action::execute(const ActionExecutionArguments &args)
 {
     qCDebug(INPUTACTIONS) << QString("Executing action \"%1\"").arg(m_id);
-    executeImpl(args);
+    doExecute(args);
 }
 
 bool Action::async() const

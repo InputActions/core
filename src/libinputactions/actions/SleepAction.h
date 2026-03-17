@@ -34,7 +34,7 @@ public:
     bool async() const override;
 
 protected:
-    void executeImpl(const ActionExecutionArguments &args) override;
+    void doExecute(const ActionExecutionArguments &args) override;
 
 private:
     std::chrono::milliseconds m_time;

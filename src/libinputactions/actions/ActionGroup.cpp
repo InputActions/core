@@ -29,7 +29,7 @@ ActionGroup::ActionGroup(ActionGroupExecutionMode mode)
 {
 }
 
-void ActionGroup::executeImpl(const ActionExecutionArguments &args)
+void ActionGroup::doExecute(const ActionExecutionArguments &args)
 {
     // TODO Each action introduces latency
     const auto checkCanExecute = [](const auto &action) {
