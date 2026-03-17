@@ -28,7 +28,7 @@ ReplaceTextAction::ReplaceTextAction(std::vector<TextSubstitutionRule> rules)
 {
 }
 
-void ReplaceTextAction::executeImpl(const ActionExecutionArguments &args)
+void ReplaceTextAction::doExecute(const ActionExecutionArguments &args)
 {
     TextSubstitutionRule *rule{};
     QThreadHelpers::runOnThread(

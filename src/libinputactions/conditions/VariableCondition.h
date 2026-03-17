@@ -39,7 +39,7 @@ public:
     ComparisonOperator comparisonOperator() const { return m_comparisonOperator; }
 
 protected:
-    bool evaluateImpl(const ConditionEvaluationArguments &arguments) override;
+    bool doEvaluate(const ConditionEvaluationArguments &arguments) override;
 
 private:
     QString m_variableName;

@@ -26,7 +26,7 @@ CustomCondition::CustomCondition(std::function<bool(const ConditionEvaluationArg
 {
 }
 
-bool CustomCondition::evaluateImpl(const ConditionEvaluationArguments &arguments)
+bool CustomCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
     return m_function(arguments);
 }

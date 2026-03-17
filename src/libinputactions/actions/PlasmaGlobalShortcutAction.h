@@ -33,7 +33,7 @@ public:
     const QString &shortcut() const { return m_shortcut; }
 
 protected:
-    void executeImpl(const ActionExecutionArguments &args) override;
+    void doExecute(const ActionExecutionArguments &args) override;
 
 private:
     QString m_component;

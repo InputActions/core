@@ -39,7 +39,7 @@ VariableCondition::VariableCondition(const QString &variableName, const Value<st
 {
 }
 
-bool VariableCondition::evaluateImpl(const ConditionEvaluationArguments &arguments)
+bool VariableCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
     const auto variable = arguments.variableManager->getVariable(m_variableName);
     if (!variable) {

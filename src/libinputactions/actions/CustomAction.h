@@ -36,7 +36,7 @@ public:
     bool mergeable() const override;
 
 protected:
-    void executeImpl(const ActionExecutionArguments &args) override;
+    void doExecute(const ActionExecutionArguments &args) override;
 
 private:
     std::function<void(const ActionExecutionArguments &args)> m_function;

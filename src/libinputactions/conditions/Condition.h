@@ -57,7 +57,7 @@ protected:
     /**
      * @see evaluate
      */
-    virtual bool evaluateImpl(const ConditionEvaluationArguments &arguments);
+    virtual bool doEvaluate(const ConditionEvaluationArguments &arguments);
 
 private:
     bool m_exceptionNotificationShown{};

@@ -65,7 +65,7 @@ public:
     void setDelay(std::chrono::milliseconds value) { m_delay = std::move(value); }
 
 protected:
-    void executeImpl(const ActionExecutionArguments &args) override;
+    void doExecute(const ActionExecutionArguments &args) override;
 
 private:
     std::vector<InputActionItem> m_sequence;

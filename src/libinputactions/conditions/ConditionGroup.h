@@ -48,7 +48,7 @@ public:
     void prepend(const std::shared_ptr<Condition> &condition);
 
 protected:
-    bool evaluateImpl(const ConditionEvaluationArguments &arguments) override;
+    bool doEvaluate(const ConditionEvaluationArguments &arguments) override;
 
     std::vector<std::shared_ptr<Condition>> m_conditions;
     ConditionGroupMode m_mode;

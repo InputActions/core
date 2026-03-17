@@ -27,7 +27,7 @@ ConditionGroup::ConditionGroup(ConditionGroupMode mode)
 {
 }
 
-bool ConditionGroup::evaluateImpl(const ConditionEvaluationArguments &arguments)
+bool ConditionGroup::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
     const auto pred = [&arguments](auto &condition) {
         return condition->evaluate(arguments);

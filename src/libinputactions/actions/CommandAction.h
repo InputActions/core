@@ -46,7 +46,7 @@ public:
     void setWait(bool value) { m_wait = value; }
 
 protected:
-    void executeImpl(const ActionExecutionArguments &args) override;
+    void doExecute(const ActionExecutionArguments &args) override;
 
 private:
     Value<QString> m_command;

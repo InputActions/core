@@ -34,7 +34,7 @@ public:
     const std::vector<TextSubstitutionRule> &rules() const { return m_rules; }
 
 protected:
-    bool evaluateImpl(const ConditionEvaluationArguments &arguments) override;
+    bool doEvaluate(const ConditionEvaluationArguments &arguments) override;
 
 private:
     std::vector<TextSubstitutionRule> m_rules;

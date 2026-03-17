@@ -41,7 +41,7 @@ bool Condition::satisfied(const ConditionEvaluationArguments &arguments)
 bool Condition::evaluate(const ConditionEvaluationArguments &arguments)
 {
     try {
-        return evaluateImpl(arguments) == !m_negate;
+        return doEvaluate(arguments) == !m_negate;
     } catch (const std::exception &e) {
         qWarning(INPUTACTIONS).noquote() << "Failed to evaluate condition: " << e.what();
         if (g_globalConfig->sendNotificationOnError() && !m_exceptionNotificationShown) {
@@ -53,7 +53,7 @@ bool Condition::evaluate(const ConditionEvaluationArguments &arguments)
     }
 }
 
-bool Condition::evaluateImpl(const ConditionEvaluationArguments &arguments)
+bool Condition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
     return true;
 }
