@@ -19,6 +19,7 @@
 #include "triggers.h"
 #include "NodeParser.h"
 #include "containers.h"
+#include "flags.h"
 #include "separated-string.h"
 #include "utils.h"
 #include <libinputactions/conditions/ConditionGroup.h>
