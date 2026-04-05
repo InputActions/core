@@ -29,8 +29,6 @@
 #include <libinputactions/input/MouseButton.h>
 #include <set>
 
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_TRIGGER)
-
 namespace InputActions
 {
 

@@ -22,8 +22,6 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/variables/VariableManager.h>
 
-Q_LOGGING_CATEGORY(INPUTACTIONS_TRIGGER, "inputactions.trigger", QtWarningMsg)
-
 namespace InputActions
 {
 
@@ -70,23 +68,14 @@ void Trigger::update(const TriggerUpdateEvent &event)
     m_absoluteAccumulatedDelta += std::abs(delta);
     m_withinThreshold = !m_threshold || m_threshold->contains(m_absoluteAccumulatedDelta);
     if (!m_withinThreshold) {
-        qCDebug(INPUTACTIONS_TRIGGER).noquote() << QString("Threshold not reached (id: %1, current: %2, min: %3, max: %4")
-                                                       .arg(m_id,
-                                                            QString::number(m_absoluteAccumulatedDelta),
-                                                            QString::number(m_threshold->min().value_or(-1)),
-                                                            QString::number(m_threshold->max().value_or(-1)));
         return;
     }
 
-    qCDebug(INPUTACTIONS_TRIGGER).noquote() << QString("Trigger updated (id: %1, delta: %2)").arg(m_id, QString::number(delta));
-
     if (!m_started) {
-        qCDebug(INPUTACTIONS_TRIGGER).noquote() << QString("Trigger started (id: %1)").arg(m_id);
         m_started = true;
         m_tickTimer.start(TICK_INTERVAL);
 
         if (m_clearModifiers && *m_clearModifiers) {
-            qCDebug(INPUTACTIONS_TRIGGER).noquote() << QString("Clearing keyboard modifiers (trigger: %1)").arg(m_id);
             g_inputBackend->clearKeyboardModifiers();
         }
 
@@ -116,7 +105,6 @@ void Trigger::end(bool allowResuming)
         return;
     }
 
-    qCDebug(INPUTACTIONS_TRIGGER).noquote() << QString("Trigger ended (id: %1)").arg(m_id);
     setLastTrigger();
     for (const auto &action : m_actions) {
         action->triggerEnded();
@@ -131,7 +119,6 @@ void Trigger::cancel()
         return;
     }
 
-    qCDebug(INPUTACTIONS_TRIGGER).noquote() << QString("Trigger cancelled (id: %1)").arg(m_id);
     for (const auto &action : m_actions) {
         action->triggerCancelled();
     }

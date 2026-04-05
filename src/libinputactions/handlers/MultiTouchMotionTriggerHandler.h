@@ -20,8 +20,6 @@
 
 #include "MotionTriggerHandler.h"
 
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MULTITOUCH)
-
 namespace InputActions
 {
 

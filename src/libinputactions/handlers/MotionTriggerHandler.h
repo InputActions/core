@@ -21,8 +21,6 @@
 #include "InputTriggerHandler.h"
 #include <libinputactions/triggers/core/DirectionalMotionTriggerCore.h>
 
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOTION)
-
 namespace InputActions
 {
 

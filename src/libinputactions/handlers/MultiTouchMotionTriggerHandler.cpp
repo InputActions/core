@@ -22,8 +22,6 @@
 #include <libinputactions/input/events.h>
 #include <libinputactions/variables/VariableManager.h>
 
-Q_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MULTITOUCH, "inputactions.handler.multitouch", QtWarningMsg)
-
 namespace InputActions
 {
 
@@ -33,23 +31,18 @@ bool MultiTouchMotionTriggerHandler::handlePinch(qreal scale, qreal angleDelta)
         return false;
     }
 
-    qCDebug(INPUTACTIONS_HANDLER_MULTITOUCH).nospace() << "Pinch event (scale: " << scale << ", angleDelta: " << angleDelta << ", delta: " << ")";
-
     const auto scaleDelta = -(m_previousPinchScale - scale);
     m_previousPinchScale = scale;
 
     m_accumulatedRotateDelta += std::abs(angleDelta);
     if (m_pinchType == PinchType::Unknown) {
         if (m_accumulatedRotateDelta >= 10) {
-            qCDebug(INPUTACTIONS_HANDLER_MULTITOUCH, "Determined pinch type (rotate)");
             m_pinchType = PinchType::Rotate;
             cancelTriggers(TriggerType::Pinch);
         } else if (std::abs(1.0 - scale) >= 0.2) {
-            qCDebug(INPUTACTIONS_HANDLER_MULTITOUCH, "Determined pinch type (pinch)");
             m_pinchType = PinchType::Pinch;
             cancelTriggers(TriggerType::Rotate);
         } else {
-            qCDebug(INPUTACTIONS_HANDLER_MULTITOUCH, "Event processed (type: Pinch, status: DeterminingType)");
             return true;
         }
     }
@@ -75,7 +68,6 @@ bool MultiTouchMotionTriggerHandler::handlePinch(qreal scale, qreal angleDelta)
 
     TriggerSpeed speed{};
     if (!determineSpeed(type, delta, speed, direction)) {
-        qCDebug(INPUTACTIONS_HANDLER_MULTITOUCH, "Event processed (type: Pinch, status: DeterminingSpeed)");
         return true;
     }
 
@@ -85,7 +77,6 @@ bool MultiTouchMotionTriggerHandler::handlePinch(qreal scale, qreal angleDelta)
     event.setSpeed(speed);
     const auto result = updateTriggers(type, event);
 
-    qCDebug(INPUTACTIONS_HANDLER_MULTITOUCH).nospace() << "Event processed (type: Pinch, hasGestures: " << result.success << ")";
     return result.block;
 }
 
