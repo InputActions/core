@@ -246,6 +246,7 @@ bool TouchpadTriggerHandler::touchpadClick(const TouchpadClickEvent &event)
 {
     if (event.state()) {
         cancelTriggers(TriggerType::Press);
+        updateVariables(event.sender());
         setState(activateTriggers(TriggerType::Click).block ? State::TouchpadButtonDownBlocked : State::TouchpadButtonDown);
     } else if (m_state == State::TouchpadButtonDown || m_state == State::TouchpadButtonDownBlocked) {
         setState(event.sender()->physicalState().validTouchPoints().empty() ? State::None : State::Touch);
