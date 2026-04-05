@@ -18,8 +18,6 @@
 
 #include "TriggerHandler.h"
 
-Q_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_TRIGGER, "inputactions.handler.trigger", QtWarningMsg)
-
 namespace InputActions
 {
 
@@ -47,7 +45,6 @@ void TriggerHandler::setTimedTriggerUpdateDelta(uint32_t value)
 
 TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes types, const TriggerActivationEvent &event)
 {
-    qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote().nospace() << "Triggers activating (types: " << types << ")";
     cancelTriggers(TriggerType::All);
     reset();
 
@@ -57,7 +54,6 @@ TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes t
     for (auto &trigger : triggers(types, event)) {
         triggerActivated(trigger);
         m_activeTriggers.push_back(trigger);
-        qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote() << QString("Trigger activated (id: %1)").arg(trigger->id());
 
         result.success = true;
         result.block = result.block || trigger->blockEvents();
@@ -75,7 +71,6 @@ TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes t
         }
     }
 
-    qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote().nospace() << "Triggers activated (count: " << m_activeTriggers.size() << ")";
     return result;
 }
 
@@ -91,8 +86,6 @@ TriggerManagementOperationResult TriggerHandler::updateTriggers(const std::map<T
     for (const auto &[type, _] : events) {
         types |= type;
     }
-
-    qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote().nospace() << "Updating gestures (types: " << types << ")";
 
     TriggerManagementOperationResult result{};
     for (auto it = m_activeTriggers.begin(); it != m_activeTriggers.end();) {
@@ -119,7 +112,6 @@ TriggerManagementOperationResult TriggerHandler::updateTriggers(const std::map<T
         trigger->update(*event);
 
         if (m_activeTriggers.size() > 1) {
-            qCDebug(INPUTACTIONS_TRIGGER, "Cancelling conflicting triggers");
             if (trigger->overridesOtherTriggersOnUpdate()) {
                 cancelTriggers(trigger);
                 break;
@@ -198,7 +190,6 @@ TriggerManagementOperationResult TriggerHandler::doCancelTriggers(TriggerTypes t
         return result;
     }
 
-    qCDebug(INPUTACTIONS_HANDLER_TRIGGER).nospace() << "Cancelling triggers (types: " << types << ")";
     for (auto it = m_activeTriggers.begin(); it != m_activeTriggers.end();) {
         auto trigger = *it;
         if (!(types & trigger->type())) {
@@ -217,7 +208,6 @@ TriggerManagementOperationResult TriggerHandler::doCancelTriggers(TriggerTypes t
 
 void TriggerHandler::cancelTriggers(Trigger *except)
 {
-    qCDebug(INPUTACTIONS_HANDLER_TRIGGER).noquote().nospace() << "Cancelling triggers (except: " << except->id() << ")";
     for (auto it = m_activeTriggers.begin(); it != m_activeTriggers.end();) {
         auto gesture = *it;
         if (gesture != except) {

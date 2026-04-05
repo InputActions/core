@@ -30,8 +30,6 @@
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
-Q_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOTION, "inputactions.handler.motion", QtWarningMsg)
-
 namespace InputActions
 {
 
@@ -71,8 +69,6 @@ bool MotionTriggerHandler::handleMotion(const InputDevice *device, const PointDe
     if (!hasActiveTriggers(TriggerType::SinglePointMotion)) {
         return false;
     }
-
-    qCDebug(INPUTACTIONS_HANDLER_MOTION).nospace() << "Event (type: Motion, delta: " << delta.unaccelerated() << ")";
 
     const auto hasStroke = hasActiveTriggers(TriggerType::Stroke);
     const auto hasSwipe = hasActiveTriggers(TriggerType::Swipe);
@@ -228,24 +224,17 @@ bool MotionTriggerHandler::determineSpeed(TriggerType type, qreal delta, Trigger
         }
     }
     if (!speedThreshold.has_value()) {
-        qCWarning(INPUTACTIONS_HANDLER_MOTION, "No matching speed threshold found for trigger, assuming fast speed.");
         m_speed = speed = TriggerSpeed::Fast;
         return false;
     }
 
     if (m_sampledInputEvents++ != m_inputEventsToSample) {
         m_accumulatedAbsoluteSampledDelta += std::abs(delta);
-        qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Determining speed (event: %1/%2, delta: %3/%4)")
-                                                              .arg(QString::number(m_sampledInputEvents),
-                                                                   QString::number(m_inputEventsToSample),
-                                                                   QString::number(m_accumulatedAbsoluteSampledDelta),
-                                                                   QString::number(speedThreshold->threshold));
         return false;
     }
 
     m_isDeterminingSpeed = false;
     m_speed = speed = (m_accumulatedAbsoluteSampledDelta / m_inputEventsToSample) >= speedThreshold->threshold ? TriggerSpeed::Fast : TriggerSpeed::Slow;
-    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << "Speed determined (speed: " << speed << ")";
     return true;
 }
 
@@ -258,7 +247,6 @@ void MotionTriggerHandler::triggerActivated(const Trigger *trigger)
 {
     if (const auto *motionTriggerCore = dynamic_cast<const MotionTriggerCore *>(&trigger->core())) {
         if (!m_isDeterminingSpeed && motionTriggerCore->hasSpeed()) {
-            qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Trigger has speed (id: %1)").arg(trigger->id());
             m_isDeterminingSpeed = true;
         }
     }
@@ -273,9 +261,6 @@ TriggerManagementOperationResult MotionTriggerHandler::endTriggersCustom(Trigger
     }
 
     const Stroke stroke(m_deltas);
-    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote()
-        << QString("Stroke constructed (points: %1, deltas: %2)").arg(QString::number(stroke.points().size()), QString::number(m_deltas.size()));
-
     Trigger *best = nullptr;
     double bestScore = 0;
     for (const auto &trigger : activeTriggers(TriggerType::Stroke)) {
@@ -294,7 +279,6 @@ TriggerManagementOperationResult MotionTriggerHandler::endTriggersCustom(Trigger
             }
         }
     }
-    qCDebug(INPUTACTIONS_HANDLER_MOTION).noquote() << QString("Stroke compared (bestScore: %2)").arg(QString::number(bestScore));
 
     if (best) {
         cancelTriggers(best);

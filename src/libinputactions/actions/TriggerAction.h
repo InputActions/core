@@ -18,14 +18,11 @@
 
 #pragma once
 
-#include <QLoggingCategory>
 #include <QPointF>
 #include <QString>
 #include <libinputactions/Range.h>
 #include <libinputactions/conditions/Condition.h>
 #include <memory>
-
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_ACTION)
 
 namespace InputActions
 {

@@ -20,8 +20,6 @@
 
 #include <libinputactions/handlers/MotionTriggerHandler.h>
 
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_MOUSE)
-
 namespace InputActions
 {
 

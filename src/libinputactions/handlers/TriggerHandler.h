@@ -21,8 +21,6 @@
 #include <QTimer>
 #include <libinputactions/triggers/Trigger.h>
 
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_HANDLER_TRIGGER)
-
 namespace InputActions
 {
 
