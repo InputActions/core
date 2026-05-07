@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <libinputactions/globals.h>
 #include <sys/inotify.h>
+#include <unistd.h>
 
 namespace InputActions
 {
