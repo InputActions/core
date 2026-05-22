@@ -20,7 +20,6 @@
 #include "containers.h"
 #include "flags.h"
 #include "globals.h"
-#include "scripting.h"
 #include "separated-string.h"
 #include "triggers.h"
 #include "utils.h"
@@ -40,6 +39,7 @@
 #include <libinputactions/conditions/VariableCondition.h>
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/ConfigIssueManager.h>
+#include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/handlers/KeyboardTriggerHandler.h>
 #include <libinputactions/handlers/MouseTriggerHandler.h>
@@ -54,6 +54,7 @@
 #include <libinputactions/interfaces/CursorShapeProvider.h>
 #include <libinputactions/scripting/ScriptAction.h>
 #include <libinputactions/scripting/ScriptCondition.h>
+#include <libinputactions/scripting/ScriptingManager.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
 #include <libinputactions/triggers/mouse/MouseTrigger.h>
@@ -162,7 +163,7 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
     } else if (const auto *replaceTextNode = node->at("replace_text")) {
         result = std::make_unique<ReplaceTextAction>(replaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
     } else if (const auto *scriptActionNode = node->at("script")) {
-        result = std::make_unique<ScriptAction>(parseScriptFunction(scriptActionNode));
+        result = std::make_unique<ScriptAction>(scriptActionNode->as<JSFunction>());
     } else if (const auto *sleepActionNode = node->at("sleep")) {
         result = std::make_unique<SleepAction>(sleepActionNode->as<std::chrono::milliseconds>());
     } else if (const auto *oneNode = node->at("one")) {
@@ -231,7 +232,7 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableRegist
             return std::make_shared<CanReplaceTextCondition>(canReplaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
         }
         if (const auto *scriptNode = node->at("script")) {
-            return std::make_shared<ScriptCondition>(parseScriptFunction(scriptNode));
+            return std::make_shared<ScriptCondition>(scriptNode->as<JSFunction>());
         }
 
         if (isLegacy(node)) {
@@ -543,6 +544,18 @@ void NodeParser<std::vector<InputDeviceRule>>::parse(const Node *node, std::vect
             }
         }
     }
+}
+
+template<>
+void NodeParser<JSFunction>::parse(const Node *node, JSFunction &result)
+{
+    auto function = JSFunction::create(g_configLoader->scriptingManager().evaluate(node->as<QString>()));
+    if (function) {
+        result = function.value();
+        return;
+    }
+
+    throw InvalidValueConfigException(node, "Expression is not a function.");
 }
 
 template<>

@@ -23,8 +23,22 @@
 namespace InputActions
 {
 
-class Node;
+class JSFunction
+{
+public:
+    JSFunction() = default;
 
-QJSValue parseScriptFunction(const Node *node);
+    /**
+     * @return Empty if the specified value is not a function.
+     */
+    static std::optional<JSFunction> create(QJSValue function);
+
+    QJSValue call(const QJSValueList &args = {}) const;
+
+private:
+    JSFunction(QJSValue value);
+
+    QJSValue m_function;
+};
 
 }

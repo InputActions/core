@@ -21,7 +21,7 @@
 namespace InputActions
 {
 
-ScriptCondition::ScriptCondition(QJSValue function)
+ScriptCondition::ScriptCondition(JSFunction function)
     : m_function(std::move(function))
 {
 }

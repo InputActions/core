@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QJSValue>
+#include "JSFunction.h"
 #include <libinputactions/conditions/Condition.h>
 
 namespace InputActions
@@ -28,15 +28,15 @@ class ScriptCondition : public Condition
 {
 public:
     /**
-     * @param function Must be a function, called with no arguments when the action is executed. The return value is ignored.
+     * @param function Called with no arguments when the condition is evaluated. The condition is satisfied when the return value is true.
      */
-    ScriptCondition(QJSValue function);
+    ScriptCondition(JSFunction function);
 
 protected:
     bool doEvaluate(const ConditionEvaluationArguments &arguments) override;
 
 private:
-    QJSValue m_function;
+    JSFunction m_function;
 };
 
 }

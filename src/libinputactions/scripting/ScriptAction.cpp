@@ -21,7 +21,7 @@
 namespace InputActions
 {
 
-ScriptAction::ScriptAction(QJSValue function)
+ScriptAction::ScriptAction(JSFunction function)
     : m_function(std::move(function))
 {
 }

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QJSValue>
+#include "JSFunction.h"
 #include <libinputactions/actions/Action.h>
 
 namespace InputActions
@@ -28,15 +28,15 @@ class ScriptAction : public Action
 {
 public:
     /**
-     * @param function Must be a function, called with no arguments when the action is executed. The return value is ignored.
+     * @param function Called with no arguments when the action is executed. The return value is ignored.
      */
-    ScriptAction(QJSValue function);
+    ScriptAction(JSFunction function);
 
 protected:
     void doExecute(const ActionExecutionArguments &args) override;
 
 private:
-    QJSValue m_function;
+    JSFunction m_function;
 };
 
 }
