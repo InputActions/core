@@ -20,6 +20,7 @@
 #include "containers.h"
 #include "flags.h"
 #include "globals.h"
+#include "scripting.h"
 #include "separated-string.h"
 #include "triggers.h"
 #include "utils.h"
@@ -51,6 +52,8 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
+#include <libinputactions/scripting/ScriptAction.h>
+#include <libinputactions/scripting/ScriptCondition.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
 #include <libinputactions/triggers/mouse/MouseTrigger.h>
@@ -158,6 +161,8 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
         result = std::make_unique<PlasmaGlobalShortcutAction>(shortcut.first, shortcut.second);
     } else if (const auto *replaceTextNode = node->at("replace_text")) {
         result = std::make_unique<ReplaceTextAction>(replaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
+    } else if (const auto *scriptActionNode = node->at("script")) {
+        result = std::make_unique<ScriptAction>(parseScriptFunction(scriptActionNode));
     } else if (const auto *sleepActionNode = node->at("sleep")) {
         result = std::make_unique<SleepAction>(sleepActionNode->as<std::chrono::milliseconds>());
     } else if (const auto *oneNode = node->at("one")) {
@@ -224,6 +229,9 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableRegist
 
         if (const auto *canReplaceTextNode = node->at("can_replace_text")) {
             return std::make_shared<CanReplaceTextCondition>(canReplaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
+        }
+        if (const auto *scriptNode = node->at("script")) {
+            return std::make_shared<ScriptCondition>(parseScriptFunction(scriptNode));
         }
 
         if (isLegacy(node)) {

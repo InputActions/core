@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <QJSEngine>
 #include <QString>
 #include <memory>
 #include <optional>
@@ -26,6 +27,7 @@ namespace InputActions
 {
 
 struct Config;
+class ScriptingManager;
 
 struct ConfigLoadSettings
 {
@@ -42,6 +44,8 @@ struct ConfigLoadSettings
 class ConfigLoader
 {
 public:
+    ScriptingManager &scriptingManager() const { return *m_scriptingManager; }
+
     /**
      * @return Whether the operation was successful. Errors may be obtained from ConfigIssueManager.
      */
@@ -55,6 +59,8 @@ public:
 private:
     Config createConfig(const QString &raw);
     void activateConfig(Config config, bool initialize);
+
+    ScriptingManager *m_scriptingManager;
 };
 
 inline std::shared_ptr<ConfigLoader> g_configLoader;
