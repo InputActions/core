@@ -44,6 +44,9 @@ struct ConfigLoadSettings
 class ConfigLoader
 {
 public:
+    /**
+     * Scripting manager for the configuration that is currently being created.
+     */
     ScriptingManager &scriptingManager() const { return *m_scriptingManager; }
 
     /**

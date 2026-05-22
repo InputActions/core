@@ -48,6 +48,11 @@ private:
     QTimer m_watchdogRestartTimer;
 };
 
+/**
+ * Do not use this instance during the creation of a configuration, use ConfigLoader::scriptingManager instead.
+ *
+ * A new instance is created on each config activation.
+ */
 inline std::unique_ptr<ScriptingManager> g_scriptingManager;
 
 }
