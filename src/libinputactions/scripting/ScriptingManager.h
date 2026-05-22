@@ -19,20 +19,33 @@
 #pragma once
 
 #include <QJSEngine>
+#include <QObject>
 #include <memory>
 
 namespace InputActions
 {
 
-class ScriptingManager
+class ScriptingManager : public QObject
 {
+    Q_OBJECT
+
 public:
     ScriptingManager();
+    ~ScriptingManager() override;
 
     QJSValue evaluate(const QString &script);
 
+    void initialize();
+
+private slots:
+    void onWatchdogValueRestartTimerTick();
+
 private:
     QJSEngine m_engine;
+
+    QThread *m_watchdogTimerThread;
+    QTimer *m_watchdogTimer;
+    QTimer m_watchdogRestartTimer;
 };
 
 inline std::unique_ptr<ScriptingManager> g_scriptingManager;

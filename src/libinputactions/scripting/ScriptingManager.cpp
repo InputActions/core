@@ -17,18 +17,58 @@
 */
 
 #include "ScriptingManager.h"
+#include <libinputactions/InputActionsMain.h>
+#include <libinputactions/helpers/QThread.h>
+#include <libinputactions/interfaces/NotificationManager.h>
 
 namespace InputActions
 {
 
+static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
+static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
+
 ScriptingManager::ScriptingManager()
+    : m_watchdogTimerThread(new QThread)
+    , m_watchdogTimer(new QTimer)
 {
     m_engine.installExtensions(QJSEngine::ConsoleExtension);
+
+    m_watchdogTimer->setInterval(WATCHDOG_TIMER_TIMEOUT);
+    m_watchdogTimer->moveToThread(m_watchdogTimerThread);
+    connect(m_watchdogTimer, &QTimer::timeout, [this]() {
+        m_engine.setInterrupted(true);
+        QThreadHelpers::runOnThread(QThreadHelpers::mainThread(), []() {
+            g_notificationManager
+                ->sendNotification("Infinite loop detected",
+                                   "A script has likely entered an infinite loop and frozen the main thread. InputActions has been suspended.");
+            g_inputActions->suspend();
+        });
+    });
+    m_watchdogTimerThread->start();
+
+    connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingManager::onWatchdogValueRestartTimerTick);
+    m_watchdogRestartTimer.setInterval(WATCHDOG_TIMER_RESET_INTERVAL);
+    m_watchdogRestartTimer.start();
+}
+
+ScriptingManager::~ScriptingManager()
+{
+    QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
+    m_watchdogTimerThread->quit();
+    m_watchdogTimerThread->wait();
+
+    m_watchdogTimer->deleteLater();
+    m_watchdogTimerThread->deleteLater();
 }
 
 QJSValue ScriptingManager::evaluate(const QString &script)
 {
     return m_engine.evaluate(script);
+}
+
+void ScriptingManager::onWatchdogValueRestartTimerTick()
+{
+    QMetaObject::invokeMethod(m_watchdogTimer, "start", Qt::QueuedConnection);
 }
 
 }
