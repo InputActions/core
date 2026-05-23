@@ -89,7 +89,7 @@ Value<T> Value<T>::variable(QString name)
             return variable->operations()->toString();
         }
 
-        if (variable->type() != typeid(T)) {
+        if (variable->type().id() != qMetaTypeId<T>()) {
             qCWarning(INPUTACTIONS).noquote()
                 << QString("Failed to get value: variable %1 is of type %2, expected %3").arg(name, variable->type().name(), typeid(T).name());
             return {};
@@ -136,11 +136,11 @@ bool Value<T>::expensive() const
 }
 
 template<typename T>
-Value<T>::operator Value<std::any>() const
+Value<T>::operator Value<QVariant>() const
 {
-    return Value<std::any>::function([valueProvider = *this] -> std::any {
+    return Value<QVariant>::function([valueProvider = *this] -> QVariant {
         if (const auto value = valueProvider.get()) {
-            return value.value();
+            return QVariant::fromValue(value.value());
         }
         return {};
     });
@@ -152,7 +152,7 @@ template class Value<Qt::KeyboardModifiers>;
 template class Value<InputDeviceTypes>;
 template class Value<qreal>;
 template class Value<QPointF>;
-template class Value<std::any>;
 template class Value<QString>;
+template class Value<QVariant>;
 
 }

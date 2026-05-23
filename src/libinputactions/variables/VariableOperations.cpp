@@ -22,7 +22,6 @@
 #include <QLoggingCategory>
 #include <QPointF>
 #include <QRegularExpression>
-#include <any>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_OPERATIONS, "inputactions.variable.operations")
@@ -35,10 +34,10 @@ VariableOperationsBase::VariableOperationsBase(Variable *variable)
 {
 }
 
-bool VariableOperationsBase::compare(const std::vector<std::any> &right, ComparisonOperator comparisonOperator) const
+bool VariableOperationsBase::compare(const std::vector<QVariant> &right, ComparisonOperator comparisonOperator) const
 {
     const auto left = m_variable->get();
-    if (!left.has_value()) {
+    if (left.isNull()) {
         return false;
     }
 
@@ -57,7 +56,7 @@ bool VariableOperationsBase::compare(const std::vector<std::any> &right, Compari
     }
 }
 
-bool VariableOperationsBase::compare(const std::any &left, const std::any &right, ComparisonOperator comparisonOperator) const
+bool VariableOperationsBase::compare(const QVariant &left, const QVariant &right, ComparisonOperator comparisonOperator) const
 {
     return false;
 }
@@ -67,7 +66,7 @@ QString VariableOperationsBase::toString() const
     return toString(m_variable->get());
 }
 
-QString VariableOperationsBase::toString(const std::any &value) const
+QString VariableOperationsBase::toString(const QVariant &value) const
 {
     return {};
 }
@@ -75,19 +74,19 @@ QString VariableOperationsBase::toString(const std::any &value) const
 std::unique_ptr<VariableOperationsBase> VariableOperationsBase::create(Variable *variable)
 {
     const auto type = variable->type();
-    if (type == typeid(bool)) {
+    if (type.id() == qMetaTypeId<bool>()) {
         return std::make_unique<VariableOperations<bool>>(variable);
-    } else if (type == typeid(qreal)) {
+    } else if (type.id() == qMetaTypeId<qreal>()) {
         return std::make_unique<VariableOperations<qreal>>(variable);
-    } else if (type == typeid(CursorShape)) {
+    } else if (type.id() == qMetaTypeId<CursorShape>()) {
         return std::make_unique<VariableOperations<CursorShape>>(variable);
-    } else if (type == typeid(Qt::KeyboardModifiers)) {
+    } else if (type.id() == qMetaTypeId<Qt::KeyboardModifiers>()) {
         return std::make_unique<VariableOperations<Qt::KeyboardModifiers>>(variable);
-    } else if (type == typeid(InputDeviceTypes)) {
+    } else if (type.id() == qMetaTypeId<InputDeviceTypes>()) {
         return std::make_unique<VariableOperations<InputDeviceTypes>>(variable);
-    } else if (type == typeid(QPointF)) {
+    } else if (type.id() == qMetaTypeId<QPointF>()) {
         return std::make_unique<VariableOperations<QPointF>>(variable);
-    } else if (type == typeid(QString)) {
+    } else if (type.id() == qMetaTypeId<QString>()) {
         return std::make_unique<VariableOperations<QString>>(variable);
     }
 
@@ -102,14 +101,14 @@ VariableOperations<T>::VariableOperations(Variable *variable)
 }
 
 template<typename T>
-bool VariableOperations<T>::compare(const std::any &left, const std::any &right, ComparisonOperator comparisonOperator) const
+bool VariableOperations<T>::compare(const QVariant &left, const QVariant &right, ComparisonOperator comparisonOperator) const
 {
-    if (left.type() != typeid(T) || right.type() != typeid(T)) {
-        qCWarning(INPUTACTIONS_VARIABLE_OPERATIONS).noquote() << "Attempted illegal variable comparison (left: " << left.type().name()
-                                                              << ", right: " << right.type().name() << ", expected: " << typeid(T).name();
+    if (left.typeId() != qMetaTypeId<T>() || right.typeId() != qMetaTypeId<T>()) {
+        qCWarning(INPUTACTIONS_VARIABLE_OPERATIONS).noquote()
+            << "Attempted illegal variable comparison (left: " << left.typeName() << ", right: " << right.typeName() << ", expected: " << typeid(T).name();
         return false;
     }
-    return compare(std::any_cast<T>(left), std::any_cast<T>(right), comparisonOperator);
+    return compare(left.value<T>(), right.value<T>(), comparisonOperator);
 }
 
 template<>
@@ -222,12 +221,12 @@ QString VariableOperations<T>::toString(const T &value)
 }
 
 template<typename T>
-QString VariableOperations<T>::toString(const std::any &value) const
+QString VariableOperations<T>::toString(const QVariant &value) const
 {
-    if (!value.has_value()) {
+    if (value.isNull()) {
         return "<null>";
     }
-    return toString(std::any_cast<T>(value));
+    return toString(value.value<T>());
 }
 
 template<typename T>

@@ -35,7 +35,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<bool>(values[0].get().value()), true);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), bool, true);
     }
 
     void negatedBoolVariableWithoutOperator__parsesNodeCorrectly()
@@ -50,7 +50,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<bool>(values[0].get().value()), true);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), bool, true);
     }
 
     void negated__parsesNodeCorrectly()
@@ -65,7 +65,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 1);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), qreal, 1);
     }
 
     void between__parsesNodeCorrectly()
@@ -80,8 +80,8 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 2);
-        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 1);
-        QCOMPARE(std::any_cast<qreal>(values[1].get().value()), 2);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), qreal, 1);
+        INPUTACTIONS_COMPARE_VARIANT(values[1].get().value(), qreal, 2);
     }
 
     void between_point__parsesNodeCorrectly()
@@ -96,8 +96,8 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 2);
-        QCOMPARE(std::any_cast<QPointF>(values[0].get().value()), QPointF(0.1, 0.2));
-        QCOMPARE(std::any_cast<QPointF>(values[1].get().value()), QPointF(0.3, 0.4));
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), QPointF, QPointF(0.1, 0.2));
+        INPUTACTIONS_COMPARE_VARIANT(values[1].get().value(), QPointF, QPointF(0.3, 0.4));
     }
 
     void between_invalid_oneValue__throwsInvalidValueConfigException()
@@ -124,7 +124,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<QString>(values[0].get().value()), "a");
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), QString, "a");
     }
 
     void contains_flags_sequence__parsesNodeCorrectly()
@@ -139,7 +139,9 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::ControlModifier | Qt::KeyboardModifier::MetaModifier);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(),
+                                     Qt::KeyboardModifiers,
+                                     Qt::KeyboardModifier::ControlModifier | Qt::KeyboardModifier::MetaModifier);
     }
 
     void contains_flags_scalar__parsesNodeCorrectly()
@@ -154,7 +156,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::MetaModifier);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), Qt::KeyboardModifiers, Qt::KeyboardModifier::MetaModifier);
     }
 
     void oneOf_sequence__parsesNodeCorrectly()
@@ -169,8 +171,8 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 2);
-        QCOMPARE(std::any_cast<QString>(values[0].get().value()), "a");
-        QCOMPARE(std::any_cast<QString>(values[1].get().value()), "b");
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), QString, "a");
+        INPUTACTIONS_COMPARE_VARIANT(values[1].get().value(), QString, "b");
     }
 
     void oneOf_scalar__parsesNodeCorrectly()
@@ -185,7 +187,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<QString>(values[0].get().value()), "a");
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), QString, "a");
     }
 
     void matches__parsesNodeCorrectly()
@@ -200,7 +202,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<QString>(values[0].get().value()), "[a]");
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), QString, "[a]");
     }
 
     void matches_invalidRegex__throwsInvalidValueConfigException()
@@ -237,7 +239,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 1);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), qreal, 1);
     }
 
     void inGroups__variableManagerPropagated_doesNotThrow()

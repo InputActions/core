@@ -21,17 +21,17 @@
 namespace InputActions
 {
 
-LocalVariable::LocalVariable(std::type_index type)
+LocalVariable::LocalVariable(QMetaType type)
     : Variable(std::move(type))
 {
 }
 
-std::any LocalVariable::get() const
+QVariant LocalVariable::get() const
 {
     return m_value;
 }
 
-void LocalVariable::set(std::any value)
+void LocalVariable::set(QVariant value)
 {
     m_value = std::move(value);
 }

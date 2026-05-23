@@ -27,15 +27,15 @@ Q_LOGGING_CATEGORY(INPUTACTIONS_CONDITION_VARIABLE, "inputactions.condition.vari
 namespace InputActions
 {
 
-VariableCondition::VariableCondition(const QString &variableName, const std::vector<Value<std::any>> &values, ComparisonOperator comparisonOperator)
+VariableCondition::VariableCondition(const QString &variableName, const std::vector<Value<QVariant>> &values, ComparisonOperator comparisonOperator)
     : m_variableName(variableName)
     , m_values(values)
     , m_comparisonOperator(comparisonOperator)
 {
 }
 
-VariableCondition::VariableCondition(const QString &variableName, const Value<std::any> &value, ComparisonOperator comparisonOperator)
-    : VariableCondition(variableName, std::vector<Value<std::any>>{value}, comparisonOperator)
+VariableCondition::VariableCondition(const QString &variableName, const Value<QVariant> &value, ComparisonOperator comparisonOperator)
+    : VariableCondition(variableName, std::vector<Value<QVariant>>{value}, comparisonOperator)
 {
 }
 
@@ -46,7 +46,7 @@ bool VariableCondition::doEvaluate(const ConditionEvaluationArguments &arguments
         throw std::runtime_error(std::format("Variable {} does not exist.", m_variableName.toStdString()));
     }
 
-    std::vector<std::any> values;
+    std::vector<QVariant> values;
     for (const auto &valueProvider : m_values) {
         if (const auto value = valueProvider.get()) {
             values.push_back(value.value());

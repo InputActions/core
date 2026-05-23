@@ -19,7 +19,6 @@
 #pragma once
 
 #include <QString>
-#include <any>
 #include <functional>
 #include <variant>
 
@@ -60,7 +59,7 @@ public:
      */
     bool expensive() const;
 
-    operator Value<std::any>() const;
+    operator Value<QVariant>() const;
 
 private:
     std::variant<std::optional<T>, std::function<std::optional<T>()>> m_value;

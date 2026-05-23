@@ -69,7 +69,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 2);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), qreal, 2);
     }
 
     void fingers_range__parsesNodeCorrectly()
@@ -86,8 +86,8 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 2);
-        QCOMPARE(std::any_cast<qreal>(values[0].get().value()), 2);
-        QCOMPARE(std::any_cast<qreal>(values[1].get().value()), 3);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), qreal, 2);
+        INPUTACTIONS_COMPARE_VARIANT(values[1].get().value(), qreal, 3);
     }
 
     void keyboardModifiers__addsDeprecatedFeatureConfigIssue()
@@ -122,7 +122,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::MetaModifier | Qt::KeyboardModifier::AltModifier);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), Qt::KeyboardModifiers, Qt::KeyboardModifier::MetaModifier | Qt::KeyboardModifier::AltModifier);
     }
 
     void keyboardModifiers_none__parsesNodeCorrectly()
@@ -139,7 +139,7 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 1);
-        QCOMPARE(std::any_cast<Qt::KeyboardModifiers>(values[0].get().value()), Qt::KeyboardModifier::NoModifier);
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), Qt::KeyboardModifiers, Qt::KeyboardModifier::NoModifier);
     }
 
     void keyboardModifiers_invalid__throwsInvalidValueConfigException()

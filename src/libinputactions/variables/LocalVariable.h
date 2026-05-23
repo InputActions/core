@@ -29,13 +29,13 @@ namespace InputActions
 class LocalVariable : public Variable
 {
 public:
-    LocalVariable(std::type_index type);
+    LocalVariable(QMetaType type);
 
-    std::any get() const override;
-    void set(std::any value) override;
+    QVariant get() const override;
+    void set(QVariant value) override;
 
 private:
-    std::any m_value;
+    QVariant m_value;
 };
 
 }

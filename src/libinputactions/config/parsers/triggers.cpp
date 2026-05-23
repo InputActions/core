@@ -128,7 +128,7 @@ void finalizeTrigger(const Node *node, Trigger *trigger)
                                                                        ComparisonOperator::EqualTo));
         } else {
             conditionGroup->append(std::make_shared<VariableCondition>(BuiltinVariables::Fingers,
-                                                                       std::vector<Value<std::any>>{
+                                                                       std::vector<Value<QVariant>>{
                                                                            Value<qreal>(range.min().value()), Value<qreal>(range.max().value())},
                                                                        ComparisonOperator::Between));
         }

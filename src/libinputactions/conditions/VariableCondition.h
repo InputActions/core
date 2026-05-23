@@ -20,7 +20,6 @@
 
 #include "Condition.h"
 #include <QString>
-#include <any>
 #include <libinputactions/Value.h>
 
 namespace InputActions
@@ -31,11 +30,11 @@ enum class ComparisonOperator;
 class VariableCondition : public Condition
 {
 public:
-    VariableCondition(const QString &variableName, const std::vector<Value<std::any>> &values, ComparisonOperator comparisonOperator);
-    VariableCondition(const QString &variableName, const Value<std::any> &value, ComparisonOperator comparisonOperator);
+    VariableCondition(const QString &variableName, const std::vector<Value<QVariant>> &values, ComparisonOperator comparisonOperator);
+    VariableCondition(const QString &variableName, const Value<QVariant> &value, ComparisonOperator comparisonOperator);
 
     const QString &variableName() const { return m_variableName; }
-    const std::vector<Value<std::any>> &values() const { return m_values; }
+    const std::vector<Value<QVariant>> &values() const { return m_values; }
     ComparisonOperator comparisonOperator() const { return m_comparisonOperator; }
 
 protected:
@@ -43,7 +42,7 @@ protected:
 
 private:
     QString m_variableName;
-    std::vector<Value<std::any>> m_values;
+    std::vector<Value<QVariant>> m_values;
     ComparisonOperator m_comparisonOperator;
 };
 

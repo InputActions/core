@@ -54,7 +54,7 @@ Variable *VariableManager::registerVariable(const QString &name, std::unique_ptr
     variable->setHidden(hidden);
     m_variables[name] = std::move(variable);
 
-    if (m_variables[name]->type() == typeid(QPointF)) {
+    if (m_variables[name]->type().id() == qMetaTypeId<QPointF>()) {
         registerRemoteVariable<qreal>(
             name + "_x",
             [this, name](auto &value) {
@@ -93,12 +93,12 @@ std::map<QString, QString> VariableManager::extraProcessEnvironment(const QStrin
 
         if (const auto *variable = getVariable(variableName)) {
             const auto value = variable->get();
-            if (!value.has_value()) {
+            if (value.isNull()) {
                 continue;
             }
 
-            if (variable->type() == typeid(bool)) {
-                if (std::any_cast<bool>(value)) {
+            if (variable->type().id() == qMetaTypeId<bool>()) {
+                if (value.toBool()) {
                     result[variableName] = "1";
                 }
                 continue;

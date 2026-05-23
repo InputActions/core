@@ -32,12 +32,12 @@ public:
     /**
      * @param getter Must always return the same type as the variable or empty.
      */
-    RemoteVariable(std::type_index type, std::function<void(std::any &value)> getter);
+    RemoteVariable(QMetaType type, std::function<void(QVariant &value)> getter);
 
-    std::any get() const override;
+    QVariant get() const override;
 
 private:
-    std::function<void(std::any &value)> m_getter;
+    std::function<void(QVariant &value)> m_getter;
 };
 
 }

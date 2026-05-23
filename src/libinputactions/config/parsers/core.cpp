@@ -63,21 +63,21 @@
 namespace InputActions
 {
 
-static Value<std::any> parseAny(const Node *node, const std::type_index &type)
+static Value<QVariant> parseVariant(const Node *node, const QMetaType &type)
 {
-    if (type == typeid(bool)) {
+    if (type.id() == qMetaTypeId<bool>()) {
         return node->as<Value<bool>>();
-    } else if (type == typeid(CursorShape)) {
+    } else if (type.id() == qMetaTypeId<CursorShape>()) {
         return node->as<Value<CursorShape>>();
-    } else if (type == typeid(Qt::KeyboardModifiers)) {
+    } else if (type.id() == qMetaTypeId<Qt::KeyboardModifiers>()) {
         return Value<Qt::KeyboardModifiers>(node->as<Qt::KeyboardModifiers>(true));
-    } else if (type == typeid(InputDeviceTypes)) {
+    } else if (type.id() == qMetaTypeId<InputDeviceTypes>()) {
         return Value<InputDeviceTypes>(node->as<InputDeviceTypes>(true));
-    } else if (type == typeid(qreal)) {
+    } else if (type.id() == qMetaTypeId<qreal>()) {
         return node->as<Value<qreal>>();
-    } else if (type == typeid(QPointF)) {
+    } else if (type.id() == qMetaTypeId<QPointF>()) {
         return node->as<Value<QPointF>>();
-    } else if (type == typeid(QString)) {
+    } else if (type.id() == qMetaTypeId<QString>()) {
         return node->as<Value<QString>>();
     }
     throw InvalidValueConfigException(node, "Unexpected type.");
@@ -104,8 +104,8 @@ static std::shared_ptr<Condition> parseVariableCondition(const Node *node, const
     }
 
     ComparisonOperator comparisonOperator;
-    std::vector<Value<std::any>> right;
-    if (firstSpace == -1 && variable->type() == typeid(bool)) { // bool variable condition without operator
+    std::vector<Value<QVariant>> right;
+    if (firstSpace == -1 && variable->type().id() == qMetaTypeId<bool>()) { // bool variable condition without operator
         comparisonOperator = ComparisonOperator::EqualTo;
         right.push_back(Value<bool>(true));
     } else {
@@ -126,14 +126,14 @@ static std::shared_ptr<Condition> parseVariableCondition(const Node *node, const
 
         if (!isTypeFlags(variable->type()) && rightNode->isSequence()) {
             for (const auto *item : rightNode->sequenceItems()) {
-                right.push_back(parseAny(item, variable->type()));
+                right.push_back(parseVariant(item, variable->type()));
             }
         } else if (comparisonOperator == ComparisonOperator::Between) {
             const auto values = parseSeparatedString2<std::shared_ptr<Node>>(rightNode.get(), ';');
-            right.push_back(parseAny(values.first.get(), variable->type()));
-            right.push_back(parseAny(values.second.get(), variable->type()));
+            right.push_back(parseVariant(values.first.get(), variable->type()));
+            right.push_back(parseVariant(values.second.get(), variable->type()));
         } else {
-            right.push_back(parseAny(rightNode.get(), variable->type()));
+            right.push_back(parseVariant(rightNode.get(), variable->type()));
         }
     }
 
