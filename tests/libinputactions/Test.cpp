@@ -8,6 +8,9 @@ namespace InputActions
 
 void Test::initMain()
 {
+    int argc = 0;
+    QCoreApplication app(argc, nullptr);
+
     auto *inputActions = new InputActionsMain;
     g_configProvider = std::make_shared<ConfigProvider>(); // don't watch config
     inputActions->setMissingImplementations();
