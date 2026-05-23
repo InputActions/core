@@ -115,11 +115,11 @@ set(libinputactions_SRCS
     libinputactions/triggers/touchscreen/TouchscreenTapTrigger.cpp
     libinputactions/triggers/touchscreen/TouchscreenTrigger.cpp
     libinputactions/triggers/Trigger.cpp
-    libinputactions/variables/LocalVariable.cpp
-    libinputactions/variables/RemoteVariable.cpp
-    libinputactions/variables/VariableManager.cpp
-    libinputactions/variables/VariableOperations.cpp
+    libinputactions/variables/ComputedVariable.cpp
+    libinputactions/variables/StoredVariable.cpp
     libinputactions/variables/Variable.cpp
+    libinputactions/variables/VariableOperations.cpp
+    libinputactions/variables/VariableRegistry.cpp
     libinputactions/variables/VariableWrapper.h
     libinputactions/globals.cpp
     libinputactions/InputActionsMain.cpp

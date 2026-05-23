@@ -25,7 +25,7 @@ namespace InputActions
 {
 
 class PointerPositionGetter;
-class VariableManager;
+class VariableRegistry;
 class WindowProvider;
 
 class InputActionsMain : public QObject
@@ -40,7 +40,7 @@ public:
     void initialize();
     void suspend();
 
-    virtual void registerGlobalVariables(VariableManager *variableManager, std::shared_ptr<PointerPositionGetter> pointerPositionGetter = {},
+    virtual void registerGlobalVariables(VariableRegistry *variableRegistry, std::shared_ptr<PointerPositionGetter> pointerPositionGetter = {},
                                          std::shared_ptr<WindowProvider> windowProvider = {});
 
 private slots:

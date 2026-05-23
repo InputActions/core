@@ -16,26 +16,24 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "Variable.h"
+#include "StoredVariable.h"
 
 namespace InputActions
 {
 
-/**
- * A locally stored variable with instant access.
- */
-class LocalVariable : public Variable
+StoredVariable::StoredVariable(QMetaType type)
+    : Variable(std::move(type))
 {
-public:
-    LocalVariable(QMetaType type);
+}
 
-    QVariant get() const override;
-    void set(QVariant value) override;
+QVariant StoredVariable::value() const
+{
+    return m_value;
+}
 
-private:
-    QVariant m_value;
-};
+void StoredVariable::setValue(QVariant value)
+{
+    m_value = std::move(value);
+}
 
 }

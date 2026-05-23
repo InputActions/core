@@ -16,22 +16,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "RemoteVariable.h"
+#pragma once
+
+#include "Variable.h"
 
 namespace InputActions
 {
 
-RemoteVariable::RemoteVariable(QMetaType type, std::function<void(QVariant &value)> getter)
-    : Variable(std::move(type))
-    , m_getter(std::move(getter))
+/**
+ * A variable whose value is stored as a class member.
+ */
+class StoredVariable : public Variable
 {
-}
+public:
+    StoredVariable(QMetaType type);
 
-QVariant RemoteVariable::get() const
-{
-    QVariant value;
-    m_getter(value);
-    return value;
-}
+    QVariant value() const override;
+    void setValue(QVariant value) override;
+
+private:
+    QVariant m_value;
+};
 
 }

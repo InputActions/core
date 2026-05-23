@@ -34,11 +34,11 @@ public:
     /**
      * @return May be empty.
      */
-    virtual QVariant get() const { return {}; }
+    virtual QVariant value() const { return {}; }
     /**
      * @param value Must be the same as the variable's type or empty.
      */
-    virtual void set(QVariant value) {}
+    virtual void setValue(QVariant value) {}
 
     /**
      * @return Operations for this variable's type.

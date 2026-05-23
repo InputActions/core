@@ -18,7 +18,7 @@
 
 #include "TextInput.h"
 #include <libinputactions/helpers/QThread.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -49,13 +49,13 @@ void TextInput::replaceSurroundingText(const QRegularExpression &regex, const Va
             capturedLength = match.capturedLength();
 
             for (auto i = 0; i < REGEX_MATCH_VARIABLE_COUNT; i++) {
-                auto *variable = g_variableManager->getVariable(QString("match_%1").arg(i));
+                auto *variable = g_variableRegistry->variable(QString("match_%1").arg(i));
                 if (i > match.lastCapturedIndex()) {
-                    variable->set({});
+                    variable->setValue({});
                     continue;
                 }
 
-                variable->set(match.capturedTexts()[i]);
+                variable->setValue(match.capturedTexts()[i]);
             }
         },
         true);

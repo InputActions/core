@@ -24,7 +24,7 @@
 #include <libinputactions/input/StrokeRecorder.h>
 #include <libinputactions/interfaces/OnScreenMessageManager.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -83,7 +83,7 @@ QString IntegratedDBusInterface::suspend()
 
 QString IntegratedDBusInterface::variables(QString filter)
 {
-    return variableList(g_variableManager.get(), filter);
+    return variableList(g_variableRegistry.get(), filter);
 }
 
 }

@@ -17,7 +17,7 @@
 */
 
 #include "ProcessRunner.h"
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 #include <map>
 
 namespace InputActions
@@ -25,12 +25,12 @@ namespace InputActions
 
 void ProcessRunner::startProcess(const QString &program, const QStringList &arguments, bool wait)
 {
-    startProcess(program, arguments, g_variableManager->extraProcessEnvironment(arguments.join(" ")), wait);
+    startProcess(program, arguments, g_variableRegistry->extraProcessEnvironment(arguments.join(" ")), wait);
 }
 
 QString ProcessRunner::startProcessReadOutput(const QString &program, const QStringList &arguments)
 {
-    return startProcessReadOutput(program, arguments, g_variableManager->extraProcessEnvironment(arguments.join(" ")));
+    return startProcessReadOutput(program, arguments, g_variableRegistry->extraProcessEnvironment(arguments.join(" ")));
 }
 
 }

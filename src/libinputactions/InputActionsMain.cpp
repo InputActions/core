@@ -20,7 +20,7 @@
 #include "interfaces/implementations/DBusPlasmaGlobalShortcutInvoker.h"
 #include "interfaces/implementations/FileConfigProvider.h"
 #include "interfaces/implementations/ProcessRunnerImpl.h"
-#include "variables/VariableManager.h"
+#include "variables/VariableRegistry.h"
 #include <QFile>
 #include <QStandardPaths>
 
@@ -52,7 +52,7 @@ InputActionsMain::~InputActionsMain()
     g_configProvider.reset();
     g_inputBackend.reset();
     g_strokeRecorder.reset();
-    g_variableManager.reset();
+    g_variableRegistry.reset();
 }
 
 void InputActionsMain::suspend()
@@ -63,7 +63,7 @@ void InputActionsMain::suspend()
 void InputActionsMain::initialize()
 {
     connect(g_configProvider.get(), &ConfigProvider::configChanged, this, &InputActionsMain::onConfigChanged);
-    registerGlobalVariables(g_variableManager.get());
+    registerGlobalVariables(g_variableRegistry.get());
 
     g_configLoader->loadEmpty(); // Initialize default values
 }
@@ -97,10 +97,10 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_globalConfig);
     setMissingImplementation(g_inputBackend);
     setMissingImplementation(g_strokeRecorder);
-    setMissingImplementation(g_variableManager);
+    setMissingImplementation(g_variableRegistry);
 }
 
-void InputActionsMain::registerGlobalVariables(VariableManager *variableManager, std::shared_ptr<PointerPositionGetter> pointerPositionGetter,
+void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistry, std::shared_ptr<PointerPositionGetter> pointerPositionGetter,
                                                std::shared_ptr<WindowProvider> windowProvider)
 {
     if (!pointerPositionGetter) {
@@ -110,28 +110,28 @@ void InputActionsMain::registerGlobalVariables(VariableManager *variableManager,
         windowProvider = g_windowProvider;
     }
 
-    variableManager->registerRemoteVariable<CursorShape>("cursor_shape", [](auto &value) {
+    variableRegistry->registerComputed<CursorShape>("cursor_shape", [](auto &value) {
         value = g_cursorShapeProvider->cursorShape();
     });
-    variableManager->registerLocalVariable(BuiltinVariables::DeviceName);
+    variableRegistry->registerStored(BuiltinVariables::DeviceName);
     for (auto i = 1; i <= FINGER_VARIABLE_COUNT; i++) {
-        variableManager->registerLocalVariable<QPointF>(QString("finger_%1_initial_position_percentage").arg(i));
-        variableManager->registerLocalVariable<QPointF>(QString("finger_%1_position_percentage").arg(i));
-        variableManager->registerLocalVariable<qreal>(QString("finger_%1_pressure").arg(i));
+        variableRegistry->registerStored<QPointF>(QString("finger_%1_initial_position_percentage").arg(i));
+        variableRegistry->registerStored<QPointF>(QString("finger_%1_position_percentage").arg(i));
+        variableRegistry->registerStored<qreal>(QString("finger_%1_pressure").arg(i));
     }
-    variableManager->registerLocalVariable(BuiltinVariables::Fingers);
-    variableManager->registerRemoteVariable<Qt::KeyboardModifiers>(BuiltinVariables::KeyboardModifiers, [](auto &value) {
+    variableRegistry->registerStored(BuiltinVariables::Fingers);
+    variableRegistry->registerComputed<Qt::KeyboardModifiers>(BuiltinVariables::KeyboardModifiers, [](auto &value) {
         value = g_inputBackend->keyboardModifiers();
     });
     for (auto i = 0; i < REGEX_MATCH_VARIABLE_COUNT; i++) {
-        variableManager->registerLocalVariable<QString>(QString("match_%1").arg(i));
+        variableRegistry->registerStored<QString>(QString("match_%1").arg(i));
     }
-    variableManager->registerLocalVariable(BuiltinVariables::LastTriggerId);
-    variableManager->registerLocalVariable(BuiltinVariables::LastTriggerTimestamp, true);
-    variableManager->registerRemoteVariable<QPointF>("pointer_position_screen_percentage", [pointerPositionGetter](auto &value) {
+    variableRegistry->registerStored(BuiltinVariables::LastTriggerId);
+    variableRegistry->registerStored(BuiltinVariables::LastTriggerTimestamp, true);
+    variableRegistry->registerComputed<QPointF>("pointer_position_screen_percentage", [pointerPositionGetter](auto &value) {
         value = pointerPositionGetter->screenPointerPosition();
     });
-    variableManager->registerRemoteVariable<QPointF>("pointer_position_window_percentage", [pointerPositionGetter, windowProvider](auto &value) {
+    variableRegistry->registerComputed<QPointF>("pointer_position_window_percentage", [pointerPositionGetter, windowProvider](auto &value) {
         const auto window = windowProvider->windowUnderPointer();
         if (!window) {
             return;
@@ -145,121 +145,121 @@ void InputActionsMain::registerGlobalVariables(VariableManager *variableManager,
         const auto translatedPosition = pointerPos.value() - windowGeometry->topLeft();
         value = QPointF(translatedPosition.x() / windowGeometry->width(), translatedPosition.y() / windowGeometry->height());
     });
-    variableManager->registerLocalVariable(BuiltinVariables::ThumbInitialPositionPercentage);
-    variableManager->registerLocalVariable(BuiltinVariables::ThumbPositionPercentage);
-    variableManager->registerLocalVariable(BuiltinVariables::ThumbPresent);
-    variableManager->registerRemoteVariable<qreal>("time_since_last_trigger", [variableManager](auto &value) {
+    variableRegistry->registerStored(BuiltinVariables::ThumbInitialPositionPercentage);
+    variableRegistry->registerStored(BuiltinVariables::ThumbPositionPercentage);
+    variableRegistry->registerStored(BuiltinVariables::ThumbPresent);
+    variableRegistry->registerComputed<qreal>("time_since_last_trigger", [variableRegistry](auto &value) {
         value = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
-              - variableManager->getVariable(BuiltinVariables::LastTriggerTimestamp)->get().value_or(0);
+              - variableRegistry->variable(BuiltinVariables::LastTriggerTimestamp)->value().value_or(0);
     });
-    variableManager->registerRemoteVariable<QString>("window_class", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_class", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->resourceClass();
         }
     });
-    variableManager->registerRemoteVariable<bool>("window_fullscreen", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<bool>("window_fullscreen", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->fullscreen();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_id", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_id", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->id();
         }
     });
-    variableManager->registerRemoteVariable<bool>("window_maximized", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<bool>("window_maximized", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->maximized();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_name", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_name", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->resourceName();
         }
     });
-    variableManager->registerRemoteVariable<qreal>("window_pid", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<qreal>("window_pid", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->pid();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_title", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_title", [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->title();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_under_pointer_class", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_under_pointer_class", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->resourceClass();
         }
     });
-    variableManager->registerVariableAlias("window_under_class", "window_under_pointer_class");
-    variableManager->registerRemoteVariable<bool>("window_under_pointer_fullscreen", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_class", "window_under_pointer_class");
+    variableRegistry->registerComputed<bool>("window_under_pointer_fullscreen", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->fullscreen();
         }
     });
-    variableManager->registerVariableAlias("window_under_fullscreen", "window_under_pointer_fullscreen");
-    variableManager->registerRemoteVariable<QString>("window_under_pointer_id", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_fullscreen", "window_under_pointer_fullscreen");
+    variableRegistry->registerComputed<QString>("window_under_pointer_id", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->id();
         }
     });
-    variableManager->registerVariableAlias("window_under_id", "window_under_pointer_id");
-    variableManager->registerRemoteVariable<bool>("window_under_pointer_maximized", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_id", "window_under_pointer_id");
+    variableRegistry->registerComputed<bool>("window_under_pointer_maximized", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->maximized();
         }
     });
-    variableManager->registerVariableAlias("window_under_maximized", "window_under_pointer_maximized");
-    variableManager->registerRemoteVariable<QString>("window_under_pointer_name", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_maximized", "window_under_pointer_maximized");
+    variableRegistry->registerComputed<QString>("window_under_pointer_name", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->resourceName();
         }
     });
-    variableManager->registerVariableAlias("window_under_name", "window_under_pointer_name");
-    variableManager->registerRemoteVariable<qreal>("window_under_pointer_pid", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_name", "window_under_pointer_name");
+    variableRegistry->registerComputed<qreal>("window_under_pointer_pid", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->pid();
         }
     });
-    variableManager->registerVariableAlias("window_under_pid", "window_under_pointer_pid");
-    variableManager->registerRemoteVariable<QString>("window_under_pointer_title", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_pid", "window_under_pointer_pid");
+    variableRegistry->registerComputed<QString>("window_under_pointer_title", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->title();
         }
     });
-    variableManager->registerVariableAlias("window_under_title", "window_under_pointer_title");
-    variableManager->registerRemoteVariable<QString>("window_under_fingers_class", [windowProvider](auto &value) {
+    variableRegistry->registerAlias("window_under_title", "window_under_pointer_title");
+    variableRegistry->registerComputed<QString>("window_under_fingers_class", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->resourceClass();
         }
     });
-    variableManager->registerRemoteVariable<bool>("window_under_fingers_fullscreen", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<bool>("window_under_fingers_fullscreen", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->fullscreen();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_under_fingers_id", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_under_fingers_id", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->id();
         }
     });
-    variableManager->registerRemoteVariable<bool>("window_under_fingers_maximized", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<bool>("window_under_fingers_maximized", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->maximized();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_under_fingers_name", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_under_fingers_name", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->resourceName();
         }
     });
-    variableManager->registerRemoteVariable<qreal>("window_under_fingers_pid", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<qreal>("window_under_fingers_pid", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->pid();
         }
     });
-    variableManager->registerRemoteVariable<QString>("window_under_fingers_title", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>("window_under_fingers_title", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->title();
         }

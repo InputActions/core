@@ -3,7 +3,7 @@
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/config/parsers/core.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -15,12 +15,12 @@ class TestVariableConditionNodeParser : public Test
 private slots:
     void init()
     {
-        g_variableManager = std::make_shared<VariableManager>();
-        g_variableManager->registerLocalVariable<bool>("bool");
-        g_variableManager->registerLocalVariable<qreal>("number");
-        g_variableManager->registerLocalVariable<QPointF>("point");
-        g_variableManager->registerLocalVariable<QString>("string");
-        g_variableManager->registerLocalVariable<Qt::KeyboardModifiers>("keyboard_modifiers");
+        g_variableRegistry = std::make_shared<VariableRegistry>();
+        g_variableRegistry->registerStored<bool>("bool");
+        g_variableRegistry->registerStored<qreal>("number");
+        g_variableRegistry->registerStored<QPointF>("point");
+        g_variableRegistry->registerStored<QString>("string");
+        g_variableRegistry->registerStored<Qt::KeyboardModifiers>("keyboard_modifiers");
     }
 
     void boolVariableWithoutOperator__parsesNodeCorrectly()
@@ -242,7 +242,7 @@ private slots:
         INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), qreal, 1);
     }
 
-    void inGroups__variableManagerPropagated_doesNotThrow()
+    void inGroups__variableRegistryPropagated_doesNotThrow()
     {
         const auto node = Node::create(R"(
             all:
@@ -251,10 +251,10 @@ private slots:
                       - $b
         )");
 
-        VariableManager variableManager;
-        variableManager.registerLocalVariable<bool>("b");
+        VariableRegistry variableRegistry;
+        variableRegistry.registerStored<bool>("b");
 
-        QVERIFY_THROWS_NO_EXCEPTION(parseCondition(node.get(), &variableManager));
+        QVERIFY_THROWS_NO_EXCEPTION(parseCondition(node.get(), &variableRegistry));
     }
 
     void invalid_invalidVariable__throwsInvalidValueConfigException()

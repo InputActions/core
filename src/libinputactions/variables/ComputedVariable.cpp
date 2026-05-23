@@ -16,24 +16,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "LocalVariable.h"
+#include "ComputedVariable.h"
 
 namespace InputActions
 {
 
-LocalVariable::LocalVariable(QMetaType type)
+ComputedVariable::ComputedVariable(QMetaType type, std::function<void(QVariant &value)> getter)
     : Variable(std::move(type))
+    , m_getter(std::move(getter))
 {
 }
 
-QVariant LocalVariable::get() const
+QVariant ComputedVariable::value() const
 {
-    return m_value;
-}
-
-void LocalVariable::set(QVariant value)
-{
-    m_value = std::move(value);
+    QVariant value;
+    m_getter(value);
+    return value;
 }
 
 }

@@ -58,7 +58,7 @@
 #include <libinputactions/triggers/touchpad/TouchpadTrigger.h>
 #include <libinputactions/triggers/touchscreen/TouchscreenTrigger.h>
 #include <libinputactions/variables/Variable.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -83,7 +83,7 @@ static Value<QVariant> parseVariant(const Node *node, const QMetaType &type)
     throw InvalidValueConfigException(node, "Unexpected type.");
 }
 
-static std::shared_ptr<Condition> parseVariableCondition(const Node *node, const VariableManager *variableManager)
+static std::shared_ptr<Condition> parseVariableCondition(const Node *node, const VariableRegistry *variableRegistry)
 {
     auto raw = node->as<QString>();
     bool negate{};
@@ -97,7 +97,7 @@ static std::shared_ptr<Condition> parseVariableCondition(const Node *node, const
     const auto secondSpace = raw.indexOf(' ', firstSpace + 1);
 
     const auto variableName = raw.left(firstSpace);
-    const auto *variable = variableManager->getVariable(variableName);
+    const auto *variable = variableRegistry->variable(variableName);
     if (!variable) {
         // Variable type must be known in order to parse the right side of the condition
         throw InvalidVariableConfigException(node, variableName);
@@ -191,10 +191,10 @@ void NodeParser<ActionInterval>::parse(const Node *node, ActionInterval &result)
     }
 }
 
-std::shared_ptr<Condition> parseCondition(const Node *node, const VariableManager *variableManager)
+std::shared_ptr<Condition> parseCondition(const Node *node, const VariableRegistry *variableRegistry)
 {
-    if (!variableManager) {
-        variableManager = g_variableManager.get();
+    if (!variableRegistry) {
+        variableRegistry = g_variableRegistry.get();
     }
 
     static const auto isLegacy = [](const Node *node) {
@@ -217,7 +217,7 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableManage
         if (groupMode) {
             auto group = std::make_shared<ConditionGroup>(*groupMode);
             for (const auto &item : groupChildren->sequenceItems()) {
-                group->append(parseCondition(item, variableManager));
+                group->append(parseCondition(item, variableRegistry));
             }
             return group;
         }
@@ -279,7 +279,7 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableManage
 
         auto group = std::make_shared<ConditionGroup>(hasLegacyCondition ? ConditionGroupMode::Any : ConditionGroupMode::All);
         for (const auto &item : items) {
-            group->append(parseCondition(item, variableManager));
+            group->append(parseCondition(item, variableRegistry));
         }
         return group;
     }
@@ -295,7 +295,7 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableManage
 
         const auto raw = conditionNode->as<QString>();
         if (raw.startsWith("$") || raw.startsWith("!$")) {
-            return parseVariableCondition(conditionNode.get(), variableManager);
+            return parseVariableCondition(conditionNode.get(), variableRegistry);
         }
     }
 
@@ -481,7 +481,7 @@ void NodeParser<std::vector<InputDeviceRule>>::parse(const Node *node, std::vect
         for (const auto *ruleNode : rulesNode->sequenceItems()) {
             InputDeviceRule rule;
             if (const auto *conditionsNode = ruleNode->at("conditions")) {
-                rule.setCondition(parseCondition(conditionsNode, &g_inputBackend->deviceRulesVariableManager()));
+                rule.setCondition(parseCondition(conditionsNode, &g_inputBackend->deviceRulesVariableRegistry()));
             }
             loadSetter(rule, &InputDeviceRule::setProperties, ruleNode);
             result.push_back(std::move(rule));
@@ -647,7 +647,7 @@ struct NodeParser<Value<T>>
         } else {
             const auto raw = node->as<QString>();
             const auto variableName = raw.mid(1); // remove $
-            if (g_variableManager->hasVariable(variableName)) {
+            if (g_variableRegistry->contains(variableName)) {
                 result = Value<T>::variable(variableName);
             } else {
                 result = Value<T>(node->as<T>());

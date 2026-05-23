@@ -1,6 +1,6 @@
 #include "Test.h"
 #include <libinputactions/Value.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -10,7 +10,7 @@ class TestValue : public Test
     Q_OBJECT
 
 private slots:
-    void init() { g_variableManager = std::make_shared<VariableManager>(); }
+    void init() { g_variableRegistry = std::make_shared<VariableRegistry>(); }
 
     void get_defaultConstructor_returnsNullopt()
     {
@@ -46,7 +46,7 @@ private slots:
 
     void get_existentVariable()
     {
-        g_variableManager->registerRemoteVariable<bool>("_test", [](auto &value) {
+        g_variableRegistry->registerComputed<bool>("_test", [](auto &value) {
             value = true;
         });
         const auto value = Value<bool>::variable("_test");

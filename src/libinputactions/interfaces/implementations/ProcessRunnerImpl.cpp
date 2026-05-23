@@ -17,7 +17,7 @@
 */
 
 #include "ProcessRunnerImpl.h"
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 #include <map>
 
 namespace InputActions

@@ -32,22 +32,22 @@ public:
     {
     }
 
-    std::optional<T> get() const
+    std::optional<T> value() const
     {
-        const auto value = m_variable->get();
+        const auto value = m_variable->value();
         if (value.isNull()) {
             return {};
         }
         return value.value<T>();
     }
 
-    void set(const std::optional<T> &value)
+    void setValue(const std::optional<T> &value)
     {
         if (!value.has_value()) {
-            m_variable->set({});
+            m_variable->setValue({});
             return;
         }
-        m_variable->set(QVariant::fromValue(value.value()));
+        m_variable->setValue(QVariant::fromValue(value.value()));
     }
 
 private:
