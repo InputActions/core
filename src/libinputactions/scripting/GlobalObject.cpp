@@ -16,27 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
-#include <QJSEngine>
+#include "GlobalObject.h"
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+VariableRegistry *GlobalObject::variableRegistry() const
 {
-    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
-}
-
-const VariableOperationsBase *Variable::operations() const
-{
-    return m_operations.get();
-}
-
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    return g_variableRegistry.get();
 }
 
 }

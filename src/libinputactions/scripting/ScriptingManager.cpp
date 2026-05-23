@@ -49,6 +49,8 @@ ScriptingManager::ScriptingManager()
     connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingManager::onWatchdogValueRestartTimerTick);
     m_watchdogRestartTimer.setInterval(WATCHDOG_TIMER_RESET_INTERVAL);
     m_watchdogRestartTimer.start();
+
+    registerApi();
 }
 
 ScriptingManager::~ScriptingManager()
@@ -64,6 +66,12 @@ ScriptingManager::~ScriptingManager()
 QJSValue ScriptingManager::evaluate(const QString &script)
 {
     return m_engine.evaluate(script);
+}
+
+void ScriptingManager::registerApi()
+{
+    m_globalObject.emplace();
+    m_engine.globalObject().setProperty("ia", m_engine.newQObject(&m_globalObject.value()));
 }
 
 void ScriptingManager::onWatchdogValueRestartTimerTick()

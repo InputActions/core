@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "GlobalObject.h"
 #include <QJSEngine>
 #include <QObject>
 #include <memory>
@@ -41,7 +42,10 @@ private slots:
     void onWatchdogValueRestartTimerTick();
 
 private:
+    void registerApi();
+
     QJSEngine m_engine;
+    std::optional<GlobalObject> m_globalObject;
 
     QThread *m_watchdogTimerThread;
     QTimer *m_watchdogTimer;
