@@ -36,7 +36,7 @@ VariableOperationsBase::VariableOperationsBase(Variable *variable)
 
 bool VariableOperationsBase::compare(const std::vector<QVariant> &right, ComparisonOperator comparisonOperator) const
 {
-    const auto left = m_variable->get();
+    const auto left = m_variable->value();
     if (left.isNull()) {
         return false;
     }
@@ -63,7 +63,7 @@ bool VariableOperationsBase::compare(const QVariant &left, const QVariant &right
 
 QString VariableOperationsBase::toString() const
 {
-    return toString(m_variable->get());
+    return toString(m_variable->value());
 }
 
 QString VariableOperationsBase::toString(const QVariant &value) const

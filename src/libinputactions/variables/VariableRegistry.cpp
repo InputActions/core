@@ -16,25 +16,25 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "VariableManager.h"
+#include "VariableRegistry.h"
 #include "Variable.h"
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
-Q_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_MANAGER, "inputactions.variable.manager", QtWarningMsg)
+Q_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_REGISTRY, "inputactions.variableregistry", QtWarningMsg)
 
 namespace InputActions
 {
 
-VariableManager::VariableManager() = default;
-VariableManager::~VariableManager() = default;
+VariableRegistry::VariableRegistry() = default;
+VariableRegistry::~VariableRegistry() = default;
 
-bool VariableManager::hasVariable(const QString &name) const
+bool VariableRegistry::contains(const QString &name) const
 {
     return m_variables.contains(name) || (m_variableAliases.contains(name) && m_variables.contains(m_variableAliases.at(name)));
 }
 
-Variable *VariableManager::getVariable(const QString &name) const
+Variable *VariableRegistry::variable(const QString &name) const
 {
     Variable *variable{};
     if (m_variables.contains(name)) {
@@ -44,29 +44,29 @@ Variable *VariableManager::getVariable(const QString &name) const
     }
 
     if (!variable) {
-        qCDebug(INPUTACTIONS_VARIABLE_MANAGER).noquote() << QString("Variable %1 not found").arg(name);
+        qCDebug(INPUTACTIONS_VARIABLE_REGISTRY).noquote() << QString("Variable %1 not found").arg(name);
     }
     return variable;
 }
 
-Variable *VariableManager::registerVariable(const QString &name, std::unique_ptr<Variable> variable, bool hidden)
+Variable *VariableRegistry::registerVariable(const QString &name, std::unique_ptr<Variable> variable, bool hidden)
 {
     variable->setHidden(hidden);
     m_variables[name] = std::move(variable);
 
     if (m_variables[name]->type().id() == qMetaTypeId<QPointF>()) {
-        registerRemoteVariable<qreal>(
+        registerComputed<qreal>(
             name + "_x",
             [this, name](auto &value) {
-                if (const auto point = getVariable<QPointF>(name)->get()) {
+                if (const auto point = this->variable<QPointF>(name)->value()) {
                     value = point->x();
                 }
             },
             true);
-        registerRemoteVariable<qreal>(
+        registerComputed<qreal>(
             name + "_y",
             [this, name](auto &value) {
-                if (const auto point = getVariable<QPointF>(name)->get()) {
+                if (const auto point = this->variable<QPointF>(name)->value()) {
                     value = point->y();
                 }
             },
@@ -76,12 +76,12 @@ Variable *VariableManager::registerVariable(const QString &name, std::unique_ptr
     return m_variables[name].get();
 }
 
-void VariableManager::registerVariableAlias(const QString &name, const QString &alias)
+void VariableRegistry::registerAlias(const QString &name, const QString &alias)
 {
     m_variableAliases[name] = alias;
 }
 
-std::map<QString, QString> VariableManager::extraProcessEnvironment(const QString &command) const
+std::map<QString, QString> VariableRegistry::extraProcessEnvironment(const QString &command) const
 {
     static const QRegularExpression variableReferenceRegex("\\$([a-zA-Z0-9_])+");
 
@@ -91,8 +91,8 @@ std::map<QString, QString> VariableManager::extraProcessEnvironment(const QStrin
         const auto match = it.next();
         const auto variableName = match.captured(0).mid(1);
 
-        if (const auto *variable = getVariable(variableName)) {
-            const auto value = variable->get();
+        if (const auto *variable = this->variable(variableName)) {
+            const auto value = variable->value();
             if (value.isNull()) {
                 continue;
             }
@@ -111,7 +111,7 @@ std::map<QString, QString> VariableManager::extraProcessEnvironment(const QStrin
     return result;
 }
 
-std::map<QString, const Variable *> VariableManager::variables() const
+std::map<QString, const Variable *> VariableRegistry::variables() const
 {
     std::map<QString, const Variable *> variables;
     for (const auto &[name, variable] : m_variables) {

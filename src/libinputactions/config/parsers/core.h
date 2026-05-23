@@ -28,9 +28,9 @@ class InputDevice;
 class Node;
 class TouchpadTriggerHandler;
 class TouchscreenTriggerHandler;
-class VariableManager;
+class VariableRegistry;
 
-std::shared_ptr<Condition> parseCondition(const Node *node, const VariableManager *variableManager = nullptr);
+std::shared_ptr<Condition> parseCondition(const Node *node, const VariableRegistry *variableRegistry = nullptr);
 
 std::unique_ptr<TouchpadTriggerHandler> parseTouchpadTriggerHandler(const Node *node, InputDevice *device);
 std::unique_ptr<TouchscreenTriggerHandler> parseTouchscreenTriggerHandler(const Node *node, InputDevice *device);

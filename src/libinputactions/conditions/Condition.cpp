@@ -19,13 +19,13 @@
 #include "Condition.h"
 #include <libinputactions/config/GlobalConfig.h>
 #include <libinputactions/interfaces/NotificationManager.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
 
 ConditionEvaluationArguments::ConditionEvaluationArguments()
-    : variableManager(g_variableManager.get())
+    : variableRegistry(g_variableRegistry.get())
 {
 }
 

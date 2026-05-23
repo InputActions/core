@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "LocalVariable.h"
-#include "RemoteVariable.h"
+#include "ComputedVariable.h"
+#include "StoredVariable.h"
 #include "VariableWrapper.h"
 #include <QPointF>
 #include <QProcess>
@@ -27,7 +27,7 @@
 #include <map>
 #include <memory>
 
-Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_MANAGER)
+Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_REGISTRY)
 
 namespace InputActions
 {
@@ -59,55 +59,55 @@ struct BuiltinVariables
     inline static const VariableInfo<bool> ThumbPresent{QStringLiteral("thumb_present")};
 };
 
-class VariableManager
+class VariableRegistry
 {
 public:
-    VariableManager();
-    ~VariableManager();
+    VariableRegistry();
+    ~VariableRegistry();
 
     template<typename T>
-    std::optional<VariableWrapper<T>> getVariable(const VariableInfo<T> &variable) const
+    std::optional<VariableWrapper<T>> variable(const VariableInfo<T> &info) const
     {
-        return getVariable<T>(variable.name);
+        return variable<T>(info.name);
     }
 
     /**
      * @return A statically-typed wrapper for the specified variable, nullptr if not found or type doesn't match.
      */
     template<typename T>
-    std::optional<VariableWrapper<T>> getVariable(const QString &name) const
+    std::optional<VariableWrapper<T>> variable(const QString &name) const
     {
-        auto *variable = getVariable(name);
-        if (!variable) {
+        auto *result = variable(name);
+        if (!result) {
             return {};
-        } else if (variable->type().id() != qMetaTypeId<T>()) {
-            qCWarning(INPUTACTIONS_VARIABLE_MANAGER).noquote()
-                << QString("VariableManager::getVariable<T> called with the wrong type (variable: %1, type: %2").arg(variable->type().name(), typeid(T).name());
+        } else if (result->type().id() != qMetaTypeId<T>()) {
+            qCWarning(INPUTACTIONS_VARIABLE_REGISTRY).noquote()
+                << QString("VariableRegistry::variable<T> called with the wrong type (variable: %1, type: %2").arg(result->type().name(), typeid(T).name());
             return {};
         }
 
-        return VariableWrapper<T>(getVariable(name));
+        return VariableWrapper<T>(result);
     }
 
-    bool hasVariable(const QString &name) const;
+    bool contains(const QString &name) const;
     /**
      * @return The variable with the specified name or nullptr if not found.
      */
-    Variable *getVariable(const QString &name) const;
+    Variable *variable(const QString &name) const;
 
     Variable *registerVariable(const QString &name, std::unique_ptr<Variable> variable, bool hidden = false);
     template<typename T>
-    VariableWrapper<T> registerLocalVariable(const QString &name, bool hidden = false)
+    VariableWrapper<T> registerStored(const QString &name, bool hidden = false)
     {
-        return {registerVariable(name, std::make_unique<LocalVariable>(QMetaType::fromType<T>()), hidden)};
+        return {registerVariable(name, std::make_unique<StoredVariable>(QMetaType::fromType<T>()), hidden)};
     }
     template<typename T>
-    void registerLocalVariable(const VariableInfo<T> &variable, bool hidden = false)
+    void registerStored(const VariableInfo<T> &variable, bool hidden = false)
     {
-        registerLocalVariable<T>(variable.name, hidden);
+        registerStored<T>(variable.name, hidden);
     }
     template<typename T>
-    void registerRemoteVariable(const QString &name, const std::function<void(std::optional<T> &value)> getter, bool hidden = false)
+    void registerComputed(const QString &name, const std::function<void(std::optional<T> &value)> getter, bool hidden = false)
     {
         const std::function<void(QVariant & value)> variantGetter = [getter](QVariant &value) {
             std::optional<T> optValue;
@@ -116,10 +116,10 @@ public:
                 value = QVariant::fromValue(optValue.value());
             }
         };
-        registerVariable(name, std::make_unique<RemoteVariable>(QMetaType::fromType<T>(), variantGetter), hidden);
+        registerVariable(name, std::make_unique<ComputedVariable>(QMetaType::fromType<T>(), variantGetter), hidden);
     }
 
-    void registerVariableAlias(const QString &variable, const QString &alias);
+    void registerAlias(const QString &variable, const QString &alias);
 
     /**
      * Compiles a set of extra environment variables for the specified command.
@@ -135,6 +135,6 @@ private:
     std::map<QString, QString> m_variableAliases;
 };
 
-inline std::shared_ptr<VariableManager> g_variableManager;
+inline std::shared_ptr<VariableRegistry> g_variableRegistry;
 
 }

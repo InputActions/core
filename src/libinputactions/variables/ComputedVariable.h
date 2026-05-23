@@ -24,17 +24,17 @@ namespace InputActions
 {
 
 /**
- * A variable whose value is calculated or fetched on demand. Variables with slow access are currently not supported.
+ * A variable whose value is computed on demand.
  */
-class RemoteVariable : public Variable
+class ComputedVariable : public Variable
 {
 public:
     /**
      * @param getter Must always return the same type as the variable or empty.
      */
-    RemoteVariable(QMetaType type, std::function<void(QVariant &value)> getter);
+    ComputedVariable(QMetaType type, std::function<void(QVariant &value)> getter);
 
-    QVariant get() const override;
+    QVariant value() const override;
 
 private:
     std::function<void(QVariant &value)> m_getter;

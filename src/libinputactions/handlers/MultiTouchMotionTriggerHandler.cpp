@@ -20,7 +20,7 @@
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/devices/InputDeviceProperties.h>
 #include <libinputactions/input/events.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -90,44 +90,44 @@ void MultiTouchMotionTriggerHandler::reset()
 
 void MultiTouchMotionTriggerHandler::updateVariables(const InputDevice *sender)
 {
-    auto thumbInitialPosition = g_variableManager->getVariable(BuiltinVariables::ThumbInitialPositionPercentage);
-    auto thumbPosition = g_variableManager->getVariable(BuiltinVariables::ThumbPositionPercentage);
-    auto thumbPresent = g_variableManager->getVariable(BuiltinVariables::ThumbPresent);
+    auto thumbInitialPosition = g_variableRegistry->variable(BuiltinVariables::ThumbInitialPositionPercentage);
+    auto thumbPosition = g_variableRegistry->variable(BuiltinVariables::ThumbPositionPercentage);
+    auto thumbPresent = g_variableRegistry->variable(BuiltinVariables::ThumbPresent);
     bool hasThumb{};
 
     const auto touchPoints = sender ? sender->physicalState().validTouchPoints() : std::vector<const TouchPoint *>();
     for (size_t i = 0; i < FINGER_VARIABLE_COUNT; i++) {
         const auto fingerVariableNumber = i + 1;
-        auto initialPosition = g_variableManager->getVariable<QPointF>(QString("finger_%1_initial_position_percentage").arg(fingerVariableNumber));
-        auto position = g_variableManager->getVariable<QPointF>(QString("finger_%1_position_percentage").arg(fingerVariableNumber));
-        auto pressure = g_variableManager->getVariable<qreal>(QString("finger_%1_pressure").arg(fingerVariableNumber));
+        auto initialPosition = g_variableRegistry->variable<QPointF>(QString("finger_%1_initial_position_percentage").arg(fingerVariableNumber));
+        auto position = g_variableRegistry->variable<QPointF>(QString("finger_%1_position_percentage").arg(fingerVariableNumber));
+        auto pressure = g_variableRegistry->variable<qreal>(QString("finger_%1_pressure").arg(fingerVariableNumber));
 
         if (!sender || touchPoints.size() <= i || !touchPoints[i]->valid) {
-            initialPosition->set({});
-            position->set({});
-            pressure->set({});
+            initialPosition->setValue({});
+            position->setValue({});
+            pressure->setValue({});
             continue;
         }
 
         const auto *point = touchPoints[i];
         if (point->type == TouchPointType::Thumb) {
             hasThumb = true;
-            thumbInitialPosition->set(point->initialPosition / sender->properties().size());
-            thumbPosition->set(point->position / sender->properties().size());
-            thumbPresent->set(true);
+            thumbInitialPosition->setValue(point->initialPosition / sender->properties().size());
+            thumbPosition->setValue(point->position / sender->properties().size());
+            thumbPresent->setValue(true);
         }
-        initialPosition->set(point->initialPosition / sender->properties().size());
-        position->set(point->position / sender->properties().size());
-        pressure->set(point->pressure);
+        initialPosition->setValue(point->initialPosition / sender->properties().size());
+        position->setValue(point->position / sender->properties().size());
+        pressure->setValue(point->pressure);
     }
 
     if (!hasThumb) {
-        thumbInitialPosition->set({});
-        thumbPosition->set({});
-        thumbPresent->set(false);
+        thumbInitialPosition->setValue({});
+        thumbPosition->setValue({});
+        thumbPresent->setValue(false);
     }
 
-    g_variableManager->getVariable(BuiltinVariables::Fingers)->set(touchPoints.size());
+    g_variableRegistry->variable(BuiltinVariables::Fingers)->setValue(touchPoints.size());
 }
 
 }

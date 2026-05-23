@@ -23,7 +23,7 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -58,7 +58,7 @@ QString DBusInterfaceBase::strokeToBase64(const Stroke &stroke)
     return QString("'%1'").arg(bytes.toBase64());
 }
 
-QString DBusInterfaceBase::variableList(const VariableManager *variableManager, const QString &filter)
+QString DBusInterfaceBase::variableList(const VariableRegistry *variableRegistry, const QString &filter)
 {
     if (!g_globalConfig->allowExternalVariableAccess()) {
         return "External variable access has been disabled. Set 'external_variable_access' to 'true' to enable.";
@@ -66,7 +66,7 @@ QString DBusInterfaceBase::variableList(const VariableManager *variableManager, 
 
     QStringList result;
     const QRegularExpression filterRegex(filter);
-    for (const auto &[name, variable] : variableManager->variables()) {
+    for (const auto &[name, variable] : variableRegistry->variables()) {
         if (variable->hidden() || !filterRegex.match(name).hasMatch()) {
             continue;
         }

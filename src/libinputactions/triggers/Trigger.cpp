@@ -20,7 +20,7 @@
 #include "core/TriggerCore.h"
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/input/backends/InputBackend.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -189,9 +189,9 @@ void Trigger::onResumeTimeoutTimerTimeout()
 void Trigger::setLastTrigger()
 {
     if (m_setLastTrigger) {
-        g_variableManager->getVariable(BuiltinVariables::LastTriggerId)->set(m_id);
-        g_variableManager->getVariable(BuiltinVariables::LastTriggerTimestamp)
-            ->set(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+        g_variableRegistry->variable(BuiltinVariables::LastTriggerId)->setValue(m_id);
+        g_variableRegistry->variable(BuiltinVariables::LastTriggerTimestamp)
+            ->setValue(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
     }
 }
 

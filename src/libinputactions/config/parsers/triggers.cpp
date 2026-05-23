@@ -53,7 +53,7 @@
 #include <libinputactions/triggers/touchscreen/TouchscreenStrokeTrigger.h>
 #include <libinputactions/triggers/touchscreen/TouchscreenSwipeTrigger.h>
 #include <libinputactions/triggers/touchscreen/TouchscreenTapTrigger.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {

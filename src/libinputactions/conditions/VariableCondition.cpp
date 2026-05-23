@@ -20,7 +20,7 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 #include <libinputactions/variables/Variable.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_CONDITION_VARIABLE, "inputactions.condition.variable", QtWarningMsg)
 
@@ -41,7 +41,7 @@ VariableCondition::VariableCondition(const QString &variableName, const Value<QV
 
 bool VariableCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
-    const auto variable = arguments.variableManager->getVariable(m_variableName);
+    const auto variable = arguments.variableRegistry->variable(m_variableName);
     if (!variable) {
         throw std::runtime_error(std::format("Variable {} does not exist.", m_variableName.toStdString()));
     }

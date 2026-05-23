@@ -24,7 +24,7 @@ namespace InputActions
 {
 
 class Stroke;
-class VariableManager;
+class VariableRegistry;
 
 class DBusInterfaceBase : public QObject
 {
@@ -32,7 +32,7 @@ public:
     QString deviceList();
     QString issues();
     QString strokeToBase64(const Stroke &stroke);
-    QString variableList(const VariableManager *variableManager, const QString &filter);
+    QString variableList(const VariableRegistry *variableRegistry, const QString &filter);
 };
 
 }

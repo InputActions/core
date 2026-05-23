@@ -23,7 +23,7 @@
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
 #include <libinputactions/interfaces/ProcessRunner.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -79,7 +79,7 @@ template<typename T>
 Value<T> Value<T>::variable(QString name)
 {
     auto value = Value<T>::function([name = std::move(name)]() -> std::optional<T> {
-        const auto *variable = g_variableManager->getVariable(name);
+        const auto *variable = g_variableRegistry->variable(name);
         if (!variable) {
             qCWarning(INPUTACTIONS).noquote() << QString("Failed to get value: variable %1 does not exist").arg(name);
             return {};
@@ -95,7 +95,7 @@ Value<T> Value<T>::variable(QString name)
             return {};
         }
 
-        if (const auto variableValue = g_variableManager->getVariable<T>(name)->get()) {
+        if (const auto variableValue = g_variableRegistry->variable<T>(name)->value()) {
             return variableValue;
         }
 

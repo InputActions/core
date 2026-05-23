@@ -21,16 +21,16 @@
 namespace InputActions
 {
 
-class VariableManager;
+class VariableRegistry;
 
 struct ConditionEvaluationArguments
 {
     ConditionEvaluationArguments();
 
     /**
-     * Set to the global manager by default.
+     * Set to the global registry by default.
      */
-    VariableManager *variableManager;
+    VariableRegistry *variableRegistry;
 };
 
 class Condition

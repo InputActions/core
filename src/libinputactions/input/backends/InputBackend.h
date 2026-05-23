@@ -20,7 +20,7 @@
 
 #include <QTimer>
 #include <libinputactions/input/KeyboardKey.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 #include <linux/input-event-codes.h>
 #include <set>
 
@@ -140,9 +140,9 @@ public:
      */
     void setDeviceRules(std::vector<InputDeviceRule> rules);
     /**
-     * The variable manager used for evaluting device rule conditions.
+     * The variable registry used for evaluting device rule conditions.
      */
-    const VariableManager &deviceRulesVariableManager() const { return m_deviceRulesVariableManager; }
+    const VariableRegistry &deviceRulesVariableRegistry() const { return m_deviceRulesVariableRegistry; }
 
     void setKeyboardTriggerHandler(std::unique_ptr<KeyboardTriggerHandler> value);
     void setMouseTriggerHandler(std::unique_ptr<MouseTriggerHandler> value);
@@ -176,7 +176,7 @@ private:
     QTimer m_emergencyCombinationTimer;
 
     std::vector<InputDeviceRule> m_deviceRules;
-    VariableManager m_deviceRulesVariableManager;
+    VariableRegistry m_deviceRulesVariableRegistry;
     VariableWrapper<QString> m_deviceNameVariable;
     VariableWrapper<InputDeviceTypes> m_deviceTypesVariable;
     VariableWrapper<bool> m_deviceKeyboardVariable;

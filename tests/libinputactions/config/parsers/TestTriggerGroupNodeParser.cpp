@@ -6,7 +6,7 @@
 #include <libinputactions/config/Node.h>
 #include <libinputactions/config/parsers/triggers.h>
 #include <libinputactions/triggers/mouse/MouseTrigger.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -18,11 +18,11 @@ class TestTriggerGroupNodeParser : public Test
 private slots:
     void init()
     {
-        g_variableManager = std::make_shared<VariableManager>();
-        g_variableManager->registerLocalVariable<bool>("a");
-        g_variableManager->registerLocalVariable<bool>("b");
-        g_variableManager->registerLocalVariable<bool>("c");
-        g_variableManager->registerLocalVariable<bool>("d");
+        g_variableRegistry = std::make_shared<VariableRegistry>();
+        g_variableRegistry->registerStored<bool>("a");
+        g_variableRegistry->registerStored<bool>("b");
+        g_variableRegistry->registerStored<bool>("c");
+        g_variableRegistry->registerStored<bool>("d");
     }
 
     void oneProperty__parsesNodeCorrectly()

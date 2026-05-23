@@ -22,7 +22,7 @@
 #include <libinputactions/input/devices/InputDeviceProperties.h>
 #include <libinputactions/input/events.h>
 #include <libinputactions/triggers/touchpad/TouchpadTrigger.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 #include <linux/input-event-codes.h>
 
 namespace InputActions
@@ -59,7 +59,7 @@ bool TouchpadTriggerHandler::pointerAxis(const MotionEvent &event)
         case State::Touch:
         case State::TouchIdle:
             isFirstEvent = true;
-            g_variableManager->getVariable(BuiltinVariables::Fingers)->set(2);
+            g_variableRegistry->variable(BuiltinVariables::Fingers)->setValue(2);
             setState(State::Scrolling);
             activateTriggers(TriggerType::SinglePointMotion);
             [[fallthrough]];
@@ -122,7 +122,7 @@ bool TouchpadTriggerHandler::pointerButton(const PointerButtonEvent &event)
                 } else {
                     break;
                 }
-                g_variableManager->getVariable(BuiltinVariables::Fingers)->set(fingers);
+                g_variableRegistry->variable(BuiltinVariables::Fingers)->setValue(fingers);
                 if (const auto result = activateTriggers(TriggerType::Tap); result.success) {
                     updateTriggers(TriggerType::Tap);
                     endTriggers(TriggerType::Tap);
@@ -154,7 +154,7 @@ bool TouchpadTriggerHandler::pointerMotion(const MotionEvent &event)
         case State::None:
         case State::Touch:
         case State::TouchIdle:
-            g_variableManager->getVariable(BuiltinVariables::Fingers)->set(1);
+            g_variableRegistry->variable(BuiltinVariables::Fingers)->setValue(1);
             setState(activateTriggers(TriggerType::SinglePointMotion).success ? State::MotionTrigger : State::MotionNoTrigger);
             [[fallthrough]];
         case State::MotionTrigger:
@@ -206,7 +206,7 @@ bool TouchpadTriggerHandler::touchUp(const TouchUpEvent &event)
             // 1-3 finger touchpad tap gestures are detected by listening for pointer button events, as it's more reliable. The child class should reset the
             // state in case no pointer button events occur.
             if (m_state == State::TouchIdle && event.sender()->type() == InputDeviceType::Touchpad
-                && g_variableManager->getVariable(BuiltinVariables::Fingers)->get() <= 3) {
+                && g_variableRegistry->variable(BuiltinVariables::Fingers)->value() <= 3) {
                 setState(State::LibinputTapBegin);
                 break;
             }
@@ -261,7 +261,7 @@ bool TouchpadTriggerHandler::touchpadGestureLifecyclePhase(const TouchpadGesture
 {
     switch (event.phase()) {
         case TouchpadGestureLifecyclePhase::Begin: {
-            g_variableManager->getVariable(BuiltinVariables::Fingers)->set(event.fingers());
+            g_variableRegistry->variable(BuiltinVariables::Fingers)->setValue(event.fingers());
             m_libinputFingers = event.fingers();
 
             // 1- and 2-finger hold gestures have almost no delay and are used to stop kinetic scrolling, there's no reason to block them

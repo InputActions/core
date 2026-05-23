@@ -14,7 +14,7 @@
 #include <libinputactions/triggers/touchpad/TouchpadHoldTrigger.h>
 #include <libinputactions/triggers/touchpad/TouchpadSwipeTrigger.h>
 #include <libinputactions/triggers/touchpad/TouchpadTapTrigger.h>
-#include <libinputactions/variables/VariableManager.h>
+#include <libinputactions/variables/VariableRegistry.h>
 #include <linux/input-event-codes.h>
 #include <ranges>
 
@@ -305,23 +305,23 @@ private slots:
         addPoint(first);
         addPoint(second);
 
-        const auto finger1Position = g_variableManager->getVariable<QPointF>("finger_1_position_percentage");
-        const auto finger2Position = g_variableManager->getVariable<QPointF>("finger_2_position_percentage");
-        QCOMPARE(finger1Position->get(), QPointF(0.1, 0.1));
-        QCOMPARE(finger2Position->get(), QPointF(0.2, 0.2));
+        const auto finger1Position = g_variableRegistry->variable<QPointF>("finger_1_position_percentage");
+        const auto finger2Position = g_variableRegistry->variable<QPointF>("finger_2_position_percentage");
+        QCOMPARE(finger1Position->value(), QPointF(0.1, 0.1));
+        QCOMPARE(finger2Position->value(), QPointF(0.2, 0.2));
 
         removePoints(1);
-        QCOMPARE(finger1Position->get(), QPointF(0.1, 0.1));
-        QCOMPARE(finger2Position->get(), QPointF(0.2, 0.2));
+        QCOMPARE(finger1Position->value(), QPointF(0.1, 0.1));
+        QCOMPARE(finger2Position->value(), QPointF(0.2, 0.2));
 
         removePoints(1);
-        QCOMPARE(finger1Position->get(), QPointF(0.1, 0.1));
-        QCOMPARE(finger2Position->get(), QPointF(0.2, 0.2));
+        QCOMPARE(finger1Position->value(), QPointF(0.1, 0.1));
+        QCOMPARE(finger2Position->value(), QPointF(0.2, 0.2));
 
         g_inputBackend->handleEvent(PointerButtonEvent(m_touchpad.get(), BTN_LEFT, true));
         g_inputBackend->handleEvent(PointerButtonEvent(m_touchpad.get(), BTN_LEFT, false));
-        QVERIFY(!finger1Position->get().has_value());
-        QVERIFY(!finger2Position->get().has_value());
+        QVERIFY(!finger1Position->value().has_value());
+        QVERIFY(!finger2Position->value().has_value());
 
         QCOMPARE(m_handler->m_state, TouchpadTriggerHandler::State::None);
     }
