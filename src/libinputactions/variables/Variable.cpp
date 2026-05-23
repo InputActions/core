@@ -21,20 +21,20 @@
 namespace InputActions
 {
 
-Variable::Variable(std::type_index type)
+Variable::Variable(QMetaType type)
     : m_type(std::move(type))
     , m_operations(VariableOperationsBase::create(this))
 {
 }
 
-const std::type_index &Variable::type() const
-{
-    return m_type;
-}
-
 const VariableOperationsBase *Variable::operations() const
 {
     return m_operations.get();
+}
+
+const QMetaType &Variable::type() const
+{
+    return m_type;
 }
 
 }

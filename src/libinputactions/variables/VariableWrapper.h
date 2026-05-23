@@ -35,10 +35,10 @@ public:
     std::optional<T> get() const
     {
         const auto value = m_variable->get();
-        if (!value.has_value()) {
+        if (value.isNull()) {
             return {};
         }
-        return std::any_cast<T>(value);
+        return value.value<T>();
     }
 
     void set(const std::optional<T> &value)
@@ -47,7 +47,7 @@ public:
             m_variable->set({});
             return;
         }
-        m_variable->set(value.value());
+        m_variable->set(QVariant::fromValue(value.value()));
     }
 
 private:

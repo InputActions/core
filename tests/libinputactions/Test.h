@@ -38,6 +38,10 @@ namespace InputActions
     action;                                                        \
     QCOMPARE(g_configIssueManager->issues().size(), 0);
 
+#define INPUTACTIONS_COMPARE_VARIANT(variant, T, expected) \
+    QCOMPARE(variant.typeId(), qMetaTypeId<T>());          \
+    QCOMPARE(variant.value<T>(), expected);
+
 class Test : public QObject
 {
     Q_OBJECT

@@ -21,15 +21,15 @@
 namespace InputActions
 {
 
-RemoteVariable::RemoteVariable(std::type_index type, std::function<void(std::any &value)> getter)
+RemoteVariable::RemoteVariable(QMetaType type, std::function<void(QVariant &value)> getter)
     : Variable(std::move(type))
     , m_getter(std::move(getter))
 {
 }
 
-std::any RemoteVariable::get() const
+QVariant RemoteVariable::get() const
 {
-    std::any value;
+    QVariant value;
     m_getter(value);
     return value;
 }

@@ -37,6 +37,6 @@ struct NodeParser<QFlags<T>>
     }
 };
 
-bool isTypeFlags(const std::type_index &type);
+bool isTypeFlags(const QMetaType &type);
 
 }

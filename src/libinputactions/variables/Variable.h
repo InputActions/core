@@ -20,7 +20,6 @@
 
 #include "VariableOperations.h"
 #include <QString>
-#include <any>
 #include <typeindex>
 
 namespace InputActions
@@ -29,24 +28,24 @@ namespace InputActions
 class Variable
 {
 public:
-    Variable(std::type_index type);
+    Variable(QMetaType type);
     virtual ~Variable() = default;
 
     /**
      * @return May be empty.
      */
-    virtual std::any get() const { return {}; }
+    virtual QVariant get() const { return {}; }
     /**
      * @param value Must be the same as the variable's type or empty.
      */
-    virtual void set(std::any value) {}
+    virtual void set(QVariant value) {}
 
     /**
      * @return Operations for this variable's type.
      */
     const VariableOperationsBase *operations() const;
 
-    const std::type_index &type() const;
+    const QMetaType &type() const;
 
     /**
      * Whether the value should not be shown in the DBus interface.
@@ -55,7 +54,7 @@ public:
     void setHidden(bool value) { m_hidden = value; }
 
 private:
-    std::type_index m_type;
+    QMetaType m_type;
     std::variant<bool, QString> m_value;
     std::unique_ptr<VariableOperationsBase> m_operations;
     bool m_hidden{};

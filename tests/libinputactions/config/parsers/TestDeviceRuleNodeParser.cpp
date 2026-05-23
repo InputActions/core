@@ -58,7 +58,7 @@ private slots:
 
         const auto &conditionValues = condition->values();
         QCOMPARE(conditionValues.size(), 1);
-        QCOMPARE(std::any_cast<bool>(conditionValues[0].get().value()), true);
+        INPUTACTIONS_COMPARE_VARIANT(conditionValues[0].get().value(), bool, true);
     }
 
     void mouse_triggerHandlerSetting_motionTimeout__addsDeprecatedFeatureConfigIssue()
@@ -92,7 +92,7 @@ private slots:
 
         const auto &conditionValues = condition->values();
         QCOMPARE(conditionValues.size(), 1);
-        QCOMPARE(std::any_cast<bool>(conditionValues[0].get().value()), true);
+        INPUTACTIONS_COMPARE_VARIANT(conditionValues[0].get().value(), bool, true);
     }
 
     void mouse_triggerHandlerSetting_pressTimeout__addsDeprecatedFeatureConfigIssue()
@@ -126,7 +126,7 @@ private slots:
 
         const auto &conditionValues = condition->values();
         QCOMPARE(conditionValues.size(), 1);
-        QCOMPARE(std::any_cast<bool>(conditionValues[0].get().value()), true);
+        INPUTACTIONS_COMPARE_VARIANT(conditionValues[0].get().value(), bool, true);
     }
 
     void mouse_triggerHandlerSetting_unblockButtonsOnTimeout__addsDeprecatedFeatureConfigIssue()
@@ -162,7 +162,7 @@ private slots:
 
         const auto &conditionValues = condition->values();
         QCOMPARE(conditionValues.size(), 1);
-        QCOMPARE(std::any_cast<QString>(conditionValues[0].get().value()), "a");
+        INPUTACTIONS_COMPARE_VARIANT(conditionValues[0].get().value(), QString, "a");
     }
 
     void touchpad_devicesNode__addsDeprecatedFeatureConfigIssue()
@@ -198,7 +198,7 @@ private slots:
 
         const auto &conditionValues = condition->values();
         QCOMPARE(conditionValues.size(), 1);
-        QCOMPARE(std::any_cast<bool>(conditionValues[0].get().value()), true);
+        INPUTACTIONS_COMPARE_VARIANT(conditionValues[0].get().value(), bool, true);
     }
 
     void touchpad_triggerHandlerSetting_clickTimeout__addsDeprecatedFeatureConfigIssue()

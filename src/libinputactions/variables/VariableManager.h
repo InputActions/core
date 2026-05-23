@@ -80,7 +80,7 @@ public:
         auto *variable = getVariable(name);
         if (!variable) {
             return {};
-        } else if (variable->type() != typeid(T)) {
+        } else if (variable->type().id() != qMetaTypeId<T>()) {
             qCWarning(INPUTACTIONS_VARIABLE_MANAGER).noquote()
                 << QString("VariableManager::getVariable<T> called with the wrong type (variable: %1, type: %2").arg(variable->type().name(), typeid(T).name());
             return {};
@@ -99,7 +99,7 @@ public:
     template<typename T>
     VariableWrapper<T> registerLocalVariable(const QString &name, bool hidden = false)
     {
-        return {registerVariable(name, std::make_unique<LocalVariable>(typeid(T)), hidden)};
+        return {registerVariable(name, std::make_unique<LocalVariable>(QMetaType::fromType<T>()), hidden)};
     }
     template<typename T>
     void registerLocalVariable(const VariableInfo<T> &variable, bool hidden = false)
@@ -109,14 +109,14 @@ public:
     template<typename T>
     void registerRemoteVariable(const QString &name, const std::function<void(std::optional<T> &value)> getter, bool hidden = false)
     {
-        const std::function<void(std::any & value)> anyGetter = [getter](std::any &value) {
+        const std::function<void(QVariant & value)> variantGetter = [getter](QVariant &value) {
             std::optional<T> optValue;
             getter(optValue);
             if (optValue.has_value()) {
-                value = optValue.value();
+                value = QVariant::fromValue(optValue.value());
             }
         };
-        registerVariable(name, std::make_unique<RemoteVariable>(typeid(T), anyGetter), hidden);
+        registerVariable(name, std::make_unique<RemoteVariable>(QMetaType::fromType<T>(), variantGetter), hidden);
     }
 
     void registerVariableAlias(const QString &variable, const QString &alias);

@@ -22,13 +22,13 @@
 namespace InputActions
 {
 
-bool isTypeFlags(const std::type_index &type)
+bool isTypeFlags(const QMetaType &type)
 {
-    static const std::set<std::type_index> flags{
-        typeid(InputDeviceTypes),
-        typeid(Qt::KeyboardModifiers),
+    static const std::set<int> flags{
+        qMetaTypeId<InputDeviceTypes>(),
+        qMetaTypeId<Qt::KeyboardModifiers>(),
     };
-    return flags.contains(type);
+    return flags.contains(type.id());
 }
 
 }
