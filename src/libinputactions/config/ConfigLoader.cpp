@@ -33,7 +33,7 @@
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/NotificationManager.h>
-#include <libinputactions/scripting/ScriptingManager.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
@@ -54,7 +54,7 @@ struct Config
     std::vector<InputDeviceRule> deviceRules;
     std::set<KeyboardKey> emergencyCombination = {KEY_BACKSPACE, KEY_SPACE, KEY_ENTER};
 
-    std::unique_ptr<ScriptingManager> scriptingManager = std::make_unique<ScriptingManager>();
+    std::unique_ptr<ScriptingEngine> scriptingEngine = std::make_unique<ScriptingEngine>();
 };
 
 void ConfigLoader::loadEmpty()
@@ -100,7 +100,7 @@ Config ConfigLoader::createConfig(const QString &raw)
     }
 
     Config config;
-    m_scriptingManager = config.scriptingManager.get();
+    m_scriptingEngine = config.scriptingEngine.get();
 
     loadMember(config.autoReload, root->at("autoreload"));
     loadMember(config.allowExternalVariableAccess, root->at("external_variable_access"));
@@ -138,7 +138,7 @@ void ConfigLoader::activateConfig(Config config, bool initialize)
     g_inputBackend->reset(); // Okay because required keys are not cleared
     g_actionExecutor->clearQueue();
     g_actionExecutor->waitForDone();
-    g_scriptingManager.reset();
+    g_scriptingEngine.reset();
 
     g_globalConfig->setAllowExternalVariableAccess(config.allowExternalVariableAccess);
     g_globalConfig->setAutoReload(config.autoReload);
@@ -156,7 +156,7 @@ void ConfigLoader::activateConfig(Config config, bool initialize)
     g_inputBackend->setDeviceRules(config.deviceRules);
     g_inputBackend->setEmergencyCombination(config.emergencyCombination);
 
-    g_scriptingManager = std::move(config.scriptingManager);
+    g_scriptingEngine = std::move(config.scriptingEngine);
     if (initialize) {
         g_inputBackend->initialize();
     }

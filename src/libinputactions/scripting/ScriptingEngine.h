@@ -26,13 +26,13 @@
 namespace InputActions
 {
 
-class ScriptingManager : public QObject
+class ScriptingEngine : public QObject
 {
     Q_OBJECT
 
 public:
-    ScriptingManager();
-    ~ScriptingManager() override;
+    ScriptingEngine();
+    ~ScriptingEngine() override;
 
     QJSValue evaluate(const QString &script);
 
@@ -53,10 +53,10 @@ private:
 };
 
 /**
- * Do not use this instance during the creation of a configuration, use ConfigLoader::scriptingManager instead.
+ * Do not use this instance during the creation of a configuration, use ConfigLoader::futureScriptingEngine instead.
  *
  * A new instance is created on each config activation.
  */
-inline std::unique_ptr<ScriptingManager> g_scriptingManager;
+inline std::unique_ptr<ScriptingEngine> g_scriptingEngine;
 
 }

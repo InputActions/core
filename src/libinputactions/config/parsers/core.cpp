@@ -54,7 +54,7 @@
 #include <libinputactions/interfaces/CursorShapeProvider.h>
 #include <libinputactions/scripting/ScriptAction.h>
 #include <libinputactions/scripting/ScriptCondition.h>
-#include <libinputactions/scripting/ScriptingManager.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
 #include <libinputactions/triggers/mouse/MouseTrigger.h>
@@ -549,7 +549,7 @@ void NodeParser<std::vector<InputDeviceRule>>::parse(const Node *node, std::vect
 template<>
 void NodeParser<JSFunction>::parse(const Node *node, JSFunction &result)
 {
-    auto function = JSFunction::create(g_configLoader->scriptingManager().evaluate(node->as<QString>()));
+    auto function = JSFunction::create(g_configLoader->futureScriptingEngine().evaluate(node->as<QString>()));
     if (function) {
         result = function.value();
         return;

@@ -84,7 +84,7 @@ set(libinputactions_SRCS
     libinputactions/scripting/JSFunction.cpp
     libinputactions/scripting/ScriptAction.cpp
     libinputactions/scripting/ScriptCondition.cpp
-    libinputactions/scripting/ScriptingManager.cpp
+    libinputactions/scripting/ScriptingEngine.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp
     libinputactions/triggers/core/MotionTriggerCore.cpp
     libinputactions/triggers/core/StrokeTriggerCore.cpp

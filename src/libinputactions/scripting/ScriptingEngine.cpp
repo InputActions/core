@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "ScriptingManager.h"
+#include "ScriptingEngine.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/NotificationManager.h>
@@ -27,7 +27,7 @@ namespace InputActions
 static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
 static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
 
-ScriptingManager::ScriptingManager()
+ScriptingEngine::ScriptingEngine()
     : m_watchdogTimerThread(new QThread)
     , m_watchdogTimer(new QTimer)
 {
@@ -46,14 +46,14 @@ ScriptingManager::ScriptingManager()
     });
     m_watchdogTimerThread->start();
 
-    connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingManager::onWatchdogValueRestartTimerTick);
+    connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingEngine::onWatchdogValueRestartTimerTick);
     m_watchdogRestartTimer.setInterval(WATCHDOG_TIMER_RESET_INTERVAL);
     m_watchdogRestartTimer.start();
 
     registerApi();
 }
 
-ScriptingManager::~ScriptingManager()
+ScriptingEngine::~ScriptingEngine()
 {
     QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
     m_watchdogTimerThread->quit();
@@ -63,18 +63,18 @@ ScriptingManager::~ScriptingManager()
     m_watchdogTimerThread->deleteLater();
 }
 
-QJSValue ScriptingManager::evaluate(const QString &script)
+QJSValue ScriptingEngine::evaluate(const QString &script)
 {
     return m_engine.evaluate(script);
 }
 
-void ScriptingManager::registerApi()
+void ScriptingEngine::registerApi()
 {
     m_globalObject.emplace();
     m_engine.globalObject().setProperty("ia", m_engine.newQObject(&m_globalObject.value()));
 }
 
-void ScriptingManager::onWatchdogValueRestartTimerTick()
+void ScriptingEngine::onWatchdogValueRestartTimerTick()
 {
     QMetaObject::invokeMethod(m_watchdogTimer, "start", Qt::QueuedConnection);
 }
