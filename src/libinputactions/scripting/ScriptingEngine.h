@@ -26,29 +26,35 @@
 namespace InputActions
 {
 
+/**
+ * Lazily initializated.
+ */
 class ScriptingEngine : public QObject
 {
     Q_OBJECT
 
 public:
-    ScriptingEngine();
+    ScriptingEngine() = default;
     ~ScriptingEngine() override;
 
     QJSValue evaluate(const QString &script);
-
-    void initialize();
 
 private slots:
     void onWatchdogValueRestartTimerTick();
 
 private:
-    void registerApi();
+    /**
+     * Returns an instance of the engine. Initializes the engine if it has not been initialized yet.
+     */
+    QJSEngine &engine();
+    void initialize();
+    void initializeWatchdog();
 
-    QJSEngine m_engine;
+    std::optional<QJSEngine> m_engine;
     std::optional<GlobalObject> m_globalObject;
 
-    QThread *m_watchdogTimerThread;
-    QTimer *m_watchdogTimer;
+    QThread *m_watchdogTimerThread{};
+    QTimer *m_watchdogTimer{};
     QTimer m_watchdogRestartTimer;
 };
 

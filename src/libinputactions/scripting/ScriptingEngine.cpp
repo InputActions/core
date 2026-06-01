@@ -27,16 +27,40 @@ namespace InputActions
 static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
 static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
 
-ScriptingEngine::ScriptingEngine()
-    : m_watchdogTimerThread(new QThread)
-    , m_watchdogTimer(new QTimer)
+ScriptingEngine::~ScriptingEngine()
 {
-    m_engine.installExtensions(QJSEngine::ConsoleExtension);
+    if (!m_engine) {
+        return;
+    }
+
+    QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
+    m_watchdogTimerThread->quit();
+    m_watchdogTimerThread->wait();
+
+    m_watchdogTimer->deleteLater();
+    m_watchdogTimerThread->deleteLater();
+}
+
+void ScriptingEngine::initialize()
+{
+    m_engine.emplace();
+    m_engine->installExtensions(QJSEngine::ConsoleExtension);
+
+    initializeWatchdog();
+
+    m_globalObject.emplace();
+    m_engine->globalObject().setProperty("ia", m_engine->newQObject(&m_globalObject.value()));
+}
+
+void ScriptingEngine::initializeWatchdog()
+{
+    m_watchdogTimerThread = new QThread;
+    m_watchdogTimer = new QTimer;
 
     m_watchdogTimer->setInterval(WATCHDOG_TIMER_TIMEOUT);
     m_watchdogTimer->moveToThread(m_watchdogTimerThread);
     connect(m_watchdogTimer, &QTimer::timeout, [this]() {
-        m_engine.setInterrupted(true);
+        m_engine->setInterrupted(true);
         QThreadHelpers::runOnThread(QThreadHelpers::mainThread(), []() {
             g_notificationManager
                 ->sendNotification("Infinite loop detected",
@@ -49,29 +73,19 @@ ScriptingEngine::ScriptingEngine()
     connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingEngine::onWatchdogValueRestartTimerTick);
     m_watchdogRestartTimer.setInterval(WATCHDOG_TIMER_RESET_INTERVAL);
     m_watchdogRestartTimer.start();
-
-    registerApi();
-}
-
-ScriptingEngine::~ScriptingEngine()
-{
-    QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
-    m_watchdogTimerThread->quit();
-    m_watchdogTimerThread->wait();
-
-    m_watchdogTimer->deleteLater();
-    m_watchdogTimerThread->deleteLater();
 }
 
 QJSValue ScriptingEngine::evaluate(const QString &script)
 {
-    return m_engine.evaluate(script);
+    return engine().evaluate(script);
 }
 
-void ScriptingEngine::registerApi()
+QJSEngine &ScriptingEngine::engine()
 {
-    m_globalObject.emplace();
-    m_engine.globalObject().setProperty("ia", m_engine.newQObject(&m_globalObject.value()));
+    if (!m_engine) {
+        initialize();
+    }
+    return m_engine.value();
 }
 
 void ScriptingEngine::onWatchdogValueRestartTimerTick()
