@@ -16,13 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "GlobalObject.h"
+#include "CoreModule.h"
 #include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
 
-VariableRegistry *GlobalObject::variableRegistry() const
+VariableRegistry *CoreModule::variableRegistry() const
 {
     return g_variableRegistry.get();
 }

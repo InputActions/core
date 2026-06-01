@@ -17,6 +17,7 @@
 */
 
 #include "ScriptingEngine.h"
+#include "modules/CoreModule.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/NotificationManager.h>
@@ -48,8 +49,16 @@ void ScriptingEngine::initialize()
 
     initializeWatchdog();
 
-    m_globalObject.emplace();
-    m_engine->globalObject().setProperty("ia", m_engine->newQObject(&m_globalObject.value()));
+    registerBuiltinModule("inputactions/core", m_engine->newQObject(new CoreModule));
+
+    auto globalObject = m_engine->globalObject();
+    globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
+                                 if (m_builtinModules.contains(module)) {
+                                     return m_builtinModules[module];
+                                 }
+
+                                 return m_engine->importModule(module);
+                             }));
 }
 
 void ScriptingEngine::initializeWatchdog()
@@ -75,12 +84,18 @@ void ScriptingEngine::initializeWatchdog()
     m_watchdogRestartTimer.start();
 }
 
-QJSValue ScriptingEngine::evaluate(const QString &script)
+void ScriptingEngine::registerBuiltinModule(const QString &name, QJSValue value)
 {
-    return engine().evaluate(script);
+    ensureEngine().registerModule(name, value);
+    m_builtinModules[name] = std::move(value);
 }
 
-QJSEngine &ScriptingEngine::engine()
+QJSValue ScriptingEngine::evaluate(const QString &script)
+{
+    return ensureEngine().evaluate(script);
+}
+
+QJSEngine &ScriptingEngine::ensureEngine()
 {
     if (!m_engine) {
         initialize();

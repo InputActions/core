@@ -25,7 +25,7 @@ namespace InputActions
 
 class VariableRegistry;
 
-class GlobalObject : public QObject
+class CoreModule : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)

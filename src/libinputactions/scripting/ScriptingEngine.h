@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "GlobalObject.h"
+#include "FunctionWrapper.h"
 #include <QJSEngine>
 #include <QObject>
 #include <memory>
@@ -39,6 +39,14 @@ public:
 
     QJSValue evaluate(const QString &script);
 
+    template<typename TReturn, typename... TArgs, typename TFunction>
+    QJSValue newFunction(TFunction &&function)
+    {
+        auto &engine = ensureEngine();
+        auto *wrapper = FunctionWrapper::create<TReturn, TArgs...>(&engine, std::forward<TFunction>(function));
+        return evaluate(QString("obj => (...args) => obj.call(args);")).call({engine.newQObject(wrapper)});
+    }
+
 private slots:
     void onWatchdogValueRestartTimerTick();
 
@@ -46,12 +54,14 @@ private:
     /**
      * Returns an instance of the engine. Initializes the engine if it has not been initialized yet.
      */
-    QJSEngine &engine();
+    QJSEngine &ensureEngine();
     void initialize();
     void initializeWatchdog();
 
+    void registerBuiltinModule(const QString &name, QJSValue value);
+
     std::optional<QJSEngine> m_engine;
-    std::optional<GlobalObject> m_globalObject;
+    std::map<QString, QJSValue> m_builtinModules;
 
     QThread *m_watchdogTimerThread{};
     QTimer *m_watchdogTimer{};
