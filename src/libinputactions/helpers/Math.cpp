@@ -50,4 +50,9 @@ qreal hypot(const QPointF &point)
     return std::hypot(point.x(), point.y());
 }
 
+qreal hypot(const QSizeF &size)
+{
+    return std::hypot(size.width(), size.height());
+}
+
 }

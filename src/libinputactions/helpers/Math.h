@@ -35,5 +35,6 @@ qreal atan2deg360(const QPointF &point);
 qreal radToDeg(qreal rad);
 
 qreal hypot(const QPointF &point);
+qreal hypot(const QSizeF &size);
 
 }
