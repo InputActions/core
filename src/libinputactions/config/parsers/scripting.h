@@ -16,28 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "JSFunction.h"
-#include <qjsvalue.h>
+#pragma once
+
+#include <QJSValue>
 
 namespace InputActions
 {
 
-JSFunction::JSFunction(QJSValue function)
-    : m_function(std::move(function))
-{
-}
+class Node;
 
-std::optional<JSFunction> JSFunction::create(QJSValue value)
-{
-    if (!value.isCallable()) {
-        return {};
-    }
-    return JSFunction(value);
-}
-
-QJSValue JSFunction::call(const QJSValueList &args) const
-{
-    return m_function.call(args);
-}
+QJSValue parseFunction(const Node *node);
 
 }

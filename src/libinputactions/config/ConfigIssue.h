@@ -19,6 +19,7 @@
 #pragma once
 
 #include "TextPosition.h"
+#include <QJSValue>
 #include <QString>
 #include <libinputactions/helpers/Copyable.h>
 
@@ -121,6 +122,19 @@ private:
     QString m_property;
 };
 
+class UncaughtScriptErrorConfigIssue
+    : public ConfigIssue
+    , public virtual Copyable<UncaughtScriptErrorConfigIssue, ConfigIssue>
+{
+public:
+    UncaughtScriptErrorConfigIssue(const Node *node, QJSValue error);
+
+    QString message() const override;
+
+private:
+    QString m_message;
+};
+
 class DuplicateSetItemConfigException
     : public ConfigException
     , public virtual Copyable<DuplicateSetItemConfigException, ConfigIssue>
@@ -210,6 +224,19 @@ public:
 
 private:
     QString m_property;
+};
+
+class UncaughtScriptErrorConfigException
+    : public ConfigException
+    , public virtual Copyable<UncaughtScriptErrorConfigException, ConfigIssue>
+{
+public:
+    UncaughtScriptErrorConfigException(const Node *node, QJSValue error);
+
+    QString message() const override;
+
+private:
+    QString m_message;
 };
 
 class YamlCppConfigException

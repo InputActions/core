@@ -18,6 +18,7 @@ set(libinputactions_SRCS
     libinputactions/config/parsers/flags.cpp
     libinputactions/config/parsers/NodeParser.h
     libinputactions/config/parsers/qt.cpp
+    libinputactions/config/parsers/scripting.cpp
     libinputactions/config/parsers/separated-string.h
     libinputactions/config/parsers/std.cpp
     libinputactions/config/parsers/triggers.cpp
@@ -82,7 +83,6 @@ set(libinputactions_SRCS
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/scripting/modules/CoreModule.cpp
     libinputactions/scripting/FunctionWrapper.cpp
-    libinputactions/scripting/JSFunction.cpp
     libinputactions/scripting/ScriptAction.cpp
     libinputactions/scripting/ScriptCondition.cpp
     libinputactions/scripting/ScriptingEngine.cpp

@@ -17,18 +17,25 @@
 */
 
 #include "ScriptAction.h"
+#include <libinputactions/config/ConfigIssueManager.h>
+#include <libinputactions/config/Node.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-ScriptAction::ScriptAction(JSFunction function)
+ScriptAction::ScriptAction(QJSValue function, std::shared_ptr<const Node> sourceNode)
     : m_function(std::move(function))
+    , m_sourceNode(std::move(sourceNode))
 {
 }
 
 void ScriptAction::doExecute(const ActionExecutionArguments &args)
 {
-    m_function.call();
+    const auto result = g_scriptingEngine->call(m_function);
+    if (result.isError() && m_sourceNode) {
+        g_configIssueManager->addIssue(UncaughtScriptErrorConfigIssue(m_sourceNode.get(), result));
+    }
 }
 
 }

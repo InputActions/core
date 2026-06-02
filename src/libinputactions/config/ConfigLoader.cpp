@@ -20,6 +20,7 @@
 #include "ConfigIssueManager.h"
 #include "GlobalConfig.h"
 #include "Node.h"
+#include "config/ConfigIssue.h"
 #include "interfaces/ConfigProvider.h"
 #include "parsers/containers.h"
 #include "parsers/core.h"
@@ -101,6 +102,19 @@ Config ConfigLoader::createConfig(const QString &raw)
 
     Config config;
     m_scriptingEngine = config.scriptingEngine.get();
+
+    if (const auto *scriptingNode = root->mapAt("scripting")) {
+        if (const auto *scriptsNode = scriptingNode->at("scripts")) {
+            for (const auto *scriptNode : scriptsNode->sequenceItems()) {
+                const auto *sourceNode = scriptNode->at("source", true);
+                const auto source = sourceNode->as<QString>();
+                const auto result = m_scriptingEngine->evaluate(sourceNode->as<QString>());
+                if (result.isError()) {
+                    throw UncaughtScriptErrorConfigException(sourceNode, result);
+                }
+            }
+        }
+    }
 
     loadMember(config.autoReload, root->at("autoreload"));
     loadMember(config.allowExternalVariableAccess, root->at("external_variable_access"));

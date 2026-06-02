@@ -18,25 +18,29 @@
 
 #pragma once
 
-#include "JSFunction.h"
+#include <QJSValue>
 #include <libinputactions/actions/Action.h>
 
 namespace InputActions
 {
+
+class Node;
 
 class ScriptAction : public Action
 {
 public:
     /**
      * @param function Called with no arguments when the action is executed. The return value is ignored.
+     * @param sourceNode The configuration node this action was defined in. May be nullptr.
      */
-    ScriptAction(JSFunction function);
+    ScriptAction(QJSValue function, std::shared_ptr<const Node> sourceNode);
 
 protected:
     void doExecute(const ActionExecutionArguments &args) override;
 
 private:
-    JSFunction m_function;
+    QJSValue m_function;
+    std::shared_ptr<const Node> m_sourceNode;
 };
 
 }

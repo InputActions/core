@@ -19,8 +19,11 @@
 #include "ScriptingEngine.h"
 #include "modules/CoreModule.h"
 #include <libinputactions/InputActionsMain.h>
+#include <libinputactions/helpers/QString.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/NotificationManager.h>
+
+Q_LOGGING_CATEGORY(INPUTACTIONS_SCRIPTING, "inputactions.scripting", QtWarningMsg)
 
 namespace InputActions
 {
@@ -92,7 +95,41 @@ void ScriptingEngine::registerBuiltinModule(const QString &name, QJSValue value)
 
 QJSValue ScriptingEngine::evaluate(const QString &script)
 {
-    return ensureEngine().evaluate(script);
+    const auto result = ensureEngine().evaluate(script);
+    if (result.isError()) {
+        logError(result);
+    }
+
+    return result;
+}
+
+QJSValue ScriptingEngine::call(const QJSValue &function, const QJSValueList &args) const
+{
+    const auto result = function.call(args);
+    if (result.isError()) {
+        logError(result);
+    }
+
+    return result;
+}
+
+QString ScriptingEngine::errorToString(const QJSValue &error) const
+{
+    const auto name = error.property("name").toString();
+    const auto message = error.property("message").toString();
+    auto file = error.property("fileName").toString();
+    if (file.isEmpty()) {
+        file = "None (defined in a YAML file)";
+    }
+    const auto lineNumber = error.property("lineNumber").toUInt();
+    const auto stack = error.property("stack").toString();
+
+    return QString("%1: %2\nFile: %3\nLine: %4\nStack:\n%5\n").arg(name, message, file, QString::number(lineNumber), QStringHelpers::indented(stack, 4));
+}
+
+void ScriptingEngine::logError(const QJSValue &error) const
+{
+    qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught script error\n" << errorToString(error);
 }
 
 QJSEngine &ScriptingEngine::ensureEngine()

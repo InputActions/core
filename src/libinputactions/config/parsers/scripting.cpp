@@ -16,29 +16,25 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <QJSValue>
+#include "scripting.h"
+#include <libinputactions/config/ConfigLoader.h>
+#include <libinputactions/config/Node.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-class JSFunction
+QJSValue parseFunction(const Node *node)
 {
-public:
-    JSFunction() = default;
+    auto result = g_configLoader->futureScriptingEngine().evaluate(node->as<QString>());
+    if (result.isError()) {
+        throw UncaughtScriptErrorConfigException(node, result);
+    }
+    if (!result.isCallable()) {
+        throw InvalidValueConfigException(node, "Expression is not a function.");
+    }
 
-    /**
-     * @return Empty if the specified value is not a function.
-     */
-    static std::optional<JSFunction> create(QJSValue function);
-
-    QJSValue call(const QJSValueList &args = {}) const;
-
-private:
-    JSFunction(QJSValue value);
-
-    QJSValue m_function;
-};
+    return result;
+}
 
 }

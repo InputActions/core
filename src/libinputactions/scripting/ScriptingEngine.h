@@ -37,7 +37,18 @@ public:
     ScriptingEngine() = default;
     ~ScriptingEngine() override;
 
+    /**
+     * Same as QJSEngine::evaluate but with error logging.
+     */
     QJSValue evaluate(const QString &script);
+
+    /**
+     * Same as QJSValue::call but with error logging.
+     */
+    QJSValue call(const QJSValue &function, const QJSValueList &args = {}) const;
+
+    QString errorToString(const QJSValue &error) const;
+    void logError(const QJSValue &error) const;
 
     template<typename TReturn, typename... TArgs, typename TFunction>
     QJSValue newFunction(TFunction &&function)
