@@ -54,9 +54,6 @@ struct BuiltinVariables
     inline static const VariableInfo<Qt::KeyboardModifiers> KeyboardModifiers{QStringLiteral("keyboard_modifiers")};
     inline static const VariableInfo<QString> LastTriggerId{QStringLiteral("last_trigger_id")};
     inline static const VariableInfo<qreal> LastTriggerTimestamp{QStringLiteral("last_trigger_timestamp")};
-    inline static const VariableInfo<QPointF> ThumbInitialPositionPercentage{QStringLiteral("thumb_initial_position_percentage")};
-    inline static const VariableInfo<QPointF> ThumbPositionPercentage{QStringLiteral("thumb_position_percentage")};
-    inline static const VariableInfo<bool> ThumbPresent{QStringLiteral("thumb_present")};
 };
 
 class VariableRegistry
@@ -117,6 +114,11 @@ public:
             }
         };
         registerVariable(name, std::make_unique<ComputedVariable>(QMetaType::fromType<T>(), variantGetter), hidden);
+    }
+    template<typename T>
+    void registerComputed(const VariableInfo<T> &variable, const std::function<void(std::optional<T> &value)> getter, bool hidden = false)
+    {
+        registerComputed<T>(variable.name, getter, hidden);
     }
 
     void registerAlias(const QString &variable, const QString &alias);
