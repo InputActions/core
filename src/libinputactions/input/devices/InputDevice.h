@@ -84,6 +84,13 @@ public:
      */
     InputDeviceState &physicalState() { return m_physicalState; }
     const InputDeviceState &physicalState() const { return m_physicalState; }
+
+    /**
+     * A snapshot of the device's true state created by a multi-touch trigger handler, used for computing finger variables.
+     */
+    const InputDeviceState &savedPhysicalState() const { return m_savedPhysicalState; }
+    void savePhysicalState();
+
     /**
      * The device's state as seen by another entity that is handling it - the compositor and its libinput instance, an external libinput instance, evtest,
      * etc. InputActions manipulates this state in various ways for the purposes of event filtering.
@@ -172,6 +179,7 @@ private:
     std::unique_ptr<TouchscreenTriggerHandler> m_touchscreenTriggerHandler;
 
     InputDeviceState m_physicalState;
+    InputDeviceState m_savedPhysicalState;
     InputDeviceState m_virtualState;
 };
 

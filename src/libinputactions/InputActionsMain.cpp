@@ -5,6 +5,7 @@
 #include "config/GlobalConfig.h"
 #include "input/StrokeRecorder.h"
 #include "input/backends/InputBackend.h"
+#include "input/devices/InputDevice.h"
 #include "interfaces/ConfigProvider.h"
 #include "interfaces/CursorShapeProvider.h"
 #include "interfaces/NotificationManager.h"
@@ -114,12 +115,46 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         value = g_cursorShapeProvider->cursorShape();
     });
     variableRegistry->registerStored(BuiltinVariables::DeviceName);
-    for (auto i = 1; i <= FINGER_VARIABLE_COUNT; i++) {
-        variableRegistry->registerStored<QPointF>(QString("finger_%1_initial_position_percentage").arg(i));
-        variableRegistry->registerStored<QPointF>(QString("finger_%1_position_percentage").arg(i));
-        variableRegistry->registerStored<qreal>(QString("finger_%1_pressure").arg(i));
+    for (size_t i = 0; i < FINGER_VARIABLE_COUNT; i++) {
+        variableRegistry->registerComputed<QPointF>(QString("finger_%1_initial_position_percentage").arg(i + 1), [i](auto &value) {
+            const auto *device = g_inputBackend->currentMultiTouchDevice();
+            if (!device) {
+                return;
+            }
+
+            const auto touchPoints = device->savedPhysicalState().validTouchPoints();
+            if (i < touchPoints.size()) {
+                value = touchPoints[i]->initialPosition / device->properties().size();
+            }
+        });
+        variableRegistry->registerComputed<QPointF>(QString("finger_%1_position_percentage").arg(i + 1), [i](auto &value) {
+            const auto *device = g_inputBackend->currentMultiTouchDevice();
+            if (!device) {
+                return;
+            }
+
+            const auto touchPoints = device->savedPhysicalState().validTouchPoints();
+            if (i < touchPoints.size()) {
+                value = touchPoints[i]->position / device->properties().size();
+            }
+        });
+        variableRegistry->registerComputed<qreal>(QString("finger_%1_pressure").arg(i + 1), [i](auto &value) {
+            const auto *device = g_inputBackend->currentMultiTouchDevice();
+            if (!device) {
+                return;
+            }
+
+            const auto touchPoints = device->savedPhysicalState().validTouchPoints();
+            if (i < touchPoints.size()) {
+                value = touchPoints[i]->pressure;
+            }
+        });
     }
-    variableRegistry->registerStored(BuiltinVariables::Fingers);
+    variableRegistry->registerComputed<qreal>(BuiltinVariables::Fingers, [](auto &value) {
+        if (const auto *device = g_inputBackend->currentMultiTouchDevice()) {
+            value = device->savedPhysicalState().validTouchPoints().size();
+        }
+    });
     variableRegistry->registerComputed<Qt::KeyboardModifiers>(BuiltinVariables::KeyboardModifiers, [](auto &value) {
         value = g_inputBackend->keyboardModifiers();
     });
@@ -145,9 +180,39 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         const auto translatedPosition = pointerPos.value() - windowGeometry->topLeft();
         value = QPointF(translatedPosition.x() / windowGeometry->width(), translatedPosition.y() / windowGeometry->height());
     });
-    variableRegistry->registerStored(BuiltinVariables::ThumbInitialPositionPercentage);
-    variableRegistry->registerStored(BuiltinVariables::ThumbPositionPercentage);
-    variableRegistry->registerStored(BuiltinVariables::ThumbPresent);
+    variableRegistry->registerComputed<QPointF>("thumb_initial_position_percentage", [](auto &value) {
+        const auto *device = g_inputBackend->currentMultiTouchDevice();
+        if (!device) {
+            return;
+        }
+
+        for (const auto *touchPoint : device->savedPhysicalState().validTouchPoints()) {
+            if (touchPoint->type == TouchPointType::Thumb) {
+                value = touchPoint->initialPosition / device->properties().size();
+                break;
+            }
+        }
+    });
+    variableRegistry->registerComputed<QPointF>("thumb_position_percentage", [](auto &value) {
+        const auto *device = g_inputBackend->currentMultiTouchDevice();
+        if (!device) {
+            return;
+        }
+
+        for (const auto *touchPoint : device->savedPhysicalState().validTouchPoints()) {
+            if (touchPoint->type == TouchPointType::Thumb) {
+                value = touchPoint->position / device->properties().size();
+                break;
+            }
+        }
+    });
+    variableRegistry->registerComputed<bool>("thumb_present", [](auto &value) {
+        if (const auto *device = g_inputBackend->currentMultiTouchDevice()) {
+            value = std::ranges::any_of(device->savedPhysicalState().validTouchPoints(), [](const auto *touchPoint) {
+                return touchPoint->type == TouchPointType::Thumb;
+            });
+        }
+    });
     variableRegistry->registerComputed<qreal>("time_since_last_trigger", [variableRegistry](auto &value) {
         value = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
               - variableRegistry->variable(BuiltinVariables::LastTriggerTimestamp)->value().value_or(0);

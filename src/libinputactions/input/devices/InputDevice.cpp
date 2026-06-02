@@ -207,4 +207,9 @@ void InputDevice::setTouchscreenTriggerHandler(std::unique_ptr<TouchscreenTrigge
     m_touchscreenTriggerHandler = std::move(value);
 }
 
+void InputDevice::savePhysicalState()
+{
+    m_savedPhysicalState = m_physicalState;
+}
+
 }
