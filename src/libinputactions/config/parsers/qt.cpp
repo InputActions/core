@@ -19,7 +19,6 @@
 #include "NodeParser.h"
 #include "containers.h"
 #include "separated-string.h"
-#include <QPointF>
 #include <QRegularExpression>
 #include <QString>
 #include <QStringList>
@@ -28,14 +27,6 @@
 
 namespace InputActions
 {
-
-template<>
-void NodeParser<QPointF>::parse(const Node *node, QPointF &result)
-{
-    const auto values = parseSeparatedString2<qreal>(node, ',');
-    result.setX(values.first);
-    result.setY(values.second);
-}
 
 template<>
 void NodeParser<QRegularExpression>::parse(const Node *node, QRegularExpression &result)

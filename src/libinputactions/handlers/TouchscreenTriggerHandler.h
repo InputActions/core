@@ -67,7 +67,7 @@ private:
     /**
      * Initial point positions for gesture recognition. May be different than the actual initial position. Key is the point id.
      */
-    std::map<int32_t, QPointF> m_pointInitialPositions;
+    std::map<int32_t, PointF> m_pointInitialPositions;
     QTimer m_holdTimer;
 
     QTimer m_touchDownTimer;
@@ -76,7 +76,7 @@ private:
 
     qreal m_initialDistance;
     qreal m_previousAngle;
-    QPointF m_previousCenter;
+    PointF m_previousCenter;
 
     bool m_touchModifiedInCurrentFrame{};
 
@@ -103,9 +103,9 @@ private:
     void setState(State state);
 
     PinchInfo pinchInfo() const;
-    QPointF touchCenter() const;
+    PointF touchCenter() const;
 
-    static uint32_t directionFromPoint(const QPointF &point);
+    static uint32_t directionFromPoint(const PointF &point);
     static bool sameDirections(uint32_t a, uint32_t b);
 
     friend class MockTouchscreenTriggerHandler;

@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <QPointF>
 #include <QString>
+#include <libinputactions/PointF.h>
 #include <libinputactions/Range.h>
 #include <libinputactions/conditions/Condition.h>
 #include <memory>
@@ -186,7 +186,7 @@ private:
      */
     qreal m_absoluteAccumulatedDelta{};
 
-    QPointF m_currentMotionPointDelta;
+    PointF m_currentMotionPointDelta;
 
     friend class TestTrigger;
 };

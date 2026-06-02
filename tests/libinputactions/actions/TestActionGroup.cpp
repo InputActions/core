@@ -14,7 +14,7 @@ private slots:
     void all_execute__propagatesArgumentsToSubActions()
     {
         auto *assertAction = new CustomAction([](const auto &args) {
-            QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(12, 34));
+            QCOMPARE(args.inputActionArgs.motionPointDelta, PointF(12, 34));
         });
 
         auto group = std::make_shared<ActionGroup>(ActionGroupExecutionMode::All);
@@ -23,7 +23,7 @@ private slots:
         g_actionExecutor->execute(*group, {
             .actionArgs = {
                 .inputActionArgs = {
-                    .motionPointDelta = QPointF(12, 34),
+                    .motionPointDelta = PointF(12, 34),
                 },
             }});
 
@@ -33,7 +33,7 @@ private slots:
     void first_execute__propagatesArgumentsToSubActions()
     {
         auto *assertAction = new CustomAction([](const auto &args) {
-            QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(12, 34));
+            QCOMPARE(args.inputActionArgs.motionPointDelta, PointF(12, 34));
         });
 
         auto group = std::make_shared<ActionGroup>(ActionGroupExecutionMode::First);
@@ -42,7 +42,7 @@ private slots:
         g_actionExecutor->execute(*group, {
             .actionArgs = {
                 .inputActionArgs = {
-                    .motionPointDelta = QPointF(12, 34),
+                    .motionPointDelta = PointF(12, 34),
                 },
             }});
 

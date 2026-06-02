@@ -39,9 +39,9 @@ struct InputActionItem
     MouseButton mousePress;
     MouseButton mouseRelease;
 
-    QPointF mouseAxis;
-    QPointF mouseMoveAbsolute;
-    QPointF mouseMoveRelative;
+    PointF mouseAxis;
+    PointF mouseMoveAbsolute;
+    PointF mouseMoveRelative;
 
     /**
      * 0 - unset

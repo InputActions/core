@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QPointF>
+#include <libinputactions/PointF.h>
 
 namespace InputActions
 {
@@ -54,7 +54,7 @@ public:
     using DeltaBase::DeltaBase;
 };
 
-class PointDelta : public DeltaBase<QPointF>
+class PointDelta : public DeltaBase<PointF>
 {
 public:
     using DeltaBase::DeltaBase;

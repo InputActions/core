@@ -21,17 +21,17 @@
 namespace InputActions::Math
 {
 
-qreal atan2(const QPointF &point)
+qreal atan2(const PointF &point)
 {
     return std::atan2(point.y(), point.x());
 }
 
-qreal atan2deg(const QPointF &point)
+qreal atan2deg(const PointF &point)
 {
     return radToDeg(atan2(point));
 }
 
-qreal atan2deg360(const QPointF &point)
+qreal atan2deg360(const PointF &point)
 {
     const auto angle = atan2deg(point);
     if (angle < 0) {
@@ -43,11 +43,6 @@ qreal atan2deg360(const QPointF &point)
 qreal radToDeg(qreal rad)
 {
     return 180.0 / M_PI * rad;
-}
-
-qreal hypot(const QPointF &point)
-{
-    return std::hypot(point.x(), point.y());
 }
 
 qreal hypot(const QSizeF &size)

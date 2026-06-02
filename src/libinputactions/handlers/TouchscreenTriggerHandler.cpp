@@ -189,7 +189,7 @@ bool TouchscreenTriggerHandler::touchFrame(const TouchFrameEvent &event)
         case State::Hold:
         case State::Touch: {
             const auto fingerPassedThreshold = [this](const auto *point) {
-                return Math::hypot(point->position - m_pointInitialPositions[point->id]) >= MOTION_THRESHOLD_MM;
+                return (point->position - m_pointInitialPositions[point->id]).hypot() >= MOTION_THRESHOLD_MM;
             };
             if (std::ranges::any_of(points, fingerPassedThreshold)) {
                 setState(State::MotionOnePointReachedThreshold);
@@ -200,7 +200,7 @@ bool TouchscreenTriggerHandler::touchFrame(const TouchFrameEvent &event)
         }
         case State::MotionOnePointReachedThreshold: {
             const auto fingerPassedThreshold = [this](const auto *point) {
-                return Math::hypot(point->position - m_pointInitialPositions[point->id]) >= MOTION_THRESHOLD_MM;
+                return (point->position - m_pointInitialPositions[point->id]).hypot() >= MOTION_THRESHOLD_MM;
             };
             if (std::ranges::all_of(points, fingerPassedThreshold)) {
                 setState(State::Motion);
@@ -212,7 +212,7 @@ bool TouchscreenTriggerHandler::touchFrame(const TouchFrameEvent &event)
         case State::Motion:
             auto sameDirection = true;
             uint32_t firstDirection{};
-            QPointF totalDelta;
+            PointF totalDelta;
             for (size_t i = 0; i < points.size(); i++) {
                 const auto &point = points[i];
 
@@ -302,7 +302,7 @@ void TouchscreenTriggerHandler::handleTouchUp()
             const auto now = std::chrono::steady_clock::now();
             if (std::ranges::all_of(m_preTouchUpPoints, [this, &now](const auto &point) {
                     return std::chrono::duration_cast<std::chrono::milliseconds>(now - point.downTimestamp) <= TAP_TIMEOUT
-                        && Math::hypot(point.position - point.initialPosition) < MOTION_THRESHOLD_MM;
+                        && (point.position - point.initialPosition).hypot() < MOTION_THRESHOLD_MM;
                 })) {
                 handleTap();
             }
@@ -322,7 +322,7 @@ void TouchscreenTriggerHandler::handleTap()
     }
 
     if (!result.block && m_block) {
-        std::vector<QPointF> points;
+        std::vector<PointF> points;
         for (const auto &point : m_preTouchUpPoints) {
             points.push_back(point.rawPosition);
         }
@@ -431,13 +431,13 @@ PinchInfo TouchscreenTriggerHandler::pinchInfo() const
 
     return {
         .angle = Math::atan2deg(delta),
-        .distance = Math::hypot(delta),
+        .distance = delta.hypot(),
     };
 }
 
-QPointF TouchscreenTriggerHandler::touchCenter() const
+PointF TouchscreenTriggerHandler::touchCenter() const
 {
-    QPointF center;
+    PointF center;
     const auto points = m_device->physicalState().validTouchPoints();
     for (const auto *point : m_device->physicalState().validTouchPoints()) {
         center += point->position;
@@ -446,7 +446,7 @@ QPointF TouchscreenTriggerHandler::touchCenter() const
     return center;
 }
 
-uint32_t TouchscreenTriggerHandler::directionFromPoint(const QPointF &point)
+uint32_t TouchscreenTriggerHandler::directionFromPoint(const PointF &point)
 {
     enum Direction
     {

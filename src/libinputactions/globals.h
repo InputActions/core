@@ -2,8 +2,8 @@
 
 #include <QLoggingCategory>
 #include <QObject>
-#include <QPointF>
 #include <QSizeF>
+#include <libinputactions/PointF.h>
 
 Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS)
 
@@ -82,9 +82,9 @@ static inline TriggerType operator~(TriggerType value)
     return TriggerType(~static_cast<uint32_t>(value));
 }
 
-static inline QPointF operator/(const QPointF &point, const QSizeF &size)
+static inline PointF operator/(const PointF &point, const QSizeF &size)
 {
-    return QPointF(point.x() / size.width(), point.y() / size.height());
+    return PointF(point.x() / size.width(), point.y() / size.height());
 }
 
 template<class... Ts>

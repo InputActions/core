@@ -54,11 +54,11 @@ Variable *VariableRegistry::registerVariable(const QString &name, std::unique_pt
     variable->setHidden(hidden);
     m_variables[name] = std::move(variable);
 
-    if (m_variables[name]->type().id() == qMetaTypeId<QPointF>()) {
+    if (m_variables[name]->type().id() == qMetaTypeId<PointF>()) {
         registerComputed<qreal>(
             name + "_x",
             [this, name](auto &value) {
-                if (const auto point = this->variable<QPointF>(name)->value()) {
+                if (const auto point = this->variable<PointF>(name)->value()) {
                     value = point->x();
                 }
             },
@@ -66,7 +66,7 @@ Variable *VariableRegistry::registerVariable(const QString &name, std::unique_pt
         registerComputed<qreal>(
             name + "_y",
             [this, name](auto &value) {
-                if (const auto point = this->variable<QPointF>(name)->value()) {
+                if (const auto point = this->variable<PointF>(name)->value()) {
                     value = point->y();
                 }
             },

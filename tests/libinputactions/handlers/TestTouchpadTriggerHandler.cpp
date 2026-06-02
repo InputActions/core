@@ -300,23 +300,23 @@ private slots:
     {
         m_handler->addTrigger(std::make_unique<TouchpadTapTrigger>());
 
-        const QPointF first(10, 10);
-        const QPointF second(20, 20);
+        const PointF first(10, 10);
+        const PointF second(20, 20);
         addPoint(first);
         addPoint(second);
 
-        const auto finger1Position = g_variableRegistry->variable<QPointF>("finger_1_position_percentage");
-        const auto finger2Position = g_variableRegistry->variable<QPointF>("finger_2_position_percentage");
-        QCOMPARE(finger1Position->value(), QPointF(0.1, 0.1));
-        QCOMPARE(finger2Position->value(), QPointF(0.2, 0.2));
+        const auto finger1Position = g_variableRegistry->variable<PointF>("finger_1_position_percentage");
+        const auto finger2Position = g_variableRegistry->variable<PointF>("finger_2_position_percentage");
+        QCOMPARE(finger1Position->value(), PointF(0.1, 0.1));
+        QCOMPARE(finger2Position->value(), PointF(0.2, 0.2));
 
         removePoints(1);
-        QCOMPARE(finger1Position->value(), QPointF(0.1, 0.1));
-        QCOMPARE(finger2Position->value(), QPointF(0.2, 0.2));
+        QCOMPARE(finger1Position->value(), PointF(0.1, 0.1));
+        QCOMPARE(finger2Position->value(), PointF(0.2, 0.2));
 
         removePoints(1);
-        QCOMPARE(finger1Position->value(), QPointF(0.1, 0.1));
-        QCOMPARE(finger2Position->value(), QPointF(0.2, 0.2));
+        QCOMPARE(finger1Position->value(), PointF(0.1, 0.1));
+        QCOMPARE(finger2Position->value(), PointF(0.2, 0.2));
 
         g_inputBackend->handleEvent(PointerButtonEvent(m_touchpad.get(), BTN_LEFT, true));
         g_inputBackend->handleEvent(PointerButtonEvent(m_touchpad.get(), BTN_LEFT, false));
@@ -518,20 +518,20 @@ private slots:
     }
 
 private:
-    void addPoint(const QPointF &position = {0.5, 0.5})
+    void addPoint(const PointF &position = {0.5, 0.5})
     {
         m_touchId++;
         g_inputBackend->handleEvent(TouchDownEvent(m_touchpad.get(), m_touchId, position, position));
     }
 
-    void addPoints(uint8_t count, const QPointF &position = {0.5, 0.5})
+    void addPoints(uint8_t count, const PointF &position = {0.5, 0.5})
     {
         for (auto i = 0; i < count; i++) {
             addPoint(position);
         }
     }
 
-    void movePoints(const QPointF &delta)
+    void movePoints(const PointF &delta)
     {
         for (auto *point : m_touchpad->physicalState().validTouchPoints()) {
             g_inputBackend->handleEvent(TouchMotionEvent(m_touchpad.get(), point->id, point->position + delta, point->rawPosition + delta));

@@ -109,7 +109,7 @@ bool MotionTriggerHandler::handleMotion(const InputDevice *device, const PointDe
         }
 
         const auto absAngleDelta = std::abs(angleDelta);
-        const auto distance = Math::hypot(d);
+        const auto distance = d.hypot();
 
         // Clamp spikes
         if (absAngleDelta > 0.5) {
@@ -160,11 +160,11 @@ bool MotionTriggerHandler::handleMotion(const InputDevice *device, const PointDe
         const auto motionThreshold = currentMotionThreshold(device);
         bool motionThresholdReached{};
 
-        QPointF totalDelta;
+        PointF totalDelta;
         auto it = m_swipeDeltas.begin();
         for (; it != m_swipeDeltas.end(); ++it) {
             totalDelta += *it;
-            if (Math::hypot(totalDelta) < motionThreshold) {
+            if (totalDelta.hypot() < motionThreshold) {
                 continue;
             }
 

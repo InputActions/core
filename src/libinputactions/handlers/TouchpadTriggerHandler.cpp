@@ -188,7 +188,7 @@ bool TouchpadTriggerHandler::touchMotion(const TouchMotionEvent &event)
         case State::TouchIdle:
             const auto *point = event.sender()->physicalState().findTouchPoint(event.id());
             const auto diff = point->position - point->initialPosition;
-            if (Math::hypot(diff) >= 4) {
+            if (diff.hypot() >= 4) {
                 setState(State::Motion);
             }
             break;

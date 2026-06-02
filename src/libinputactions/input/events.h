@@ -20,7 +20,7 @@
 
 #include "Delta.h"
 #include <QKeyCombination>
-#include <QPointF>
+#include <libinputactions/PointF.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/input/KeyboardKey.h>
 #include <libinputactions/input/MouseButton.h>
@@ -187,33 +187,33 @@ private:
 class TouchDownEvent : public InputEvent
 {
 public:
-    TouchDownEvent(InputDevice *sender, int32_t id, QPointF position, QPointF rawPosition, uint32_t pressure = 0);
+    TouchDownEvent(InputDevice *sender, int32_t id, PointF position, PointF rawPosition, uint32_t pressure = 0);
 
     int32_t id() const { return m_id; }
-    const QPointF &position() const { return m_position; }
-    const QPointF &rawPosition() const { return m_rawPosition; }
+    const PointF &position() const { return m_position; }
+    const PointF &rawPosition() const { return m_rawPosition; }
     uint32_t pressure() const { return m_pressure; }
 
 private:
     int32_t m_id;
-    QPointF m_position;
-    QPointF m_rawPosition;
+    PointF m_position;
+    PointF m_rawPosition;
     uint32_t m_pressure;
 };
 
 class TouchMotionEvent : public InputEvent
 {
 public:
-    TouchMotionEvent(InputDevice *sender, int32_t id, QPointF position, QPointF rawPosition);
+    TouchMotionEvent(InputDevice *sender, int32_t id, PointF position, PointF rawPosition);
 
     int32_t id() const { return m_id; }
-    const QPointF &position() const { return m_position; }
-    const QPointF &rawPosition() const { return m_rawPosition; }
+    const PointF &position() const { return m_position; }
+    const PointF &rawPosition() const { return m_rawPosition; }
 
 private:
     int32_t m_id;
-    QPointF m_position;
-    QPointF m_rawPosition;
+    PointF m_position;
+    PointF m_rawPosition;
 };
 
 class TouchPressureChangeEvent : public InputEvent

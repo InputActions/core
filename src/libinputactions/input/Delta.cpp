@@ -24,12 +24,12 @@ namespace InputActions
 
 qreal PointDelta::acceleratedHypot() const
 {
-    return Math::hypot(accelerated());
+    return accelerated().hypot();
 }
 
 qreal PointDelta::unacceleratedHypot() const
 {
-    return Math::hypot(unaccelerated());
+    return unaccelerated().hypot();
 }
 
 PointDelta PointDelta::operator+(const PointDelta &other) const

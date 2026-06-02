@@ -83,7 +83,7 @@ TouchpadGestureLifecyclePhaseEvent::TouchpadGestureLifecyclePhaseEvent(InputDevi
 {
 }
 
-TouchDownEvent::TouchDownEvent(InputDevice *sender, int32_t id, QPointF position, QPointF rawPosition, uint32_t pressure)
+TouchDownEvent::TouchDownEvent(InputDevice *sender, int32_t id, PointF position, PointF rawPosition, uint32_t pressure)
     : InputEvent(InputEventType::TouchDown, sender)
     , m_id(id)
     , m_position(position)
@@ -92,7 +92,7 @@ TouchDownEvent::TouchDownEvent(InputDevice *sender, int32_t id, QPointF position
 {
 }
 
-TouchMotionEvent::TouchMotionEvent(InputDevice *sender, int32_t id, QPointF position, QPointF rawPosition)
+TouchMotionEvent::TouchMotionEvent(InputDevice *sender, int32_t id, PointF position, PointF rawPosition)
     : InputEvent(InputEventType::TouchMotion, sender)
     , m_id(id)
     , m_position(position)

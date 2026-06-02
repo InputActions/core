@@ -151,7 +151,7 @@ template class Value<CursorShape>;
 template class Value<Qt::KeyboardModifiers>;
 template class Value<InputDeviceTypes>;
 template class Value<qreal>;
-template class Value<QPointF>;
+template class Value<PointF>;
 template class Value<QString>;
 template class Value<QVariant>;
 

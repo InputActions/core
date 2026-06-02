@@ -1,4 +1,5 @@
 #include "Test.h"
+#include <libinputactions/PointF.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/config/parsers/separated-string.h>
 #include <libinputactions/helpers/QString.h>
@@ -23,10 +24,10 @@ private slots:
     void point__parsesNodeCorrectly()
     {
         const auto node = Node::create("12.34,43.21;67.89,98.76");
-        const auto values = parseSeparatedString2<QPointF>(node.get(), ';');
+        const auto values = parseSeparatedString2<PointF>(node.get(), ';');
 
-        QCOMPARE(values.first, QPointF(12.34, 43.21));
-        QCOMPARE(values.second, QPointF(67.89, 98.76));
+        QCOMPARE(values.first, PointF(12.34, 43.21));
+        QCOMPARE(values.second, PointF(67.89, 98.76));
     }
 
     void string__parsesNodeCorrectly()

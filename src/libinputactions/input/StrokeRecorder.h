@@ -20,8 +20,8 @@
 
 #include "InputEventHandler.h"
 #include <QObject>
-#include <QPointF>
 #include <QTimer>
+#include <libinputactions/PointF.h>
 
 namespace InputActions
 {
@@ -64,10 +64,10 @@ private:
 
     bool m_isRecordingStroke = false;
     std::function<void(const Stroke &stroke)> m_strokeCallback;
-    std::vector<QPointF> m_strokePoints;
+    std::vector<PointF> m_strokePoints;
     QTimer m_strokeRecordingTimeoutTimer;
 
-    QPointF m_previousTouchscreenTouchCenter;
+    PointF m_previousTouchscreenTouchCenter;
     bool m_blockTouchscreenEventsUntilDeviceNeutral{};
 };
 

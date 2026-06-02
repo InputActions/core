@@ -52,7 +52,7 @@ StrokeTriggerCore::StrokeTriggerCore(std::vector<Stroke> strokes)
 constexpr double stroke_infinity = 0.2;
 #define EPS 0.000001
 
-Stroke::Stroke(const std::vector<QPointF> &deltas)
+Stroke::Stroke(const std::vector<PointF> &deltas)
 {
     for (auto &point : simplify(deltasToPath(deltas))) {
         m_points.push_back({
@@ -137,10 +137,10 @@ double Stroke::min_matching_score()
     return 0.7;
 }
 
-std::vector<QPointF> Stroke::deltasToPath(const std::vector<QPointF> &deltas)
+std::vector<PointF> Stroke::deltasToPath(const std::vector<PointF> &deltas)
 {
-    std::vector<QPointF> result{QPointF(0, 0)};
-    QPointF total;
+    std::vector<PointF> result{PointF(0, 0)};
+    PointF total;
     for (const auto &delta : deltas) {
         total += delta;
         result.push_back(total);
@@ -148,17 +148,17 @@ std::vector<QPointF> Stroke::deltasToPath(const std::vector<QPointF> &deltas)
     return result;
 }
 
-std::vector<QPointF> Stroke::simplify(const std::vector<QPointF> &points, qreal epsilon)
+std::vector<PointF> Stroke::simplify(const std::vector<PointF> &points, qreal epsilon)
 {
-    std::vector<QPointF> result;
+    std::vector<PointF> result;
     ramerDouglasPeucker(points, epsilon, result);
     return result;
 }
 
-qreal Stroke::perpendicularDistance(const QPointF &point, const QPointF &lineStart, const QPointF &lineEnd)
+qreal Stroke::perpendicularDistance(const PointF &point, const PointF &lineStart, const PointF &lineEnd)
 {
-    QPointF vec1(point.x() - lineStart.x(), point.y() - lineStart.y());
-    QPointF vec2(lineEnd.x() - lineStart.x(), lineEnd.y() - lineStart.y());
+    PointF vec1(point.x() - lineStart.x(), point.y() - lineStart.y());
+    PointF vec2(lineEnd.x() - lineStart.x(), lineEnd.y() - lineStart.y());
     auto d_vec2 = std::sqrt(vec2.x() * vec2.x() + vec2.y() * vec2.y());
     float cross_product = vec1.x() * vec2.y() - vec2.x() * vec1.y();
     float d = abs(cross_product / d_vec2);
@@ -166,7 +166,7 @@ qreal Stroke::perpendicularDistance(const QPointF &point, const QPointF &lineSta
 }
 
 // TODO: This algorithm is not suitable for strokes and should be replaced with something else: https://github.com/taj-ny/InputActions/issues/335
-void Stroke::ramerDouglasPeucker(const std::vector<QPointF> &points, qreal epsilon, std::vector<QPointF> &out)
+void Stroke::ramerDouglasPeucker(const std::vector<PointF> &points, qreal epsilon, std::vector<PointF> &out)
 {
     if (points.size() < 2) {
         out = points;
@@ -202,10 +202,10 @@ void Stroke::ramerDouglasPeucker(const std::vector<QPointF> &points, qreal epsil
     // Recursively simplify
     if (splitIndex != -1) {
         // Recursive call
-        std::vector<QPointF> recResults1;
-        std::vector<QPointF> recResults2;
-        std::vector<QPointF> firstLine(points.begin(), points.begin() + splitIndex + 1);
-        std::vector<QPointF> lastLine(points.begin() + splitIndex, points.end());
+        std::vector<PointF> recResults1;
+        std::vector<PointF> recResults2;
+        std::vector<PointF> firstLine(points.begin(), points.begin() + splitIndex + 1);
+        std::vector<PointF> lastLine(points.begin() + splitIndex, points.end());
         ramerDouglasPeucker(firstLine, epsilon, recResults1);
         ramerDouglasPeucker(lastLine, epsilon, recResults2);
 
@@ -222,13 +222,13 @@ void Stroke::ramerDouglasPeucker(const std::vector<QPointF> &points, qreal epsil
     }
 }
 
-qreal Stroke::angle(const QPointF &a, const QPointF &b, const QPointF &c)
+qreal Stroke::angle(const PointF &a, const PointF &b, const PointF &c)
 {
     const auto ba = a - b;
     const auto bc = c - b;
 
     const auto dot = ba.x() * bc.x() + ba.y() * bc.y();
-    const auto mag = Math::hypot(ba) * Math::hypot(bc);
+    const auto mag = ba.hypot() * bc.hypot();
 
     if (mag == 0) {
         return 0;

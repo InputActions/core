@@ -124,7 +124,7 @@ private slots:
         const auto items = node->as<std::vector<InputActionItem>>();
 
         QCOMPARE(items.size(), 1);
-        QCOMPARE(items[0].mouseMoveAbsolute, QPointF(-1.2, 1.2));
+        QCOMPARE(items[0].mouseMoveAbsolute, PointF(-1.2, 1.2));
     }
 
     void mouseMoveByDelta_noMultiplier__parsesNodeCorrectly()
@@ -151,7 +151,7 @@ private slots:
         const auto items = node->as<std::vector<InputActionItem>>();
 
         QCOMPARE(items.size(), 1);
-        QCOMPARE(items[0].mouseMoveRelative, QPointF(-1.2, 1.2));
+        QCOMPARE(items[0].mouseMoveRelative, PointF(-1.2, 1.2));
     }
 
     void mouseWheel__parsesNodeCorrectly()
@@ -160,7 +160,7 @@ private slots:
         const auto items = node->as<std::vector<InputActionItem>>();
 
         QCOMPARE(items.size(), 1);
-        QCOMPARE(items[0].mouseAxis, QPointF(-1.2, 1.2));
+        QCOMPARE(items[0].mouseAxis, PointF(-1.2, 1.2));
     }
 
     void invalid__throwsInvalidValueConfigException_data()
