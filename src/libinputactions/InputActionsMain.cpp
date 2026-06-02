@@ -3,6 +3,7 @@
 #include "config/ConfigIssueManager.h"
 #include "config/ConfigLoader.h"
 #include "config/GlobalConfig.h"
+#include "helpers/Math.h"
 #include "input/StrokeRecorder.h"
 #include "input/backends/InputBackend.h"
 #include "input/devices/InputDevice.h"
@@ -161,6 +162,26 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
     for (auto i = 0; i < REGEX_MATCH_VARIABLE_COUNT; i++) {
         variableRegistry->registerStored<QString>(QString("match_%1").arg(i));
     }
+    variableRegistry->registerComputed<qreal>("max_finger_distance_percentage", [](auto &value) {
+        const auto *device = g_inputBackend->currentMultiTouchDevice();
+        if (!device) {
+            return;
+        }
+
+        const auto points = device->savedPhysicalState().validTouchPoints();
+        if (points.size() < 2) {
+            return;
+        }
+
+        qreal max{};
+        for (size_t i = 0; i < points.size(); i++) {
+            for (size_t j = i + 1; j < points.size(); j++) {
+                max = std::max(max, Math::hypot(points[i]->position - points[j]->position));
+            }
+        }
+
+        value = max / Math::hypot(device->properties().size());
+    });
     variableRegistry->registerStored(BuiltinVariables::LastTriggerId);
     variableRegistry->registerStored(BuiltinVariables::LastTriggerTimestamp, true);
     variableRegistry->registerComputed<QPointF>("pointer_position_screen_percentage", [pointerPositionGetter](auto &value) {
