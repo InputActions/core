@@ -19,8 +19,8 @@
 #pragma once
 
 #include "Action.h"
-#include <QPointF>
 #include <QThreadPool>
+#include <libinputactions/PointF.h>
 
 namespace InputActions
 {

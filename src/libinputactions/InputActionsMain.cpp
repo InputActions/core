@@ -117,7 +117,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
     });
     variableRegistry->registerStored(BuiltinVariables::DeviceName);
     for (size_t i = 0; i < FINGER_VARIABLE_COUNT; i++) {
-        variableRegistry->registerComputed<QPointF>(QString("finger_%1_initial_position_percentage").arg(i + 1), [i](auto &value) {
+        variableRegistry->registerComputed<PointF>(QString("finger_%1_initial_position_percentage").arg(i + 1), [i](auto &value) {
             const auto *device = g_inputBackend->currentMultiTouchDevice();
             if (!device) {
                 return;
@@ -128,7 +128,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
                 value = touchPoints[i]->initialPosition / device->properties().size();
             }
         });
-        variableRegistry->registerComputed<QPointF>(QString("finger_%1_position_percentage").arg(i + 1), [i](auto &value) {
+        variableRegistry->registerComputed<PointF>(QString("finger_%1_position_percentage").arg(i + 1), [i](auto &value) {
             const auto *device = g_inputBackend->currentMultiTouchDevice();
             if (!device) {
                 return;
@@ -176,7 +176,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         qreal max{};
         for (size_t i = 0; i < points.size(); i++) {
             for (size_t j = i + 1; j < points.size(); j++) {
-                max = std::max(max, Math::hypot(points[i]->position - points[j]->position));
+                max = std::max(max, (points[i]->position - points[j]->position).hypot());
             }
         }
 
@@ -184,10 +184,10 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
     });
     variableRegistry->registerStored(BuiltinVariables::LastTriggerId);
     variableRegistry->registerStored(BuiltinVariables::LastTriggerTimestamp, true);
-    variableRegistry->registerComputed<QPointF>("pointer_position_screen_percentage", [pointerPositionGetter](auto &value) {
+    variableRegistry->registerComputed<PointF>("pointer_position_screen_percentage", [pointerPositionGetter](auto &value) {
         value = pointerPositionGetter->screenPointerPosition();
     });
-    variableRegistry->registerComputed<QPointF>("pointer_position_window_percentage", [pointerPositionGetter, windowProvider](auto &value) {
+    variableRegistry->registerComputed<PointF>("pointer_position_window_percentage", [pointerPositionGetter, windowProvider](auto &value) {
         const auto window = windowProvider->windowUnderPointer();
         if (!window) {
             return;
@@ -198,10 +198,10 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         if (!pointerPos || !windowGeometry) {
             return;
         }
-        const auto translatedPosition = pointerPos.value() - windowGeometry->topLeft();
-        value = QPointF(translatedPosition.x() / windowGeometry->width(), translatedPosition.y() / windowGeometry->height());
+        const auto translatedPosition = pointerPos.value() - static_cast<PointF>(windowGeometry->topLeft());
+        value = PointF(translatedPosition.x() / windowGeometry->width(), translatedPosition.y() / windowGeometry->height());
     });
-    variableRegistry->registerComputed<QPointF>("thumb_initial_position_percentage", [](auto &value) {
+    variableRegistry->registerComputed<PointF>("thumb_initial_position_percentage", [](auto &value) {
         const auto *device = g_inputBackend->currentMultiTouchDevice();
         if (!device) {
             return;
@@ -214,7 +214,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
             }
         }
     });
-    variableRegistry->registerComputed<QPointF>("thumb_position_percentage", [](auto &value) {
+    variableRegistry->registerComputed<PointF>("thumb_position_percentage", [](auto &value) {
         const auto *device = g_inputBackend->currentMultiTouchDevice();
         if (!device) {
             return;

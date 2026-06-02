@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QPointF>
+#include <libinputactions/PointF.h>
 #include <memory>
 
 namespace InputActions
@@ -30,7 +30,7 @@ public:
     PointerPositionSetter() = default;
     virtual ~PointerPositionSetter() = default;
 
-    virtual void setGlobalPointerPosition(const QPointF &value) {};
+    virtual void setGlobalPointerPosition(const PointF &value) {};
 };
 
 inline std::shared_ptr<PointerPositionSetter> g_pointerPositionSetter;

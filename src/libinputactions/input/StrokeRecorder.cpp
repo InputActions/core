@@ -93,7 +93,7 @@ bool StrokeRecorder::touchFrame(const TouchFrameEvent &event)
         return true;
     }
 
-    QPointF center;
+    PointF center;
     const auto validPoints = event.sender()->physicalState().validTouchPoints();
     for (const auto *point : validPoints) {
         center += point->position;

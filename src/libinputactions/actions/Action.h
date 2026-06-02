@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <QPointF>
 #include <QString>
+#include <libinputactions/PointF.h>
 #include <memory>
 
 namespace InputActions
@@ -39,7 +39,7 @@ struct ActionExecutionArguments
         /**
          * For the move_by_delta mouse action.
          */
-        QPointF motionPointDelta;
+        PointF motionPointDelta;
     } inputActionArgs;
 };
 

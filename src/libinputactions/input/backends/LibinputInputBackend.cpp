@@ -34,7 +34,7 @@ bool LibinputInputBackend::keyboardKey(InputDevice *sender, KeyboardKey key, boo
     return handleEvent(KeyboardKeyEvent(sender, key, state));
 }
 
-bool LibinputInputBackend::pointerAxis(InputDevice *sender, const QPointF &delta, bool oneAxisPerEvent)
+bool LibinputInputBackend::pointerAxis(InputDevice *sender, const PointF &delta, bool oneAxisPerEvent)
 {
     if (m_ignoreEvents || !sender) {
         return false;
@@ -186,7 +186,7 @@ bool LibinputInputBackend::touchscreenTouchCancel(InputDevice *sender)
     return handleEvent(TouchCancelEvent(sender));
 }
 
-bool LibinputInputBackend::touchscreenTouchDown(InputDevice *sender, int32_t id, const QPointF &position, const QPointF &rawPosition)
+bool LibinputInputBackend::touchscreenTouchDown(InputDevice *sender, int32_t id, const PointF &position, const PointF &rawPosition)
 {
     if (m_ignoreEvents || !sender) {
         return false;
@@ -204,7 +204,7 @@ bool LibinputInputBackend::touchscreenTouchFrame(InputDevice *sender)
     return handleEvent(TouchFrameEvent(sender));
 }
 
-bool LibinputInputBackend::touchscreenTouchMotion(InputDevice *sender, int32_t id, const QPointF &position, const QPointF &rawPosition)
+bool LibinputInputBackend::touchscreenTouchMotion(InputDevice *sender, int32_t id, const PointF &position, const PointF &rawPosition)
 {
     if (m_ignoreEvents || !sender) {
         return false;

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QPointF>
+#include <libinputactions/PointF.h>
 #include <libinputactions/input/MouseButton.h>
 #include <set>
 
@@ -37,8 +37,8 @@ public:
      * Must be called by the overriding method in order to track pressed buttons.
      */
     virtual void mouseButton(MouseButton button, bool state);
-    virtual void mouseMotion(const QPointF &pos) {}
-    virtual void mouseWheel(const QPointF &delta) {}
+    virtual void mouseMotion(const PointF &pos) {}
+    virtual void mouseWheel(const PointF &delta) {}
 
 protected:
     /**

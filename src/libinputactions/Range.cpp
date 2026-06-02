@@ -17,7 +17,7 @@
 */
 
 #include "Range.h"
-#include <QPointF>
+#include <libinputactions/PointF.h>
 #include <limits>
 
 namespace InputActions
@@ -43,7 +43,7 @@ bool Range<T>::contains(const T &value) const
 }
 
 template<>
-bool Range<QPointF>::contains(const QPointF &value) const
+bool Range<PointF>::contains(const PointF &value) const
 {
     return (!m_min || (value.x() >= m_min->x() && value.y() >= m_min->y())) && (!m_max || (value.x() <= m_max->x() && value.y() <= m_max->y()));
 }
@@ -70,6 +70,6 @@ Range<T>::operator Range<U>() const
 template class Range<uint8_t>;
 template class Range<uint32_t>;
 template class Range<qreal>;
-template class Range<QPointF>;
+template class Range<PointF>;
 
 }

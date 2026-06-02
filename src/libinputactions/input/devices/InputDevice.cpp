@@ -45,7 +45,7 @@ void InputDevice::keyboardKey(KeyboardKey key, bool state)
     m_virtualState.setKeyState(key, state);
 }
 
-void InputDevice::touchscreenTap(const std::vector<QPointF> &points)
+void InputDevice::touchscreenTap(const std::vector<PointF> &points)
 {
     if (m_touchscreenTapTimer.isActive() || !m_physicalState.validTouchPoints().empty()) {
         return;

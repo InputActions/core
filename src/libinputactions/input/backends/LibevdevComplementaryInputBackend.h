@@ -36,7 +36,7 @@ class Device;
 struct SlotData
 {
     bool active{};
-    QPointF position;
+    PointF position;
     uint32_t pressure{};
 };
 

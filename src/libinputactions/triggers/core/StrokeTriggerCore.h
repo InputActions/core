@@ -52,7 +52,7 @@ class Stroke
 {
 public:
     Stroke() = default;
-    Stroke(const std::vector<QPointF> &pointsRaw);
+    Stroke(const std::vector<PointF> &pointsRaw);
     Stroke(const std::vector<Point> &points);
 
     const std::vector<Point> &points() const;
@@ -69,16 +69,16 @@ private:
     /**
      * Converts the specified list of deltas to a path that starts at (0,0).
      */
-    static std::vector<QPointF> deltasToPath(const std::vector<QPointF> &deltas);
+    static std::vector<PointF> deltasToPath(const std::vector<PointF> &deltas);
 
     /**
      * Simplifies the specified path using the Ramer-Douglas–Peucker algorithm.
      */
-    static std::vector<QPointF> simplify(const std::vector<QPointF> &points, qreal epsilon = 10);
+    static std::vector<PointF> simplify(const std::vector<PointF> &points, qreal epsilon = 10);
 
-    static qreal perpendicularDistance(const QPointF &point, const QPointF &lineStart, const QPointF &lineEnd);
-    static void ramerDouglasPeucker(const std::vector<QPointF> &points, qreal epsilon, std::vector<QPointF> &out);
-    static qreal angle(const QPointF &a, const QPointF &b, const QPointF &c);
+    static qreal perpendicularDistance(const PointF &point, const PointF &lineStart, const PointF &lineEnd);
+    static void ramerDouglasPeucker(const std::vector<PointF> &points, qreal epsilon, std::vector<PointF> &out);
+    static qreal angle(const PointF &a, const PointF &b, const PointF &c);
 
     std::vector<Point> m_points;
 };

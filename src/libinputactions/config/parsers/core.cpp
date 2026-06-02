@@ -23,9 +23,9 @@
 #include "separated-string.h"
 #include "triggers.h"
 #include "utils.h"
-#include <QPointF>
 #include <QRegularExpression>
 #include <QString>
+#include <libinputactions/PointF.h>
 #include <libinputactions/Value.h>
 #include <libinputactions/actions/ActionGroup.h>
 #include <libinputactions/actions/CommandAction.h>
@@ -75,8 +75,8 @@ static Value<QVariant> parseVariant(const Node *node, const QMetaType &type)
         return Value<InputDeviceTypes>(node->as<InputDeviceTypes>(true));
     } else if (type.id() == qMetaTypeId<qreal>()) {
         return node->as<Value<qreal>>();
-    } else if (type.id() == qMetaTypeId<QPointF>()) {
-        return node->as<Value<QPointF>>();
+    } else if (type.id() == qMetaTypeId<PointF>()) {
+        return node->as<Value<PointF>>();
     } else if (type.id() == qMetaTypeId<QString>()) {
         return node->as<Value<QString>>();
     }
@@ -396,15 +396,15 @@ void NodeParser<std::vector<InputActionItem>>::parse(const Node *node, std::vect
                     });
                 } else if (action.startsWith("MOVE_BY")) {
                     result.push_back({
-                        .mouseMoveRelative = actionNode->substringNodeQuoted(arguments)->as<QPointF>(),
+                        .mouseMoveRelative = actionNode->substringNodeQuoted(arguments)->as<PointF>(),
                     });
                 } else if (action.startsWith("MOVE_TO")) {
                     result.push_back({
-                        .mouseMoveAbsolute = actionNode->substringNodeQuoted(arguments)->as<QPointF>(),
+                        .mouseMoveAbsolute = actionNode->substringNodeQuoted(arguments)->as<PointF>(),
                     });
                 } else if (action.startsWith("WHEEL")) {
                     result.push_back({
-                        .mouseAxis = actionNode->substringNodeQuoted(arguments)->as<QPointF>(),
+                        .mouseAxis = actionNode->substringNodeQuoted(arguments)->as<PointF>(),
                     });
                 } else {
                     if (actionRaw.contains("++")) {
@@ -565,6 +565,14 @@ template<>
 void NodeParser<KeyboardShortcut>::parse(const Node *node, KeyboardShortcut &result)
 {
     loadMember(result.keys, node);
+}
+
+template<>
+void NodeParser<PointF>::parse(const Node *node, PointF &result)
+{
+    const auto values = parseSeparatedString2<qreal>(node, ',');
+    result.setX(values.first);
+    result.setY(values.second);
 }
 
 template<typename T>

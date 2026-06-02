@@ -20,8 +20,8 @@
 #include "Variable.h"
 #include <QLocale>
 #include <QLoggingCategory>
-#include <QPointF>
 #include <QRegularExpression>
+#include <libinputactions/PointF.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_OPERATIONS, "inputactions.variable.operations")
@@ -84,8 +84,8 @@ std::unique_ptr<VariableOperationsBase> VariableOperationsBase::create(Variable 
         return std::make_unique<VariableOperations<Qt::KeyboardModifiers>>(variable);
     } else if (type.id() == qMetaTypeId<InputDeviceTypes>()) {
         return std::make_unique<VariableOperations<InputDeviceTypes>>(variable);
-    } else if (type.id() == qMetaTypeId<QPointF>()) {
-        return std::make_unique<VariableOperations<QPointF>>(variable);
+    } else if (type.id() == qMetaTypeId<PointF>()) {
+        return std::make_unique<VariableOperations<PointF>>(variable);
     } else if (type.id() == qMetaTypeId<QString>()) {
         return std::make_unique<VariableOperations<QString>>(variable);
     }
@@ -158,7 +158,7 @@ VARIABLEOPERATIONS_COMPARE_QFLAGS(Qt::KeyboardModifier)
 VARIABLEOPERATIONS_COMPARE_QFLAGS(InputDeviceType)
 
 template<>
-bool VariableOperations<QPointF>::compare(const QPointF &left, const QPointF &right, ComparisonOperator comparisonOperator)
+bool VariableOperations<PointF>::compare(const PointF &left, const PointF &right, ComparisonOperator comparisonOperator)
 {
     return VariableOperations<qreal>::compare(left.x(), right.x(), comparisonOperator)
         && VariableOperations<qreal>::compare(left.y(), right.y(), comparisonOperator);
@@ -203,7 +203,7 @@ QString VariableOperations<CursorShape>::toString(const CursorShape &value)
 }
 
 template<>
-QString VariableOperations<QPointF>::toString(const QPointF &value)
+QString VariableOperations<PointF>::toString(const PointF &value)
 {
     return QString("(%1, %2)").arg(value.x()).arg(value.y());
 }

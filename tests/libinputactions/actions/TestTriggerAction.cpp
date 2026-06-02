@@ -78,7 +78,7 @@ private slots:
     void tryExecute_motion_accelerated__passesMotionPointDeltaToAction()
     {
         auto *assertAction = new CustomAction([](const auto &args) {
-            QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(20, 20));
+            QCOMPARE(args.inputActionArgs.motionPointDelta, PointF(20, 20));
         });
 
         TriggerAction action{std::unique_ptr<Action>(assertAction)};
@@ -96,7 +96,7 @@ private slots:
     void tryExecute_motion_unaccelerated__passesMotionPointDeltaToAction()
     {
         auto *assertAction = new CustomAction([](const auto &args) {
-            QCOMPARE(args.inputActionArgs.motionPointDelta, QPointF(10, 10));
+            QCOMPARE(args.inputActionArgs.motionPointDelta, PointF(10, 10));
         });
 
         TriggerAction action{std::unique_ptr<Action>(assertAction)};

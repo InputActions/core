@@ -21,9 +21,9 @@
 #include "ComputedVariable.h"
 #include "StoredVariable.h"
 #include "VariableWrapper.h"
-#include <QPointF>
 #include <QProcess>
 #include <QString>
+#include <libinputactions/PointF.h>
 #include <map>
 #include <memory>
 

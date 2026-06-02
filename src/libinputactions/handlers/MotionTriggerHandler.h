@@ -91,7 +91,7 @@ private:
     /**
      * Contains latest events whose sum is roughly equal to (but never less than) the motion threshold, any events over the threshold are discarded.
      */
-    std::vector<QPointF> m_swipeDeltas;
+    std::vector<PointF> m_swipeDeltas;
     uint32_t m_swipeUpdates{};
 
     bool m_isDeterminingSpeed = false;
@@ -108,7 +108,7 @@ private:
     bool m_circleIsFirstEvent = true;
     QTimer m_circleCoastingTimer;
 
-    std::vector<QPointF> m_deltas;
+    std::vector<PointF> m_deltas;
 
     qreal m_swipeDeltaMultiplier = 1.0;
     uint8_t m_inputEventsToSample = 3;

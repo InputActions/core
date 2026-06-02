@@ -141,14 +141,14 @@ void LibevdevComplementaryInputBackend::handleEvdevEvent(InputDevice *sender, co
                         continue;
                     }
                     if (!previousSlot.active && slot.active) {
-                        const QPointF position(slot.position.x() / data->virtualSize.width() * properties.size().width(),
-                                               slot.position.y() / data->virtualSize.height() * properties.size().height());
+                        const PointF position(slot.position.x() / data->virtualSize.width() * properties.size().width(),
+                                              slot.position.y() / data->virtualSize.height() * properties.size().height());
                         handleEvent(TouchDownEvent(sender, id, position, slot.position, slot.pressure));
                         continue;
                     }
                     if (previousSlot.position != slot.position) {
-                        const QPointF position(slot.position.x() / data->virtualSize.width() * properties.size().width(),
-                                               slot.position.y() / data->virtualSize.height() * properties.size().height());
+                        const PointF position(slot.position.x() / data->virtualSize.width() * properties.size().width(),
+                                              slot.position.y() / data->virtualSize.height() * properties.size().height());
                         handleEvent(TouchMotionEvent(sender, id, position, slot.position));
                     }
                     if (previousSlot.pressure != slot.pressure) {

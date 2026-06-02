@@ -20,10 +20,10 @@
 
 #include "InputDeviceProperties.h"
 #include "InputDeviceState.h"
-#include <QPointF>
 #include <QRegularExpression>
 #include <QSizeF>
 #include <QTimer>
+#include <libinputactions/PointF.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/input/InputEventHandler.h>
 #include <libinputactions/input/KeyboardKey.h>
@@ -114,7 +114,7 @@ public:
      * @param points Raw positions.
      * @see TouchPoint::rawPosition
      */
-    void touchscreenTap(const std::vector<QPointF> &points);
+    void touchscreenTap(const std::vector<PointF> &points);
 
     /**
      * Sets the device's virtual state into a neutral one. In the standalone implementation, the device must be grabbed, otherwise the call will be ignored.
@@ -145,13 +145,13 @@ protected:
      * @param points Raw positions.
      * @see TouchPoint::rawPosition
      */
-    virtual void touchscreenTapDown(const std::vector<QPointF> &points) {}
+    virtual void touchscreenTapDown(const std::vector<PointF> &points) {}
     /**
      * Must generate touch up events and a touch frame event for the specified points.
      * @param points Raw positions.
      * @see TouchPoint::rawPosition
      */
-    virtual void touchscreenTapUp(const std::vector<QPointF> &points) {}
+    virtual void touchscreenTapUp(const std::vector<PointF> &points) {}
 
     bool keyboardKey(const KeyboardKeyEvent &event) override;
 
@@ -175,7 +175,7 @@ private:
     std::unique_ptr<TouchpadTriggerHandler> m_touchpadTriggerHandler;
 
     QTimer m_touchscreenTapTimer;
-    std::vector<QPointF> m_touchscreenTapPoints;
+    std::vector<PointF> m_touchscreenTapPoints;
     std::unique_ptr<TouchscreenTriggerHandler> m_touchscreenTriggerHandler;
 
     InputDeviceState m_physicalState;

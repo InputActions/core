@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <QPointF>
 #include <chrono>
+#include <libinputactions/PointF.h>
 #include <libinputactions/input/KeyboardKey.h>
 #include <set>
 
@@ -55,14 +55,14 @@ struct TouchPoint
     /**
      * Raw position provided by the compositor or evdev. Required for simulating taps. Only used for touchscreens.
      */
-    QPointF rawPosition;
+    PointF rawPosition;
     /**
      * Raw position provided by the compositor or evdev. Required for simulating taps. Only used for touchscreens.
      */
-    QPointF rawInitialPosition;
+    PointF rawInitialPosition;
 
-    QPointF position;
-    QPointF initialPosition;
+    PointF position;
+    PointF initialPosition;
     uint32_t pressure{};
     std::chrono::steady_clock::time_point downTimestamp;
 };

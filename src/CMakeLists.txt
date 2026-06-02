@@ -123,6 +123,7 @@ set(libinputactions_SRCS
     libinputactions/variables/VariableWrapper.h
     libinputactions/globals.cpp
     libinputactions/InputActionsMain.cpp
+    libinputactions/PointF.cpp
     libinputactions/Range.cpp
     libinputactions/Value.cpp
 )

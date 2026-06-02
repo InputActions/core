@@ -24,22 +24,22 @@ private slots:
 
     void handleMotion_swipe__calculatesAnglesCorrectly_data()
     {
-        QTest::addColumn<QPointF>("delta");
+        QTest::addColumn<PointF>("delta");
         QTest::addColumn<qreal>("expectedAngles");
 
-        QTest::addRow("[10, 0] => 0") << QPointF(10, 0) << 0.0;
-        QTest::addRow("[10, -10] => 45") << QPointF(10, -10) << 45.0;
-        QTest::addRow("[0, -10] => 90") << QPointF(0, -10) << 90.0;
-        QTest::addRow("[-10, -10] => 90") << QPointF(-10, -10) << 135.0;
-        QTest::addRow("[-10, 0] => 180") << QPointF(-10, 0) << 180.0;
-        QTest::addRow("[-10, 10] => 225") << QPointF(-10, 10) << 225.0;
-        QTest::addRow("[0, 10] => 270") << QPointF(0, 10) << 270.0;
-        QTest::addRow("[10, 10] => 315") << QPointF(10, 10) << 315.0;
+        QTest::addRow("[10, 0] => 0") << PointF(10, 0) << 0.0;
+        QTest::addRow("[10, -10] => 45") << PointF(10, -10) << 45.0;
+        QTest::addRow("[0, -10] => 90") << PointF(0, -10) << 90.0;
+        QTest::addRow("[-10, -10] => 90") << PointF(-10, -10) << 135.0;
+        QTest::addRow("[-10, 0] => 180") << PointF(-10, 0) << 180.0;
+        QTest::addRow("[-10, 10] => 225") << PointF(-10, 10) << 225.0;
+        QTest::addRow("[0, 10] => 270") << PointF(0, 10) << 270.0;
+        QTest::addRow("[10, 10] => 315") << PointF(10, 10) << 315.0;
     }
 
     void handleMotion_swipe__calculatesAnglesCorrectly()
     {
-        QFETCH(QPointF, delta);
+        QFETCH(PointF, delta);
         QFETCH(qreal, expectedAngles);
 
         EXPECT_CALL(*m_handler,

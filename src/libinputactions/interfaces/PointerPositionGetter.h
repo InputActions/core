@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QPointF>
+#include <libinputactions/PointF.h>
 
 namespace InputActions
 {
@@ -32,11 +32,11 @@ public:
     /**
      * @return Global position in pixels or std::nullopt if not available.
      */
-    virtual std::optional<QPointF> globalPointerPosition() { return {}; }
+    virtual std::optional<PointF> globalPointerPosition() { return {}; }
     /**
      * @return Position relative to the current screen as a percentage ranging from (0.0,0.0) to (1.0,1.0), or std::nullopt if not available.
      */
-    virtual std::optional<QPointF> screenPointerPosition() { return {}; }
+    virtual std::optional<PointF> screenPointerPosition() { return {}; }
 };
 
 inline std::shared_ptr<PointerPositionGetter> g_pointerPositionGetter;

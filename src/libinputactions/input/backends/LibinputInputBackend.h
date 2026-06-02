@@ -45,7 +45,7 @@ protected:
      * @param sender The event will be ignored if nullptr.
      * @returns Whether to block the event.
      */
-    bool pointerAxis(InputDevice *sender, const QPointF &delta, bool oneAxisPerEvent = false);
+    bool pointerAxis(InputDevice *sender, const PointF &delta, bool oneAxisPerEvent = false);
     /**
      * Handles mouse and touchpad buttons.
      * @param sender The event will be ignored if nullptr.
@@ -110,13 +110,13 @@ protected:
      * @param position Physical position in millimeters relative to the top-left corner.
      * @param rawPosition Raw position provided by the compositor or evdev. Required for simulating taps.
      */
-    bool touchscreenTouchDown(InputDevice *sender, int32_t id, const QPointF &position, const QPointF &rawPosition);
+    bool touchscreenTouchDown(InputDevice *sender, int32_t id, const PointF &position, const PointF &rawPosition);
     bool touchscreenTouchFrame(InputDevice *sender);
     /**
      * @param position Physical position in millimeters relative to the top-left corner.
      * @param rawPosition Raw position provided by the compositor or evdev. Required for simulating taps.
      */
-    bool touchscreenTouchMotion(InputDevice *sender, int32_t id, const QPointF &position, const QPointF &rawPosition);
+    bool touchscreenTouchMotion(InputDevice *sender, int32_t id, const PointF &position, const PointF &rawPosition);
     bool touchscreenTouchUp(InputDevice *sender, int32_t id);
 
     /**
@@ -132,7 +132,7 @@ private:
     uint32_t m_fingers{};
     bool m_block{};
 
-    std::optional<QPointF> m_previousPointerPosition;
+    std::optional<PointF> m_previousPointerPosition;
 };
 
 }

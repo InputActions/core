@@ -18,7 +18,7 @@ private slots:
         g_variableRegistry = std::make_shared<VariableRegistry>();
         g_variableRegistry->registerStored<bool>("bool");
         g_variableRegistry->registerStored<qreal>("number");
-        g_variableRegistry->registerStored<QPointF>("point");
+        g_variableRegistry->registerStored<PointF>("point");
         g_variableRegistry->registerStored<QString>("string");
         g_variableRegistry->registerStored<Qt::KeyboardModifiers>("keyboard_modifiers");
     }
@@ -96,8 +96,8 @@ private slots:
 
         const auto &values = condition->values();
         QCOMPARE(values.size(), 2);
-        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), QPointF, QPointF(0.1, 0.2));
-        INPUTACTIONS_COMPARE_VARIANT(values[1].get().value(), QPointF, QPointF(0.3, 0.4));
+        INPUTACTIONS_COMPARE_VARIANT(values[0].get().value(), PointF, PointF(0.1, 0.2));
+        INPUTACTIONS_COMPARE_VARIANT(values[1].get().value(), PointF, PointF(0.3, 0.4));
     }
 
     void between_invalid_oneValue__throwsInvalidValueConfigException()

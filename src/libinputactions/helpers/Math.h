@@ -18,23 +18,22 @@
 
 #pragma once
 
-#include <QPointF>
+#include <libinputactions/PointF.h>
 
 namespace InputActions::Math
 {
 
-qreal atan2(const QPointF &point);
+qreal atan2(const PointF &point);
 /**
  * @return [-180°, 180°]
  */
-qreal atan2deg(const QPointF &point);
+qreal atan2deg(const PointF &point);
 /**
  * @return [0°, 360°]
  */
-qreal atan2deg360(const QPointF &point);
+qreal atan2deg360(const PointF &point);
 qreal radToDeg(qreal rad);
 
-qreal hypot(const QPointF &point);
 qreal hypot(const QSizeF &size);
 
 }
