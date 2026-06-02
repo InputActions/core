@@ -17,7 +17,7 @@
 */
 
 #include "ScriptingEngine.h"
-#include "modules/CoreModule.h"
+#include "modules/core/CoreModule.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/helpers/QString.h>
 #include <libinputactions/helpers/QThread.h>

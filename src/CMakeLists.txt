@@ -81,7 +81,7 @@ set(libinputactions_SRCS
     libinputactions/interfaces/TextInput.cpp
     libinputactions/interfaces/Window.h
     libinputactions/interfaces/WindowProvider.cpp
-    libinputactions/scripting/modules/CoreModule.cpp
+    libinputactions/scripting/modules/core/CoreModule.cpp
     libinputactions/scripting/FunctionWrapper.cpp
     libinputactions/scripting/ScriptAction.cpp
     libinputactions/scripting/ScriptCondition.cpp
