@@ -17,10 +17,16 @@
 */
 
 #include "CoreModule.h"
+#include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
+
+InputBackend *CoreModule::input() const
+{
+    return g_inputBackend.get();
+}
 
 VariableRegistry *CoreModule::variableRegistry() const
 {

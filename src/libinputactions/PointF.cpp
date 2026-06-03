@@ -48,6 +48,11 @@ bool PointF::isNull() const
     return !m_x && !m_y;
 }
 
+PointF PointF::clone() const
+{
+    return {m_x, m_y};
+}
+
 bool PointF::operator==(const PointF &other) const
 {
     return m_x == other.m_x && m_y == other.m_y;

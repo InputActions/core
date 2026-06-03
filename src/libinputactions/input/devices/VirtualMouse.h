@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <libinputactions/PointF.h>
 #include <libinputactions/input/MouseButton.h>
 #include <set>
@@ -28,17 +29,17 @@ namespace InputActions
 /**
  * Virtual device for emitting anonymous mouse events.
  */
-class VirtualMouse
+class VirtualMouse : public QObject
 {
-public:
-    virtual ~VirtualMouse() = default;
+    Q_OBJECT
 
+public:
     /**
      * Must be called by the overriding method in order to track pressed buttons.
      */
     virtual void mouseButton(MouseButton button, bool state);
-    virtual void mouseMotion(const PointF &pos) {}
-    virtual void mouseWheel(const PointF &delta) {}
+    Q_INVOKABLE virtual void mouseMotion(const PointF &pos) {}
+    Q_INVOKABLE virtual void mouseWheel(const PointF &delta) {}
 
 protected:
     /**

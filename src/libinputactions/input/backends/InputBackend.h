@@ -20,6 +20,7 @@
 
 #include <QTimer>
 #include <libinputactions/input/KeyboardKey.h>
+#include <libinputactions/input/devices/VirtualMouse.h>
 #include <libinputactions/variables/VariableRegistry.h>
 #include <linux/input-event-codes.h>
 #include <set>
@@ -38,7 +39,6 @@ class PointerTriggerHandler;
 class TouchpadTriggerHandler;
 class TouchscreenTriggerHandler;
 class VirtualKeyboard;
-class VirtualMouse;
 
 /**
  * Collects input events and forwards them to event handlers. Handlers can only be set before initialization.
@@ -59,6 +59,8 @@ class VirtualMouse;
 class InputBackend : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(VirtualMouse *virtualMouse READ virtualMouse)
 
 public:
     InputBackend();

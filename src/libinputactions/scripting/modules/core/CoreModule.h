@@ -23,14 +23,18 @@
 namespace InputActions
 {
 
+class InputBackend;
 class VariableRegistry;
 
 class CoreModule : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(InputBackend *input READ input)
     Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)
 
 public:
+    InputBackend *input() const;
     VariableRegistry *variableRegistry() const;
 };
 

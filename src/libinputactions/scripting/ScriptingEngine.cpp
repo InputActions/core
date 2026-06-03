@@ -19,6 +19,7 @@
 #include "ScriptingEngine.h"
 #include "modules/core/CoreModule.h"
 #include <libinputactions/InputActionsMain.h>
+#include <libinputactions/PointF.h>
 #include <libinputactions/helpers/QString.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/NotificationManager.h>
@@ -52,7 +53,9 @@ void ScriptingEngine::initialize()
 
     initializeWatchdog();
 
-    registerBuiltinModule("inputactions/core", m_engine->newQObject(new CoreModule));
+    auto coreModule = m_engine->newQObject(new CoreModule);
+    coreModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));
+    registerBuiltinModule("inputactions/core", coreModule);
 
     auto globalObject = m_engine->globalObject();
     globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
