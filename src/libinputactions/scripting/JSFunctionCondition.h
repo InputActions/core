@@ -26,14 +26,14 @@ namespace InputActions
 
 class Node;
 
-class ScriptCondition : public Condition
+class JSFunctionCondition : public Condition
 {
 public:
     /**
      * @param function Called with no arguments when the condition is evaluated. The condition is satisfied when the return value is true.
      * @param sourceNode The configuration node this action was defined in. May be nullptr.
      */
-    ScriptCondition(QJSValue function, std::shared_ptr<const Node> sourceNode);
+    JSFunctionCondition(QJSValue function, std::shared_ptr<const Node> sourceNode);
 
 protected:
     bool doEvaluate(const ConditionEvaluationArguments &arguments) override;

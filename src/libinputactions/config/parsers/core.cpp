@@ -53,8 +53,8 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
-#include <libinputactions/scripting/ScriptAction.h>
-#include <libinputactions/scripting/ScriptCondition.h>
+#include <libinputactions/scripting/JSFunctionAction.h>
+#include <libinputactions/scripting/JSFunctionCondition.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
@@ -154,6 +154,8 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
         auto action = std::make_unique<CommandAction>(commandNode->as<Value<QString>>());
         loadSetter(action, &CommandAction::setWait, node->at("wait"));
         result = std::move(action);
+    } else if (const auto *functionNode = node->at("function")) {
+        result = std::make_unique<JSFunctionAction>(parseFunction(functionNode), functionNode->shared_from_this());
     } else if (const auto *inputNode = node->at("input")) {
         auto action = std::make_unique<InputAction>(inputNode->as<std::vector<InputActionItem>>());
         loadSetter(action, &InputAction::setDelay, node->at("delay"));
@@ -163,8 +165,6 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
         result = std::make_unique<PlasmaGlobalShortcutAction>(shortcut.first, shortcut.second);
     } else if (const auto *replaceTextNode = node->at("replace_text")) {
         result = std::make_unique<ReplaceTextAction>(replaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
-    } else if (const auto *scriptActionNode = node->at("script")) {
-        result = std::make_unique<ScriptAction>(parseFunction(scriptActionNode), scriptActionNode->shared_from_this());
     } else if (const auto *sleepActionNode = node->at("sleep")) {
         result = std::make_unique<SleepAction>(sleepActionNode->as<std::chrono::milliseconds>());
     } else if (const auto *oneNode = node->at("one")) {
@@ -232,8 +232,8 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableRegist
         if (const auto *canReplaceTextNode = node->at("can_replace_text")) {
             return std::make_shared<CanReplaceTextCondition>(canReplaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
         }
-        if (const auto *scriptNode = node->at("script")) {
-            return std::make_shared<ScriptCondition>(parseFunction(scriptNode), scriptNode->shared_from_this());
+        if (const auto *functionNode = node->at("function")) {
+            return std::make_shared<JSFunctionCondition>(parseFunction(functionNode), functionNode->shared_from_this());
         }
 
         if (isLegacy(node)) {

@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "ScriptCondition.h"
+#include "JSFunctionCondition.h"
 #include <libinputactions/config/ConfigIssueManager.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
@@ -24,13 +24,13 @@
 namespace InputActions
 {
 
-ScriptCondition::ScriptCondition(QJSValue function, std::shared_ptr<const Node> sourceNode)
+JSFunctionCondition::JSFunctionCondition(QJSValue function, std::shared_ptr<const Node> sourceNode)
     : m_function(std::move(function))
     , m_sourceNode(std::move(sourceNode))
 {
 }
 
-bool ScriptCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
+bool JSFunctionCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
     const auto result = g_scriptingEngine->call(m_function);
     if (result.isError() && m_sourceNode) {

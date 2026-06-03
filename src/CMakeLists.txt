@@ -83,8 +83,8 @@ set(libinputactions_SRCS
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/scripting/modules/core/CoreModule.cpp
     libinputactions/scripting/FunctionWrapper.cpp
-    libinputactions/scripting/ScriptAction.cpp
-    libinputactions/scripting/ScriptCondition.cpp
+    libinputactions/scripting/JSFunctionAction.cpp
+    libinputactions/scripting/JSFunctionCondition.cpp
     libinputactions/scripting/ScriptingEngine.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp
     libinputactions/triggers/core/MotionTriggerCore.cpp

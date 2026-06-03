@@ -16,31 +16,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <QJSValue>
-#include <libinputactions/actions/Action.h>
+#include "JSFunctionAction.h"
+#include <libinputactions/config/ConfigIssueManager.h>
+#include <libinputactions/config/Node.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-class Node;
-
-class ScriptAction : public Action
+JSFunctionAction::JSFunctionAction(QJSValue function, std::shared_ptr<const Node> sourceNode)
+    : m_function(std::move(function))
+    , m_sourceNode(std::move(sourceNode))
 {
-public:
-    /**
-     * @param function Called with no arguments when the action is executed. The return value is ignored.
-     * @param sourceNode The configuration node this action was defined in. May be nullptr.
-     */
-    ScriptAction(QJSValue function, std::shared_ptr<const Node> sourceNode);
+}
 
-protected:
-    void doExecute(const ActionExecutionArguments &args) override;
-
-private:
-    QJSValue m_function;
-    std::shared_ptr<const Node> m_sourceNode;
-};
+void JSFunctionAction::doExecute(const ActionExecutionArguments &args)
+{
+    const auto result = g_scriptingEngine->call(m_function);
+    if (result.isError() && m_sourceNode) {
+        g_configIssueManager->addIssue(UncaughtScriptErrorConfigIssue(m_sourceNode.get(), result));
+    }
+}
 
 }
