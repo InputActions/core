@@ -103,9 +103,10 @@ void ScriptingEngine::initializeWatchdog()
     });
     m_watchdogTimerThread->start();
 
-    connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingEngine::onWatchdogValueRestartTimerTick);
+    connect(&m_watchdogRestartTimer, &QTimer::timeout, this, &ScriptingEngine::onWatchdogRestartTimerTick);
     m_watchdogRestartTimer.setInterval(WATCHDOG_TIMER_RESET_INTERVAL);
     m_watchdogRestartTimer.start();
+    onWatchdogRestartTimerTick();
 }
 
 void ScriptingEngine::registerBuiltinModule(const QString &name, QJSValue value)
@@ -168,7 +169,7 @@ QJSEngine &ScriptingEngine::ensureEngine()
     return m_engine.value();
 }
 
-void ScriptingEngine::onWatchdogValueRestartTimerTick()
+void ScriptingEngine::onWatchdogRestartTimerTick()
 {
     QMetaObject::invokeMethod(m_watchdogTimer, "start", Qt::QueuedConnection);
 }

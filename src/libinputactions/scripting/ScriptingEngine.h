@@ -73,7 +73,7 @@ public:
     QJSEngine &ensureEngine();
 
 private slots:
-    void onWatchdogValueRestartTimerTick();
+    void onWatchdogRestartTimerTick();
 
 private:
     void initialize();
