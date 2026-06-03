@@ -16,25 +16,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "scripting.h"
-#include <libinputactions/config/ConfigLoader.h>
-#include <libinputactions/config/Node.h>
-#include <libinputactions/scripting/ScriptingEngine.h>
+#pragma once
+
+#include <QJSValue>
+#include <QObject>
 
 namespace InputActions
 {
 
-QJSValue parseFunction(const Node *node)
+class File : public QObject
 {
-    auto result = g_scriptingEngine->evaluate(node->as<QString>());
-    if (result.isError()) {
-        throw UncaughtScriptErrorConfigException(node, result);
-    }
-    if (!result.isCallable()) {
-        throw InvalidValueConfigException(node, "Expression is not a function.");
-    }
+    Q_OBJECT
 
-    return result;
-}
+public:
+    static QJSValue readAllTextAsync(const QString &path);
+    static QJSValue writeAllTextAsync(const QString &path, const QString &text);
+};
 
 }

@@ -18,7 +18,6 @@
 
 #include "ConfigIssue.h"
 #include "ConfigIssueManager.h"
-#include "ConfigLoader.h"
 #include "Node.h"
 #include <QRegularExpression>
 #include <libinputactions/ansi-escape-codes.h>
@@ -188,7 +187,7 @@ QString UnusedPropertyConfigIssue::message() const
 
 UncaughtScriptErrorConfigIssue::UncaughtScriptErrorConfigIssue(const Node *node, QJSValue error)
     : ConfigIssue(node)
-    , m_message(g_configLoader->futureScriptingEngine().errorToString(error))
+    , m_message(g_scriptingEngine->errorToString(error))
 {
 }
 
@@ -210,7 +209,7 @@ QString MissingRequiredPropertyConfigException::message() const
 
 UncaughtScriptErrorConfigException::UncaughtScriptErrorConfigException(const Node *node, QJSValue error)
     : ConfigException(node)
-    , m_message(g_configLoader->futureScriptingEngine().errorToString(error))
+    , m_message(g_scriptingEngine->errorToString(error))
 {
 }
 

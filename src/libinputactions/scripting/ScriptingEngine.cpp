@@ -17,7 +17,9 @@
 */
 
 #include "ScriptingEngine.h"
+#include "Promise.h"
 #include "modules/core/CoreModule.h"
+#include "modules/fs/File.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/PointF.h>
 #include <libinputactions/helpers/QString.h>
@@ -53,9 +55,25 @@ void ScriptingEngine::initialize()
 
     initializeWatchdog();
 
+    m_promiseFactory = m_engine->evaluate(R"(
+        holder => {
+            return new Promise((fulfill, reject) => {
+                holder.fulfill = fulfill;
+                holder.reject = reject;
+            });
+        }
+    )");
+
     auto coreModule = m_engine->newQObject(new CoreModule);
     coreModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));
     registerBuiltinModule("inputactions/core", coreModule);
+
+    auto fsModule = m_engine->newObject();
+    fsModule.setProperty("File", m_engine->newQMetaObject(&File::staticMetaObject));
+    auto file = fsModule.property("File");
+    file.setProperty("readAllTextAsync", newFunction<QJSValue, QString>(&File::readAllTextAsync));
+    file.setProperty("writeAllTextAsync", newFunction<QJSValue, QString, QString>(&File::writeAllTextAsync));
+    registerBuiltinModule("inputactions/fs", fsModule);
 
     auto globalObject = m_engine->globalObject();
     globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
@@ -133,6 +151,13 @@ QString ScriptingEngine::errorToString(const QJSValue &error) const
 void ScriptingEngine::logError(const QJSValue &error) const
 {
     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught script error\n" << errorToString(error);
+}
+
+Promise ScriptingEngine::newPromise()
+{
+    const auto holder = ensureEngine().newObject();
+    const auto promise = m_promiseFactory.call({holder});
+    return {this, promise, holder.property("fulfill"), holder.property("reject")};
 }
 
 QJSEngine &ScriptingEngine::ensureEngine()

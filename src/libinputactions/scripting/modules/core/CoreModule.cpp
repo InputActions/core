@@ -17,7 +17,9 @@
 */
 
 #include "CoreModule.h"
+#include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/input/backends/InputBackend.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions

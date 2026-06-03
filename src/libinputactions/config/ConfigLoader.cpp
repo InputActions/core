@@ -54,8 +54,6 @@ struct Config
 
     std::vector<InputDeviceRule> deviceRules;
     std::set<KeyboardKey> emergencyCombination = {KEY_BACKSPACE, KEY_SPACE, KEY_ENTER};
-
-    std::unique_ptr<ScriptingEngine> scriptingEngine = std::make_unique<ScriptingEngine>();
 };
 
 void ConfigLoader::loadEmpty()
@@ -65,14 +63,17 @@ void ConfigLoader::loadEmpty()
 
 bool ConfigLoader::load(const ConfigLoadSettings &settings)
 {
+    auto scriptingEngine = g_scriptingEngine;
     try {
         qCDebug(INPUTACTIONS, "Reloading config");
         const auto rawConfig = settings.config.value_or(g_configProvider->currentConfig());
 
         g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
+        g_scriptingEngine = std::make_shared<ScriptingEngine>();
         auto config = createConfig(rawConfig);
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
+        g_scriptingEngine = scriptingEngine;
         g_configIssueManager->addIssue(e);
     }
 
@@ -101,14 +102,13 @@ Config ConfigLoader::createConfig(const QString &raw)
     }
 
     Config config;
-    m_scriptingEngine = config.scriptingEngine.get();
 
     if (const auto *scriptingNode = root->mapAt("scripting")) {
         if (const auto *scriptsNode = scriptingNode->at("scripts")) {
             for (const auto *scriptNode : scriptsNode->sequenceItems()) {
                 const auto *sourceNode = scriptNode->at("source", true);
                 const auto source = sourceNode->as<QString>();
-                const auto result = m_scriptingEngine->evaluate(sourceNode->as<QString>());
+                const auto result = g_scriptingEngine->evaluate(sourceNode->as<QString>());
                 if (result.isError()) {
                     throw UncaughtScriptErrorConfigException(sourceNode, result);
                 }
@@ -152,7 +152,6 @@ void ConfigLoader::activateConfig(Config config, bool initialize)
     g_inputBackend->reset(); // Okay because required keys are not cleared
     g_actionExecutor->clearQueue();
     g_actionExecutor->waitForDone();
-    g_scriptingEngine.reset();
 
     g_globalConfig->setAllowExternalVariableAccess(config.allowExternalVariableAccess);
     g_globalConfig->setAutoReload(config.autoReload);
@@ -170,7 +169,6 @@ void ConfigLoader::activateConfig(Config config, bool initialize)
     g_inputBackend->setDeviceRules(config.deviceRules);
     g_inputBackend->setEmergencyCombination(config.emergencyCombination);
 
-    g_scriptingEngine = std::move(config.scriptingEngine);
     if (initialize) {
         g_inputBackend->initialize();
     }

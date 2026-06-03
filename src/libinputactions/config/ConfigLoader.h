@@ -27,7 +27,6 @@ namespace InputActions
 {
 
 struct Config;
-class ScriptingEngine;
 
 struct ConfigLoadSettings
 {
@@ -45,11 +44,6 @@ class ConfigLoader
 {
 public:
     /**
-     * Scripting engine for the configuration that is currently being loaded.
-     */
-    ScriptingEngine &futureScriptingEngine() const { return *m_scriptingEngine; }
-
-    /**
      * @return Whether the operation was successful. Errors may be obtained from ConfigIssueManager.
      */
     bool load(const ConfigLoadSettings &settings = {});
@@ -62,8 +56,6 @@ public:
 private:
     Config createConfig(const QString &raw);
     void activateConfig(Config config, bool initialize);
-
-    ScriptingEngine *m_scriptingEngine;
 };
 
 inline std::shared_ptr<ConfigLoader> g_configLoader;

@@ -26,6 +26,8 @@
 namespace InputActions
 {
 
+class Promise;
+
 /**
  * Lazily initializated.
  */
@@ -50,6 +52,11 @@ public:
     QString errorToString(const QJSValue &error) const;
     void logError(const QJSValue &error) const;
 
+    /**
+     * Thread-safe.
+     */
+    void throwError(const QString &message) const;
+
     template<typename TReturn, typename... TArgs, typename TFunction>
     QJSValue newFunction(TFunction &&function)
     {
@@ -58,14 +65,17 @@ public:
         return evaluate(QString("obj => (...args) => obj.call(args);")).call({engine.newQObject(wrapper)});
     }
 
-private slots:
-    void onWatchdogValueRestartTimerTick();
+    Promise newPromise();
 
-private:
     /**
      * Returns an instance of the engine. Initializes the engine if it has not been initialized yet.
      */
     QJSEngine &ensureEngine();
+
+private slots:
+    void onWatchdogValueRestartTimerTick();
+
+private:
     void initialize();
     void initializeWatchdog();
 
@@ -74,16 +84,13 @@ private:
     std::optional<QJSEngine> m_engine;
     std::map<QString, QJSValue> m_builtinModules;
 
+    QJSValue m_promiseFactory;
+
     QThread *m_watchdogTimerThread{};
     QTimer *m_watchdogTimer{};
     QTimer m_watchdogRestartTimer;
 };
 
-/**
- * Do not use this instance during the creation of a configuration, use ConfigLoader::futureScriptingEngine instead.
- *
- * A new instance is created on each config activation.
- */
-inline std::unique_ptr<ScriptingEngine> g_scriptingEngine;
+inline std::shared_ptr<ScriptingEngine> g_scriptingEngine;
 
 }
