@@ -22,6 +22,7 @@
 #include "interfaces/implementations/DBusPlasmaGlobalShortcutInvoker.h"
 #include "interfaces/implementations/FileConfigProvider.h"
 #include "interfaces/implementations/ProcessRunnerImpl.h"
+#include "scripting/ScriptingEngine.h"
 #include "variables/VariableRegistry.h"
 #include <QFile>
 #include <QStandardPaths>
@@ -53,6 +54,7 @@ InputActionsMain::~InputActionsMain()
     g_globalConfig.reset();
     g_configProvider.reset();
     g_inputBackend.reset();
+    g_scriptingEngine.reset();
     g_strokeRecorder.reset();
     g_variableRegistry.reset();
 }
@@ -98,6 +100,7 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_configLoader);
     setMissingImplementation(g_globalConfig);
     setMissingImplementation(g_inputBackend);
+    setMissingImplementation(g_scriptingEngine);
     setMissingImplementation(g_strokeRecorder);
     setMissingImplementation(g_variableRegistry);
 }

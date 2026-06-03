@@ -46,6 +46,8 @@ public:
 
     Q_INVOKABLE double hypot() const;
 
+    Q_INVOKABLE PointF clone() const;
+
     bool operator==(const PointF &other) const;
     bool operator!=(const PointF &other) const;
 

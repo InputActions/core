@@ -16,27 +16,31 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
-#include <QJSEngine>
+#pragma once
+
+#include <QJSValue>
+#include <libinputactions/actions/Action.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
-{
-    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
-}
+class Node;
 
-const VariableOperationsBase *Variable::operations() const
+class JSFunctionAction : public Action
 {
-    return m_operations.get();
-}
+public:
+    /**
+     * @param function Called with no arguments when the action is executed. The return value is ignored.
+     * @param sourceNode The configuration node this action was defined in. May be nullptr.
+     */
+    JSFunctionAction(QJSValue function, std::shared_ptr<const Node> sourceNode);
 
-const QMetaType &Variable::type() const
-{
-    return m_type;
-}
+protected:
+    void doExecute(const ActionExecutionArguments &args) override;
+
+private:
+    QJSValue m_function;
+    std::shared_ptr<const Node> m_sourceNode;
+};
 
 }

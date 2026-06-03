@@ -21,6 +21,7 @@
 #include "ComputedVariable.h"
 #include "StoredVariable.h"
 #include "VariableWrapper.h"
+#include <QObject>
 #include <QProcess>
 #include <QString>
 #include <libinputactions/PointF.h>
@@ -56,11 +57,18 @@ struct BuiltinVariables
     inline static const VariableInfo<qreal> LastTriggerTimestamp{QStringLiteral("last_trigger_timestamp")};
 };
 
-class VariableRegistry
+class VariableRegistry : public QObject
 {
+    Q_OBJECT
+
 public:
     VariableRegistry();
-    ~VariableRegistry();
+    ~VariableRegistry() override;
+
+    /**
+     * @return The variable with the specified name or nullptr if not found.
+     */
+    Q_INVOKABLE Variable *variable(const QString &name) const;
 
     template<typename T>
     std::optional<VariableWrapper<T>> variable(const VariableInfo<T> &info) const
@@ -87,10 +95,6 @@ public:
     }
 
     bool contains(const QString &name) const;
-    /**
-     * @return The variable with the specified name or nullptr if not found.
-     */
-    Variable *variable(const QString &name) const;
 
     Variable *registerVariable(const QString &name, std::unique_ptr<Variable> variable, bool hidden = false);
     template<typename T>

@@ -18,6 +18,7 @@ set(libinputactions_SRCS
     libinputactions/config/parsers/flags.cpp
     libinputactions/config/parsers/NodeParser.h
     libinputactions/config/parsers/qt.cpp
+    libinputactions/config/parsers/scripting.cpp
     libinputactions/config/parsers/separated-string.h
     libinputactions/config/parsers/std.cpp
     libinputactions/config/parsers/triggers.cpp
@@ -80,6 +81,13 @@ set(libinputactions_SRCS
     libinputactions/interfaces/TextInput.cpp
     libinputactions/interfaces/Window.h
     libinputactions/interfaces/WindowProvider.cpp
+    libinputactions/scripting/modules/core/CoreModule.cpp
+    libinputactions/scripting/modules/fs/File.cpp
+    libinputactions/scripting/FunctionWrapper.cpp
+    libinputactions/scripting/JSFunctionAction.cpp
+    libinputactions/scripting/JSFunctionCondition.cpp
+    libinputactions/scripting/Promise.cpp
+    libinputactions/scripting/ScriptingEngine.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp
     libinputactions/triggers/core/MotionTriggerCore.cpp
     libinputactions/triggers/core/StrokeTriggerCore.cpp
@@ -133,6 +141,7 @@ target_link_libraries(libinputactions PUBLIC
     libevdev-cpp
     Qt6::Core
     Qt6::DBus
+    Qt6::Qml
     ${LIBEVDEV_LIBRARIES}
 )
 target_compile_definitions(libinputactions PUBLIC TEST_VIRTUAL=$<IF:$<BOOL:${BUILD_TESTS}>,virtual,>)

@@ -16,27 +16,24 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
-#include <QJSEngine>
+#include "scripting.h"
+#include <libinputactions/config/Node.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+QJSValue parseFunction(const Node *node)
 {
-    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
-}
+    auto result = g_scriptingEngine->evaluate(node->as<QString>());
+    if (result.isError()) {
+        throw UncaughtScriptErrorConfigException(node, result);
+    }
+    if (!result.isCallable()) {
+        throw InvalidValueConfigException(node, "Expression is not a function.");
+    }
 
-const VariableOperationsBase *Variable::operations() const
-{
-    return m_operations.get();
-}
-
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    return result;
 }
 
 }

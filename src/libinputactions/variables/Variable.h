@@ -19,14 +19,17 @@
 #pragma once
 
 #include "VariableOperations.h"
+#include <QObject>
 #include <QString>
-#include <typeindex>
 
 namespace InputActions
 {
 
-class Variable
+class Variable : public QObject
 {
+    Q_OBJECT
+    Q_PROPERTY(QVariant value READ value)
+
 public:
     Variable(QMetaType type);
     virtual ~Variable() = default;

@@ -20,6 +20,7 @@
 #include "containers.h"
 #include "flags.h"
 #include "globals.h"
+#include "scripting.h"
 #include "separated-string.h"
 #include "triggers.h"
 #include "utils.h"
@@ -39,6 +40,7 @@
 #include <libinputactions/conditions/VariableCondition.h>
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/config/ConfigIssueManager.h>
+#include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/handlers/KeyboardTriggerHandler.h>
 #include <libinputactions/handlers/MouseTriggerHandler.h>
@@ -51,6 +53,9 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
+#include <libinputactions/scripting/JSFunctionAction.h>
+#include <libinputactions/scripting/JSFunctionCondition.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/keyboard/KeyboardShortcutTrigger.h>
 #include <libinputactions/triggers/mouse/MouseTrigger.h>
@@ -149,6 +154,8 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
         auto action = std::make_unique<CommandAction>(commandNode->as<Value<QString>>());
         loadSetter(action, &CommandAction::setWait, node->at("wait"));
         result = std::move(action);
+    } else if (const auto *functionNode = node->at("function")) {
+        result = std::make_unique<JSFunctionAction>(parseFunction(functionNode), functionNode->shared_from_this());
     } else if (const auto *inputNode = node->at("input")) {
         auto action = std::make_unique<InputAction>(inputNode->as<std::vector<InputActionItem>>());
         loadSetter(action, &InputAction::setDelay, node->at("delay"));
@@ -224,6 +231,9 @@ std::shared_ptr<Condition> parseCondition(const Node *node, const VariableRegist
 
         if (const auto *canReplaceTextNode = node->at("can_replace_text")) {
             return std::make_shared<CanReplaceTextCondition>(canReplaceTextNode->as<std::vector<TextSubstitutionRule>>(true));
+        }
+        if (const auto *functionNode = node->at("function")) {
+            return std::make_shared<JSFunctionCondition>(parseFunction(functionNode), functionNode->shared_from_this());
         }
 
         if (isLegacy(node)) {

@@ -16,27 +16,20 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
-#include <QJSEngine>
+#include "FunctionWrapper.h"
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+FunctionWrapper::FunctionWrapper(QJSEngine *engine, std::function<QJSValue(QJSValueList args)> function)
+    : m_engine(engine)
+    , m_function(std::move(function))
 {
-    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
 }
 
-const VariableOperationsBase *Variable::operations() const
+QJSValue FunctionWrapper::call(QJSValueList args)
 {
-    return m_operations.get();
-}
-
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    return m_function(args);
 }
 
 }

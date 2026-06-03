@@ -17,7 +17,7 @@ jobs:
         run: pacman -Syu --noconfirm
 
       - name: Install dependencies
-        run: pacman -S --needed --noconfirm base-devel git extra-cmake-modules qt6-tools yaml-cpp gtest
+        run: pacman -S --needed --noconfirm base-devel git extra-cmake-modules qt6-declarative qt6-tools yaml-cpp gtest
 
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

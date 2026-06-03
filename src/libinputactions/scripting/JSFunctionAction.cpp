@@ -16,27 +16,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
-#include <QJSEngine>
+#include "JSFunctionAction.h"
+#include <libinputactions/config/ConfigIssueManager.h>
+#include <libinputactions/config/Node.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+JSFunctionAction::JSFunctionAction(QJSValue function, std::shared_ptr<const Node> sourceNode)
+    : m_function(std::move(function))
+    , m_sourceNode(std::move(sourceNode))
 {
-    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
 }
 
-const VariableOperationsBase *Variable::operations() const
+void JSFunctionAction::doExecute(const ActionExecutionArguments &args)
 {
-    return m_operations.get();
-}
-
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    const auto result = g_scriptingEngine->call(m_function);
+    if (result.isError() && m_sourceNode) {
+        g_configIssueManager->addIssue(UncaughtScriptErrorConfigIssue(m_sourceNode.get(), result));
+    }
 }
 
 }

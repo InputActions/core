@@ -16,27 +16,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
-#include <QJSEngine>
+#include "CoreModule.h"
+#include <libinputactions/input/backends/InputBackend.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+InputBackend *CoreModule::input() const
 {
-    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
+    return g_inputBackend.get();
 }
 
-const VariableOperationsBase *Variable::operations() const
+VariableRegistry *CoreModule::variableRegistry() const
 {
-    return m_operations.get();
-}
-
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    return g_variableRegistry.get();
 }
 
 }

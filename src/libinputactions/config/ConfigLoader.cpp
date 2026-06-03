@@ -20,6 +20,7 @@
 #include "ConfigIssueManager.h"
 #include "GlobalConfig.h"
 #include "Node.h"
+#include "config/ConfigIssue.h"
 #include "interfaces/ConfigProvider.h"
 #include "parsers/containers.h"
 #include "parsers/core.h"
@@ -33,6 +34,7 @@
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/NotificationManager.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
@@ -61,14 +63,17 @@ void ConfigLoader::loadEmpty()
 
 bool ConfigLoader::load(const ConfigLoadSettings &settings)
 {
+    auto scriptingEngine = g_scriptingEngine;
     try {
         qCDebug(INPUTACTIONS, "Reloading config");
         const auto rawConfig = settings.config.value_or(g_configProvider->currentConfig());
 
         g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
+        g_scriptingEngine = std::make_shared<ScriptingEngine>();
         auto config = createConfig(rawConfig);
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
+        g_scriptingEngine = scriptingEngine;
         g_configIssueManager->addIssue(e);
     }
 
@@ -97,6 +102,20 @@ Config ConfigLoader::createConfig(const QString &raw)
     }
 
     Config config;
+
+    if (const auto *scriptingNode = root->mapAt("scripting")) {
+        if (const auto *scriptsNode = scriptingNode->at("scripts")) {
+            for (const auto *scriptNode : scriptsNode->sequenceItems()) {
+                const auto *sourceNode = scriptNode->at("source", true);
+                const auto source = sourceNode->as<QString>();
+                const auto result = g_scriptingEngine->evaluate(sourceNode->as<QString>());
+                if (result.isError()) {
+                    throw UncaughtScriptErrorConfigException(sourceNode, result);
+                }
+            }
+        }
+    }
+
     loadMember(config.autoReload, root->at("autoreload"));
     loadMember(config.allowExternalVariableAccess, root->at("external_variable_access"));
     if (const auto *notificationsNode = root->mapAt("notifications")) {

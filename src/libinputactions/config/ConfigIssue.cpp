@@ -21,6 +21,8 @@
 #include "Node.h"
 #include <QRegularExpression>
 #include <libinputactions/ansi-escape-codes.h>
+#include <libinputactions/helpers/QString.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
@@ -183,6 +185,17 @@ QString UnusedPropertyConfigIssue::message() const
     return QString("Property '%1' does not exist or has no effect in this context.").arg(m_property);
 }
 
+UncaughtScriptErrorConfigIssue::UncaughtScriptErrorConfigIssue(const Node *node, QJSValue error)
+    : ConfigIssue(node)
+    , m_message(g_scriptingEngine->errorToString(error))
+{
+}
+
+QString UncaughtScriptErrorConfigIssue::message() const
+{
+    return QString("Uncaught script error\n\n%1").arg(m_message);
+}
+
 MissingRequiredPropertyConfigException::MissingRequiredPropertyConfigException(const Node *node, QString property)
     : ConfigException(node)
     , m_property(std::move(property))
@@ -194,6 +207,17 @@ QString MissingRequiredPropertyConfigException::message() const
     return QString("Required property '%1' was not specified.").arg(m_property);
 }
 
+UncaughtScriptErrorConfigException::UncaughtScriptErrorConfigException(const Node *node, QJSValue error)
+    : ConfigException(node)
+    , m_message(g_scriptingEngine->errorToString(error))
+{
+}
+
+QString UncaughtScriptErrorConfigException::message() const
+{
+    return QString("Uncaught script error\n\n%1").arg(m_message);
+}
+
 YamlCppConfigException::YamlCppConfigException(TextPosition position, QString message)
     : ConfigException(position)
     , m_message(std::move(message))
@@ -201,6 +225,16 @@ YamlCppConfigException::YamlCppConfigException(TextPosition position, QString me
     m_message.replace(QRegularExpression("yaml-cpp: error at line \\d+, column \\d+: "), "");
     m_message[0] = m_message[0].toUpper();
     m_message += ".";
+}
+
+ScriptingDisabledConfigException::ScriptingDisabledConfigException()
+    : ConfigException(TextPosition())
+{
+}
+
+QString ScriptingDisabledConfigException::message() const
+{
+    return "Scripting is currently not available in the standalone implementation for security reasons. Remove all scripts from the configuration.";
 }
 
 }
