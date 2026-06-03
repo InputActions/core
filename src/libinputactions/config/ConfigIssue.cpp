@@ -227,4 +227,14 @@ YamlCppConfigException::YamlCppConfigException(TextPosition position, QString me
     m_message += ".";
 }
 
+ScriptingDisabledConfigException::ScriptingDisabledConfigException()
+    : ConfigException(TextPosition())
+{
+}
+
+QString ScriptingDisabledConfigException::message() const
+{
+    return "Scripting is currently not available in the standalone implementation for security reasons. Remove all scripts from the configuration.";
+}
+
 }

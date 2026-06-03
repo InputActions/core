@@ -22,6 +22,7 @@
 #include "modules/fs/File.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/PointF.h>
+#include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/helpers/QString.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/NotificationManager.h>
@@ -163,6 +164,10 @@ Promise ScriptingEngine::newPromise()
 
 QJSEngine &ScriptingEngine::ensureEngine()
 {
+    if (disabled) {
+        throw ScriptingDisabledConfigException();
+    }
+
     if (!m_engine) {
         initialize();
     }

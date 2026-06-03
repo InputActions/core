@@ -252,4 +252,14 @@ private:
     QString m_message;
 };
 
+class ScriptingDisabledConfigException
+    : public ConfigException
+    , public virtual Copyable<ScriptingDisabledConfigException, ConfigIssue>
+{
+public:
+    ScriptingDisabledConfigException();
+
+    QString message() const override;
+};
+
 }

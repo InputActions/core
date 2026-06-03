@@ -72,6 +72,8 @@ public:
      */
     QJSEngine &ensureEngine();
 
+    static inline bool disabled = false; // temporary
+
 private slots:
     void onWatchdogRestartTimerTick();
 
