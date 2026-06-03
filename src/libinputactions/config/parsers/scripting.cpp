@@ -17,7 +17,6 @@
 */
 
 #include "scripting.h"
-#include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/config/Node.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 

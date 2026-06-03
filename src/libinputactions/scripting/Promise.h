@@ -19,7 +19,6 @@
 #pragma once
 
 #include "ScriptingEngine.h"
-#include "helpers/QThread.h"
 #include <QJSValue>
 #include <libinputactions/helpers/QThread.h>
 
@@ -29,7 +28,7 @@ namespace InputActions
 class ScriptingEngine;
 
 /**
- * Wraps a function in a QObject to make it invokable from JavaScript.
+ * Wraps a JavaScript Promise.
  */
 class Promise
 {

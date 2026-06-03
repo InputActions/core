@@ -22,7 +22,6 @@
 #include "StoredVariable.h"
 #include "VariableWrapper.h"
 #include <QObject>
-#include <QPointF>
 #include <QProcess>
 #include <QString>
 #include <libinputactions/PointF.h>

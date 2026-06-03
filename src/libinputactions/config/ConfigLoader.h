@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <QJSEngine>
 #include <QString>
 #include <memory>
 #include <optional>
