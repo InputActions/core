@@ -25,7 +25,7 @@
 namespace InputActions
 {
 
-struct Config;
+struct ConfigData;
 
 struct ConfigLoadSettings
 {
@@ -53,8 +53,8 @@ public:
     void loadEmpty();
 
 private:
-    Config createConfig(const QString &raw);
-    void activateConfig(Config config, bool initialize);
+    ConfigData createConfig(const QString &raw);
+    void activateConfig(ConfigData config, bool initialize);
 };
 
 inline std::shared_ptr<ConfigLoader> g_configLoader;

@@ -17,11 +17,26 @@
 */
 
 #include "CoreModule.h"
+#include "Config.h"
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/variables/VariableRegistry.h>
+#include <QJSEngine>
 
 namespace InputActions
 {
+
+CoreModule::CoreModule()
+    : m_config(std::make_unique<Config>())
+{
+    QJSEngine::setObjectOwnership(m_config.get(), QJSEngine::CppOwnership);
+}
+
+CoreModule::~CoreModule() = default;
+
+Config *CoreModule::config() const
+{
+    return m_config.get();
+}
 
 InputBackend *CoreModule::input() const
 {

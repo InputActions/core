@@ -26,6 +26,7 @@
 namespace InputActions
 {
 
+class CoreModule;
 class Promise;
 
 /**
@@ -36,8 +37,13 @@ class ScriptingEngine : public QObject
     Q_OBJECT
 
 public:
-    ScriptingEngine() = default;
+    ScriptingEngine();
     ~ScriptingEngine() override;
+
+    /**
+     * Nullptr if engine not initialized.
+     */
+    CoreModule *coreModule() const;
 
     /**
      * Same as QJSEngine::evaluate but with error logging.
@@ -84,6 +90,8 @@ private:
     void registerBuiltinModule(const QString &name, QJSValue value);
 
     std::optional<QJSEngine> m_engine;
+
+    std::unique_ptr<CoreModule> m_coreModule;
     std::map<QString, QJSValue> m_builtinModules;
 
     QJSValue m_promiseFactory;
