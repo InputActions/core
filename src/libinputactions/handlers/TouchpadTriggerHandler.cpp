@@ -128,7 +128,7 @@ bool TouchpadTriggerHandler::pointerButton(const PointerButtonEvent &event)
                     endTriggers(TriggerType::Tap);
                     block = result.block;
                 }
-                event.sender()->savePhysicalState();
+                updateVariables(event.sender());
                 setState(State::None);
             }
             break;
@@ -175,7 +175,7 @@ bool TouchpadTriggerHandler::touchDown(const TouchDownEvent &event)
             break;
     }
 
-    event.sender()->savePhysicalState();
+    updateVariables(event.sender());
     return false;
 }
 
@@ -194,7 +194,7 @@ bool TouchpadTriggerHandler::touchMotion(const TouchMotionEvent &event)
             break;
     }
 
-    event.sender()->savePhysicalState();
+    updateVariables(event.sender());
     return false;
 }
 
@@ -233,7 +233,7 @@ bool TouchpadTriggerHandler::touchUp(const TouchUpEvent &event)
         return false;
     }
 
-    event.sender()->savePhysicalState();
+    updateVariables(event.sender());
     if (event.sender()->physicalState().validTouchPoints().empty()) {
         setState(State::None);
         endTriggers(TriggerType::All);
@@ -246,7 +246,7 @@ bool TouchpadTriggerHandler::touchpadClick(const TouchpadClickEvent &event)
 {
     if (event.state()) {
         cancelTriggers(TriggerType::Press);
-        event.sender()->savePhysicalState();
+        updateVariables(event.sender());
         setState(activateTriggers(TriggerType::Click).block ? State::TouchpadButtonDownBlocked : State::TouchpadButtonDown);
     } else if (m_state == State::TouchpadButtonDown || m_state == State::TouchpadButtonDownBlocked) {
         setState(event.sender()->physicalState().validTouchPoints().empty() ? State::None : State::Touch);
@@ -338,7 +338,7 @@ void TouchpadTriggerHandler::setState(State state)
             m_libinputTapTimeoutTimer.start(LIBINPUT_TAP_TIMEOUT);
             break;
         case State::None:
-            m_device->savePhysicalState();
+            updateVariables();
             break;
     }
 
