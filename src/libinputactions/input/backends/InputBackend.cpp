@@ -178,9 +178,6 @@ void InputBackend::removeDevice(const InputDevice *device)
     qCDebug(INPUTACTIONS).noquote().nospace() << "Device removed (name: " << device->name() << ")";
     std::erase(m_devices, device);
     createEventHandlerChain();
-    if (m_currentMultiTouchDevice == device) {
-        m_currentMultiTouchDevice = {};
-    }
     if (m_currentTouchscreen == device) {
         m_currentTouchscreen = {};
     }
@@ -214,12 +211,8 @@ bool InputBackend::handleEvent(const InputEvent &event)
         return false;
     }
 
-    const auto deviceType = event.sender()->type();
-    if (deviceType == InputDeviceType::Touchscreen) {
+    if (event.sender()->type() == InputDeviceType::Touchscreen) {
         m_currentTouchscreen = event.sender();
-    }
-    if (deviceType == InputDeviceType::Touchpad || deviceType == InputDeviceType::Touchscreen) {
-        m_currentMultiTouchDevice = event.sender();
     }
 
     event.sender()->handleEvent(event);

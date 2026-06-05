@@ -123,7 +123,7 @@ bool TouchscreenTriggerHandler::touchDown(const TouchDownEvent &event)
 
     setBlockAndUpdateVirtualDeviceState(true); // Block by default
     beginGestureRecognition();
-    m_device->savePhysicalState();
+    updateVariables(m_device);
 
     m_preTouchUpPoints.clear();
     for (const auto *point : event.sender()->physicalState().validTouchPoints()) {
@@ -159,7 +159,7 @@ bool TouchscreenTriggerHandler::touchFrame(const TouchFrameEvent &event)
     }
 
     if (m_state != State::WaitingForTouchUps) {
-        m_device->savePhysicalState();
+        updateVariables(m_device);
     }
 
     switch (m_state) {
@@ -290,7 +290,7 @@ void TouchscreenTriggerHandler::handleTouchUp()
     if (!m_device->physicalState().validTouchPoints().empty()) {
         cancelTriggers(TriggerType::All);
         beginGestureRecognition();
-        m_device->savePhysicalState();
+        updateVariables(m_device);
         setState(State::Touch);
         return;
     }
@@ -310,7 +310,7 @@ void TouchscreenTriggerHandler::handleTouchUp()
         }
     }
     setState(State::None);
-    m_device->savePhysicalState();
+    updateVariables();
 }
 
 void TouchscreenTriggerHandler::handleTap()

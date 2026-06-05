@@ -94,11 +94,6 @@ public:
      * @return May be nullptr.
      */
     InputDevice *firstTouchscreen() const;
-
-    /**
-     * @return The multi-touch device currently in use or nullptr if not available.
-     */
-    InputDevice *currentMultiTouchDevice() const { return m_currentMultiTouchDevice; }
     /**
      * @return The touchscreen currently in use or nullptr if not available.
      */
@@ -176,7 +171,6 @@ private:
 
     std::vector<InputEventHandler *> m_eventHandlerChain;
     std::vector<InputDevice *> m_devices;
-    InputDevice *m_currentMultiTouchDevice{};
     InputDevice *m_currentTouchscreen{};
 
     std::set<KeyboardKey> m_virtualKeyboardKeys;

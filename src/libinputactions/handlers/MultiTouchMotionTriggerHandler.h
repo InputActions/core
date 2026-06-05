@@ -43,6 +43,11 @@ protected:
 
     void reset() override;
 
+    /*
+     * @param device If nullptr, variables will be unset.
+     */
+    static void updateVariables(const InputDevice *device = {});
+
 private:
     qreal m_previousPinchScale = 1;
     PinchType m_pinchType = PinchType::Unknown;
