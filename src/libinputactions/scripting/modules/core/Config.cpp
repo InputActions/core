@@ -16,35 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <QObject>
+#include "Config.h"
 
 namespace InputActions
 {
-
-class Config;
-class InputBackend;
-class VariableRegistry;
-
-class CoreModule : public QObject
-{
-    Q_OBJECT
-
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackend *input READ input)
-    Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)
-
-public:
-    CoreModule();
-    ~CoreModule() override;
-
-    Config *config() const;
-    InputBackend *input() const;
-    VariableRegistry *variableRegistry() const;
-
-private:
-    std::unique_ptr<Config> m_config;
-};
-
 }

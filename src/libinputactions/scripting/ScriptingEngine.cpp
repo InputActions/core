@@ -18,6 +18,7 @@
 
 #include "ScriptingEngine.h"
 #include "Promise.h"
+#include "modules/core/Config.h"
 #include "modules/core/CoreModule.h"
 #include "modules/fs/File.h"
 #include <libinputactions/InputActionsMain.h>
@@ -35,11 +36,15 @@ namespace InputActions
 static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
 static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
 
+ScriptingEngine::ScriptingEngine() = default;
+
 ScriptingEngine::~ScriptingEngine()
 {
     if (!m_engine) {
         return;
     }
+
+    Q_EMIT coreModule()->config()->aboutToBeDestroyed();
 
     QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
     m_watchdogTimerThread->quit();
@@ -65,7 +70,9 @@ void ScriptingEngine::initialize()
         }
     )");
 
-    auto coreModule = m_engine->newQObject(new CoreModule);
+    m_coreModule = std::make_unique<CoreModule>();
+    QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
+    auto coreModule = m_engine->newQObject(m_coreModule.get());
     coreModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));
     registerBuiltinModule("inputactions/core", coreModule);
 
@@ -177,6 +184,11 @@ QJSEngine &ScriptingEngine::ensureEngine()
 void ScriptingEngine::onWatchdogRestartTimerTick()
 {
     QMetaObject::invokeMethod(m_watchdogTimer, "start", Qt::QueuedConnection);
+}
+
+CoreModule *ScriptingEngine::coreModule() const
+{
+    return m_coreModule.get();
 }
 
 }

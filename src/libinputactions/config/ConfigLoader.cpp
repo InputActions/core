@@ -34,12 +34,14 @@
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/NotificationManager.h>
+#include <libinputactions/scripting/modules/core/Config.h>
+#include <libinputactions/scripting/modules/core/CoreModule.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-struct Config
+struct ConfigData
 {
     bool allowExternalVariableAccess = true;
     bool autoReload = true;
@@ -64,6 +66,7 @@ void ConfigLoader::loadEmpty()
 bool ConfigLoader::load(const ConfigLoadSettings &settings)
 {
     auto scriptingEngine = g_scriptingEngine;
+
     try {
         qCDebug(INPUTACTIONS, "Reloading config");
         const auto rawConfig = settings.config.value_or(g_configProvider->currentConfig());
@@ -71,6 +74,7 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
         g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
         g_scriptingEngine = std::make_shared<ScriptingEngine>();
         auto config = createConfig(rawConfig);
+        scriptingEngine.reset();
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
         g_scriptingEngine = scriptingEngine;
@@ -94,14 +98,14 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
     return true;
 }
 
-Config ConfigLoader::createConfig(const QString &raw)
+ConfigData ConfigLoader::createConfig(const QString &raw)
 {
     const auto root = Node::create(raw);
     if (!root->isMap()) {
         throw InvalidNodeTypeConfigException(root.get(), NodeType::Map);
     }
 
-    Config config;
+    ConfigData config;
 
     if (const auto *scriptingNode = root->mapAt("scripting")) {
         if (const auto *scriptsNode = scriptingNode->at("scripts")) {
@@ -147,11 +151,16 @@ Config ConfigLoader::createConfig(const QString &raw)
     return config;
 }
 
-void ConfigLoader::activateConfig(Config config, bool initialize)
+void ConfigLoader::activateConfig(ConfigData config, bool initialize)
 {
     g_inputBackend->reset(); // Okay because required keys are not cleared
     g_actionExecutor->clearQueue();
     g_actionExecutor->waitForDone();
+
+    const auto *coreModule = g_scriptingEngine->coreModule();
+    if (coreModule) {
+        Q_EMIT coreModule->config()->aboutToBeActivated();
+    }
 
     g_globalConfig->setAllowExternalVariableAccess(config.allowExternalVariableAccess);
     g_globalConfig->setAutoReload(config.autoReload);
@@ -171,6 +180,10 @@ void ConfigLoader::activateConfig(Config config, bool initialize)
 
     if (initialize) {
         g_inputBackend->initialize();
+    }
+
+    if (coreModule) {
+        Q_EMIT coreModule->config()->activated();
     }
 }
 

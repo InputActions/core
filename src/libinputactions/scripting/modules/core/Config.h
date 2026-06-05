@@ -23,28 +23,14 @@
 namespace InputActions
 {
 
-class Config;
-class InputBackend;
-class VariableRegistry;
-
-class CoreModule : public QObject
+class Config : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackend *input READ input)
-    Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)
-
-public:
-    CoreModule();
-    ~CoreModule() override;
-
-    Config *config() const;
-    InputBackend *input() const;
-    VariableRegistry *variableRegistry() const;
-
-private:
-    std::unique_ptr<Config> m_config;
+signals:
+    void aboutToBeActivated();
+    void activated();
+    void aboutToBeDestroyed();
 };
 
 }
