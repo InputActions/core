@@ -157,7 +157,7 @@ public:
     void setEmergencyCombination(std::set<KeyboardKey> value) { m_emergencyCombination = value; }
 
 protected:
-    virtual void doInitialize();
+    virtual void doInitialize() {}
     virtual void removeDevice(const InputDevice *device);
     void createEventHandlerChain();
 

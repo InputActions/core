@@ -147,7 +147,7 @@ void InputBackend::applyDeviceProperties(const InputDevice *device, InputDeviceP
     }
 }
 
-void InputBackend::doInitialize()
+void InputBackend::initialize()
 {
     doInitialize();
     m_initialized = true;
