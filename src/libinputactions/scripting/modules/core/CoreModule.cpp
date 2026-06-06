@@ -18,9 +18,9 @@
 
 #include "CoreModule.h"
 #include "Config.h"
+#include <QJSEngine>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/variables/VariableRegistry.h>
-#include <QJSEngine>
 
 namespace InputActions
 {

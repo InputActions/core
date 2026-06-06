@@ -75,7 +75,7 @@ public:
     /**
      * Detects and adds devices.
      */
-    virtual void initialize() {}
+    void initialize();
 
     /**
      * Evaluates device rules for the specified device and returns the properties without modifying the device's properties. Use this for devices that have not
@@ -83,6 +83,7 @@ public:
      */
     InputDeviceProperties deviceProperties(const InputDevice *device);
 
+    bool initialized() const { return m_initialized; }
     std::vector<InputDevice *> devices();
     /**
      * Use in case the device is not provided by the compositor for some reason.
@@ -158,6 +159,7 @@ public:
     void setEmergencyCombination(std::set<KeyboardKey> value) { m_emergencyCombination = value; }
 
 protected:
+    virtual void doInitialize() {}
     virtual void removeDevice(const InputDevice *device);
     void createEventHandlerChain();
 
@@ -169,6 +171,7 @@ private slots:
 private:
     void applyDeviceProperties(const InputDevice *device, InputDeviceProperties &properties);
 
+    bool m_initialized{};
     std::vector<InputEventHandler *> m_eventHandlerChain;
     std::vector<InputDevice *> m_devices;
     InputDevice *m_currentTouchscreen{};

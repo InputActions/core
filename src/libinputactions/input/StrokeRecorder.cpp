@@ -18,6 +18,7 @@
 
 #include "StrokeRecorder.h"
 #include "events.h"
+#include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 
@@ -36,6 +37,10 @@ StrokeRecorder::StrokeRecorder()
 
 void StrokeRecorder::recordStroke(const std::function<void(const Stroke &stroke)> &callback)
 {
+    if (!g_inputBackend->initialized()) {
+        return;
+    }
+
     m_isRecordingStroke = true;
     m_strokeCallback = callback;
 }

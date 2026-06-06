@@ -147,8 +147,15 @@ void InputBackend::applyDeviceProperties(const InputDevice *device, InputDeviceP
     }
 }
 
+void InputBackend::initialize()
+{
+    doInitialize();
+    m_initialized = true;
+}
+
 void InputBackend::reset()
 {
+    m_initialized = false;
     m_deviceRules.clear();
     m_keyboardTriggerHandler = {};
     m_mouseTriggerHandler = {};
