@@ -22,6 +22,7 @@
 #include <libinputactions/config/ConfigIssueManager.h>
 #include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/input/StrokeRecorder.h>
+#include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/interfaces/OnScreenMessageManager.h>
 #include <libinputactions/triggers/StrokeTrigger.h>
 #include <libinputactions/variables/VariableManager.h>
@@ -54,6 +55,11 @@ QString IntegratedDBusInterface::issues()
 
 void IntegratedDBusInterface::recordStroke(const QDBusMessage &message)
 {
+    if (!g_inputBackend->initialized()) {
+        sendErrorReply(QDBusError::Failed, "Stroke recording requires a valid configuration to be active.");
+        return;
+    }
+
     g_onScreenMessageManager->showMessage("InputActions is recording input. Perform a stroke gesture by moving the mouse or any amount of fingers in the one "
                                           "direction on a touchpad or a touchscreen. Recording will end after 250 ms of inactivity.");
 

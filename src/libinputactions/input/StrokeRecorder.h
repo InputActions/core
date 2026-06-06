@@ -39,7 +39,8 @@ public:
 
     /**
      * @param callback Will be called when the stroke has been recorded.
-     * @remark Calling this when a stroke is already being recorded will result in the previous callback never being called.
+     * @remark Calling this when a stroke is already being recorded will result in the previous callback never being called. If the input backend is not
+     * initialized, this method does nothing.
      */
     void recordStroke(const std::function<void(const Stroke &stroke)> &callback);
 
