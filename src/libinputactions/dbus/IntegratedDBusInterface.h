@@ -20,6 +20,7 @@
 
 #include "DBusInterfaceBase.h"
 #include <QDBusConnection>
+#include <QDBusContext>
 #include <QDBusMessage>
 #include <QObject>
 
@@ -29,7 +30,9 @@ namespace InputActions
 static const QString INPUTACTIONS_DBUS_SERVICE = "org.inputactions";
 static const QString INPUTACTIONS_DBUS_PATH = "/";
 
-class IntegratedDBusInterface : public DBusInterfaceBase
+class IntegratedDBusInterface
+    : public DBusInterfaceBase
+    , protected QDBusContext
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.inputactions")

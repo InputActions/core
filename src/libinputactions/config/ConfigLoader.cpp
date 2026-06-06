@@ -34,9 +34,9 @@
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/NotificationManager.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>
 #include <libinputactions/scripting/modules/core/CoreModule.h>
-#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
