@@ -92,7 +92,9 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
 Config ConfigLoader::createConfig(const QString &raw)
 {
     const auto root = Node::create(raw);
-    if (!root->isMap()) {
+    if (root->isNull()) {
+        return {};
+    } else if (!root->isMap()) {
         throw InvalidNodeTypeConfigException(root.get(), NodeType::Map);
     }
 
