@@ -637,7 +637,7 @@ template<>
 void NodeParser<Stroke>::parse(const Node *node, Stroke &result)
 {
     const auto bytes = QByteArray::fromBase64(node->as<QString>().toUtf8());
-    if (bytes.size() % 4 != 0) {
+    if (bytes.isEmpty() || bytes.size() % 4 != 0) {
         throw InvalidValueConfigException(node, "Invalid stroke.");
     }
     std::vector<Point> points;

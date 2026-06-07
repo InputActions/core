@@ -11,6 +11,13 @@ class TestStrokeTriggerCoreNodeParser : public Test
     Q_OBJECT
 
 private slots:
+    void emptyStroke_throwsInvalidValueConfigException()
+    {
+        const auto node = Node::create("strokes: [ '' ]");
+
+        INPUTACTIONS_VERIFY_THROWS_CONFIG_EXCEPTION(node->as<std::unique_ptr<StrokeTriggerCore>>(), InvalidValueConfigException, 0, 11);
+    }
+
     void invalidStroke_throwsInvalidValueConfigException()
     {
         const auto node = Node::create("strokes: [ 'MgAAMjJkZA=' ]");
