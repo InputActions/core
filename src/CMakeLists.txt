@@ -11,6 +11,7 @@ set(libinputactions_SRCS
     libinputactions/actions/ReplaceTextAction.cpp
     libinputactions/actions/SleepAction.cpp
     libinputactions/actions/TriggerAction.cpp
+    libinputactions/actions/WindowActivateAction.cpp
     libinputactions/config/parsers/base.cpp
     libinputactions/config/parsers/containers.h
     libinputactions/config/parsers/core.cpp

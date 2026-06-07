@@ -40,4 +40,9 @@ std::shared_ptr<Window> WindowProvider::windowUnderPointer()
     return {};
 }
 
+std::shared_ptr<Window> WindowProvider::findWindowById(const QString &id)
+{
+    return {};
+}
+
 }

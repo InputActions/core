@@ -17,6 +17,7 @@
 */
 
 #include "TriggerHandler.h"
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -24,6 +25,12 @@ namespace InputActions
 static const std::vector<TriggerType> TIMED_TRIGGERS = {TriggerType::Click, TriggerType::KeyboardShortcut, TriggerType::Hover, TriggerType::Press};
 
 TriggerHandler::TriggerHandler()
+    : m_windowIdVariable(g_variableRegistry->variable(BuiltinVariables::WindowId).value())
+    , m_windowUnderFingersIdVariable(g_variableRegistry->variable(BuiltinVariables::WindowUnderFingersId).value())
+    , m_windowUnderPointerIdVariable(g_variableRegistry->variable(BuiltinVariables::WindowUnderPointerId).value())
+    , m_initialWindowIdVariable(g_variableRegistry->variable(BuiltinVariables::InitialWindowId).value())
+    , m_initialWindowUnderFingersIdVariable(g_variableRegistry->variable(BuiltinVariables::InitialWindowUnderFingersId).value())
+    , m_initialWindowUnderPointerIdVariable(g_variableRegistry->variable(BuiltinVariables::InitialWindowUnderPointerId).value())
 {
     m_timedTriggerUpdateTimer.setTimerType(Qt::PreciseTimer);
     m_timedTriggerUpdateTimer.setInterval(m_timedTriggerUpdateDelta);
@@ -69,6 +76,12 @@ TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes t
         if (!std::ranges::contains(m_activeTriggers, trigger.get())) {
             trigger->cancel();
         }
+    }
+
+    if (result.success) {
+        m_initialWindowIdVariable.setValue(m_windowIdVariable.value());
+        m_initialWindowUnderFingersIdVariable.setValue(m_windowUnderFingersIdVariable.value());
+        m_initialWindowUnderPointerIdVariable.setValue(m_windowUnderPointerIdVariable.value());
     }
 
     return result;
