@@ -52,13 +52,20 @@ struct BuiltinVariables
 {
     inline static const VariableInfo<QString> DeviceName{QStringLiteral("device_name")};
     inline static const VariableInfo<qreal> Fingers{QStringLiteral("fingers")};
+    inline static const VariableInfo<QString> InitialWindowId{QStringLiteral("initial_window_id")};
+    inline static const VariableInfo<QString> InitialWindowUnderFingersId{QStringLiteral("initial_window_under_fingers_id")};
+    inline static const VariableInfo<QString> InitialWindowUnderPointerId{QStringLiteral("initial_window_under_pointer_id")};
     inline static const VariableInfo<Qt::KeyboardModifiers> KeyboardModifiers{QStringLiteral("keyboard_modifiers")};
     inline static const VariableInfo<QString> LastTriggerId{QStringLiteral("last_trigger_id")};
     inline static const VariableInfo<qreal> LastTriggerTimestamp{QStringLiteral("last_trigger_timestamp")};
     inline static const VariableInfo<qreal> MaxFingerDistancePercentage{QStringLiteral("max_finger_distance_percentage")};
+    inline static const VariableInfo<QString> PreviousWindowId{QStringLiteral("previous_window_id")};
     inline static const VariableInfo<PointF> ThumbInitialPositionPercentage{QStringLiteral("thumb_initial_position_percentage")};
     inline static const VariableInfo<PointF> ThumbPositionPercentage{QStringLiteral("thumb_position_percentage")};
     inline static const VariableInfo<bool> ThumbPresent{QStringLiteral("thumb_present")};
+    inline static const VariableInfo<QString> WindowId{QStringLiteral("window_id")};
+    inline static const VariableInfo<QString> WindowUnderFingersId{QStringLiteral("window_under_fingers_id")};
+    inline static const VariableInfo<QString> WindowUnderPointerId{QStringLiteral("window_under_pointer_id")};
 };
 
 class VariableRegistry : public QObject

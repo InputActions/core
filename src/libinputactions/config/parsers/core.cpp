@@ -35,6 +35,7 @@
 #include <libinputactions/actions/ReplaceTextAction.h>
 #include <libinputactions/actions/SleepAction.h>
 #include <libinputactions/actions/TriggerAction.h>
+#include <libinputactions/actions/WindowActivateAction.h>
 #include <libinputactions/conditions/CanReplaceTextCondition.h>
 #include <libinputactions/conditions/ConditionGroup.h>
 #include <libinputactions/conditions/VariableCondition.h>
@@ -150,7 +151,10 @@ static std::shared_ptr<Condition> parseVariableCondition(const Node *node, const
 template<>
 void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_ptr<Action> &result)
 {
-    if (const auto *commandNode = node->at("command")) {
+    if (const auto *activateWindowNode = node->at("activate_window")) {
+        auto action = std::make_unique<WindowActivateAction>(activateWindowNode->as<Value<QString>>());
+        result = std::move(action);
+    } else if (const auto *commandNode = node->at("command")) {
         auto action = std::make_unique<CommandAction>(commandNode->as<Value<QString>>());
         loadSetter(action, &CommandAction::setWait, node->at("wait"));
         result = std::move(action);

@@ -18,30 +18,24 @@
 
 #pragma once
 
-#include <QRectF>
-#include <QString>
+#include "Action.h"
+#include <libinputactions/Value.h>
+#include <libinputactions/variables/VariableWrapper.h>
 
 namespace InputActions
 {
 
-class Window
+class WindowActivateAction : public Action
 {
 public:
-    virtual ~Window() = default;
-
-    virtual std::optional<QString> id() { return {}; }
-    virtual std::optional<pid_t> pid() { return {}; }
-    virtual std::optional<QRectF> geometry() { return {}; }
-    virtual std::optional<QString> title() { return {}; }
-    virtual std::optional<QString> resourceClass() { return {}; }
-    virtual std::optional<QString> resourceName() { return {}; }
-    virtual std::optional<bool> maximized() { return {}; }
-    virtual std::optional<bool> fullscreen() { return {}; }
-
-    virtual void activate() {}
+    WindowActivateAction(Value<QString> targetWindowId);
 
 protected:
-    Window() = default;
+    void doExecute(const ActionExecutionArguments &args) override;
+
+private:
+    Value<QString> m_targetWindowId;
+    VariableWrapper<QString> m_previousWindowIdVariable;
 };
 
 }

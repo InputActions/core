@@ -43,6 +43,11 @@ public:
      * @return The window under the pointer, or nullptr if not available.
      */
     virtual std::shared_ptr<Window> windowUnderPointer();
+
+    /**
+     * @return The window with the specified id, or nullptr if not available.
+     */
+    virtual std::shared_ptr<Window> findWindowById(const QString &id);
 };
 
 inline std::shared_ptr<WindowProvider> g_windowProvider;

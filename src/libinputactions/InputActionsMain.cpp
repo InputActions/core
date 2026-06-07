@@ -123,6 +123,9 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         variableRegistry->registerStored<qreal>(QString("finger_%1_pressure").arg(i));
     }
     variableRegistry->registerStored(BuiltinVariables::Fingers);
+    variableRegistry->registerStored(BuiltinVariables::InitialWindowId);
+    variableRegistry->registerStored(BuiltinVariables::InitialWindowUnderFingersId);
+    variableRegistry->registerStored(BuiltinVariables::InitialWindowUnderPointerId);
     variableRegistry->registerComputed<Qt::KeyboardModifiers>(BuiltinVariables::KeyboardModifiers, [](auto &value) {
         value = g_inputBackend->keyboardModifiers();
     });
@@ -149,6 +152,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         const auto translatedPosition = pointerPos.value() - static_cast<PointF>(windowGeometry->topLeft());
         value = PointF(translatedPosition.x() / windowGeometry->width(), translatedPosition.y() / windowGeometry->height());
     });
+    variableRegistry->registerStored(BuiltinVariables::PreviousWindowId);
     variableRegistry->registerStored(BuiltinVariables::ThumbInitialPositionPercentage);
     variableRegistry->registerStored(BuiltinVariables::ThumbPositionPercentage);
     variableRegistry->registerStored(BuiltinVariables::ThumbPresent);
@@ -166,7 +170,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
             value = window->fullscreen();
         }
     });
-    variableRegistry->registerComputed<QString>("window_id", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>(BuiltinVariables::WindowId, [windowProvider](auto &value) {
         if (const auto window = windowProvider->activeWindow()) {
             value = window->id();
         }
@@ -203,12 +207,12 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         }
     });
     variableRegistry->registerAlias("window_under_fullscreen", "window_under_pointer_fullscreen");
-    variableRegistry->registerComputed<QString>("window_under_pointer_id", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>(BuiltinVariables::WindowUnderPointerId, [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->id();
         }
     });
-    variableRegistry->registerAlias("window_under_id", "window_under_pointer_id");
+    variableRegistry->registerAlias("window_under_id", BuiltinVariables::WindowUnderPointerId);
     variableRegistry->registerComputed<bool>("window_under_pointer_maximized", [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderPointer()) {
             value = window->maximized();
@@ -243,7 +247,7 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
             value = window->fullscreen();
         }
     });
-    variableRegistry->registerComputed<QString>("window_under_fingers_id", [windowProvider](auto &value) {
+    variableRegistry->registerComputed<QString>(BuiltinVariables::WindowUnderFingersId, [windowProvider](auto &value) {
         if (const auto window = windowProvider->windowUnderFingers()) {
             value = window->id();
         }
