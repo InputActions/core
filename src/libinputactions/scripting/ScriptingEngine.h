@@ -49,6 +49,10 @@ public:
      * Same as QJSEngine::evaluate but with error logging.
      */
     QJSValue evaluate(const QString &script);
+    /**
+     * Same as QJSEngine::importModule but with error logging.
+     */
+    QJSValue importModule(const QString &fileName);
 
     /**
      * Same as QJSValue::call but with error logging.

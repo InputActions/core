@@ -25,6 +25,7 @@
 #include "parsers/containers.h"
 #include "parsers/core.h"
 #include "parsers/utils.h"
+#include <QFile>
 #include <libinputactions/actions/ActionExecutor.h>
 #include <libinputactions/handlers/KeyboardTriggerHandler.h>
 #include <libinputactions/handlers/MouseTriggerHandler.h>
@@ -112,11 +113,22 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
     if (const auto *scriptingNode = root->mapAt("scripting")) {
         if (const auto *scriptsNode = scriptingNode->at("scripts")) {
             for (const auto *scriptNode : scriptsNode->sequenceItems()) {
-                const auto *sourceNode = scriptNode->at("source", true);
-                const auto source = sourceNode->as<QString>();
-                const auto result = g_scriptingEngine->evaluate(sourceNode->as<QString>());
-                if (result.isError()) {
-                    throw UncaughtScriptErrorConfigException(sourceNode, result);
+                if (const auto *sourceNode = scriptNode->at("source")) {
+                    const auto source = sourceNode->as<QString>();
+                    const auto result = g_scriptingEngine->evaluate(sourceNode->as<QString>());
+                    if (result.isError()) {
+                        throw UncaughtScriptErrorConfigException(sourceNode, result);
+                    }
+                } else if (const auto *fileNode = scriptNode->at("file", true)) {
+                    const auto file = fileNode->as<QString>();
+                    if (!QFile::exists(file)) {
+                        throw InvalidValueConfigException(fileNode, "File does not exist.");
+                    }
+
+                    const auto result = g_scriptingEngine->importModule(file);
+                    if (result.isError()) {
+                        throw UncaughtScriptErrorConfigException(fileNode, result);
+                    }
                 }
             }
         }
