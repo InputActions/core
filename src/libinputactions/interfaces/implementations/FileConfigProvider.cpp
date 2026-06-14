@@ -70,10 +70,10 @@ const QString &FileConfigProvider::currentPath() const
 
 void FileConfigProvider::initWatchers()
 {
-    m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, QFileInfo(m_path).dir().path().toStdString().c_str(), IN_CREATE | IN_MODIFY)); // watch dir
-    m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, m_path.toStdString().c_str(), IN_MODIFY | IN_DONT_FOLLOW)); // watch file
+    m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, QFileInfo(m_path).dir().path().toStdString().c_str(), IN_CREATE | IN_CLOSE_WRITE)); // watch dir
+    m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, m_path.toStdString().c_str(), IN_CLOSE_WRITE | IN_DONT_FOLLOW)); // watch file
     if (!QFile(m_path).symLinkTarget().isEmpty()) {
-        m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, m_path.toStdString().c_str(), IN_MODIFY)); // watch file that link points to
+        m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, m_path.toStdString().c_str(), IN_CLOSE_WRITE)); // watch file that link points to
     }
 }
 
