@@ -79,8 +79,8 @@ void ScriptingEngine::initialize()
     auto fsModule = m_engine->newObject();
     fsModule.setProperty("File", m_engine->newQMetaObject(&File::staticMetaObject));
     auto file = fsModule.property("File");
-    file.setProperty("readAllTextAsync", newFunction<QJSValue, QString>(&File::readAllTextAsync));
-    file.setProperty("writeAllTextAsync", newFunction<QJSValue, QString, QString>(&File::writeAllTextAsync));
+    file.setProperty("readAllText", newFunction<QJSValue, QString>(&File::readAllText));
+    file.setProperty("writeAllText", newFunction<QJSValue, QString, QString>(&File::writeAllText));
     registerBuiltinModule("inputactions/fs", fsModule);
 
     auto globalObject = m_engine->globalObject();
