@@ -26,7 +26,7 @@
 namespace InputActions
 {
 
-QJSValue File::readAllTextAsync(const QString &path)
+QJSValue File::readAllText(const QString &path)
 {
     auto promise = g_scriptingEngine->newPromise();
     QThreadPool::globalInstance()->start([path, promise]() {
@@ -42,7 +42,7 @@ QJSValue File::readAllTextAsync(const QString &path)
     return promise.promise();
 }
 
-QJSValue File::writeAllTextAsync(const QString &path, const QString &text)
+QJSValue File::writeAllText(const QString &path, const QString &text)
 {
     auto promise = g_scriptingEngine->newPromise();
     QThreadPool::globalInstance()->start([path, text, promise]() {

@@ -29,8 +29,8 @@ class File : public QObject
     Q_OBJECT
 
 public:
-    static QJSValue readAllTextAsync(const QString &path);
-    static QJSValue writeAllTextAsync(const QString &path, const QString &text);
+    static QJSValue readAllText(const QString &path);
+    static QJSValue writeAllText(const QString &path, const QString &text);
 };
 
 }
