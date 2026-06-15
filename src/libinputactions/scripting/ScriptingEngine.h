@@ -105,6 +105,9 @@ private:
     QTimer m_watchdogRestartTimer;
 };
 
+/**
+ * The engine in which code is currently being executed. Safe to use in C++ functions called from JS.
+ */
 inline std::shared_ptr<ScriptingEngine> g_scriptingEngine;
 
 }
