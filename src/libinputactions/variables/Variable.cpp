@@ -17,7 +17,7 @@
 */
 
 #include "Variable.h"
-#include <QJSEngine>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
@@ -37,6 +37,11 @@ const VariableOperationsBase *Variable::operations() const
 const QMetaType &Variable::type() const
 {
     return m_type;
+}
+
+QJSValue Variable::scriptValue() const
+{
+    return g_scriptingEngine->ensureEngine().toScriptValue(value());
 }
 
 }
