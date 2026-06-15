@@ -31,6 +31,8 @@ class Promise;
 
 /**
  * Lazily initializated.
+ *
+ * Q_PROPERTIES exposed to JavaScript of non-primitive types (with the exception of QObject *) must be of type QJSValue to prevent object reuse.
  */
 class ScriptingEngine : public QObject
 {

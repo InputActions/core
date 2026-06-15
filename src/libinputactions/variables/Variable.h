@@ -19,6 +19,7 @@
 #pragma once
 
 #include "VariableOperations.h"
+#include <QJSValue>
 #include <QObject>
 #include <QString>
 
@@ -28,7 +29,7 @@ namespace InputActions
 class Variable : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QVariant value READ value)
+    Q_PROPERTY(QJSValue value READ scriptValue)
 
 public:
     Variable(QMetaType type);
@@ -57,6 +58,8 @@ public:
     void setHidden(bool value) { m_hidden = value; }
 
 private:
+    QJSValue scriptValue() const;
+
     QMetaType m_type;
     std::variant<bool, QString> m_value;
     std::unique_ptr<VariableOperationsBase> m_operations;
