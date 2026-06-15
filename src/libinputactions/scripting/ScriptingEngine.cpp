@@ -67,7 +67,7 @@ void ScriptingEngine::initialize()
         }
     )");
 
-    m_coreModule = std::make_unique<CoreModule>();
+    m_coreModule = std::make_unique<CoreModule>(m_engine->globalObject());
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     auto coreModule = m_engine->newQObject(m_coreModule.get());
     coreModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));

@@ -25,8 +25,9 @@
 namespace InputActions
 {
 
-CoreModule::CoreModule()
+CoreModule::CoreModule(QJSValue globalObject)
     : m_config(std::make_unique<Config>())
+    , m_globalObject(std::move(globalObject))
 {
     QJSEngine::setObjectOwnership(m_config.get(), QJSEngine::CppOwnership);
 }
