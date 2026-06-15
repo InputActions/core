@@ -66,8 +66,17 @@ void ConfigLoader::loadEmpty()
 
 bool ConfigLoader::load(const ConfigLoadSettings &settings)
 {
-    auto scriptingEngine = g_scriptingEngine;
+    static const auto destroyEngine = [](std::shared_ptr<ScriptingEngine> &engine) {
+        auto oldEngine = g_scriptingEngine;
+        g_scriptingEngine = engine;
+        if (auto *coreModule = engine->coreModule()) {
+            Q_EMIT coreModule->config()->aboutToBeDestroyed();
+        }
+        g_scriptingEngine = oldEngine;
+        engine.reset();
+    };
 
+    auto currentEngine = g_scriptingEngine;
     try {
         qCDebug(INPUTACTIONS, "Reloading config");
         const auto rawConfig = settings.config.value_or(g_configProvider->currentConfig());
@@ -75,10 +84,11 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
         g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
         g_scriptingEngine = std::make_shared<ScriptingEngine>();
         auto config = createConfig(rawConfig);
-        scriptingEngine.reset();
+        destroyEngine(currentEngine);
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
-        g_scriptingEngine = scriptingEngine;
+        destroyEngine(g_scriptingEngine);
+        g_scriptingEngine = currentEngine;
         g_configIssueManager->addIssue(e);
     }
 

@@ -18,7 +18,6 @@
 
 #include "ScriptingEngine.h"
 #include "Promise.h"
-#include "modules/core/Config.h"
 #include "modules/core/CoreModule.h"
 #include "modules/fs/File.h"
 #include <libinputactions/InputActionsMain.h>
@@ -43,8 +42,6 @@ ScriptingEngine::~ScriptingEngine()
     if (!m_engine) {
         return;
     }
-
-    Q_EMIT coreModule()->config()->aboutToBeDestroyed();
 
     QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
     m_watchdogTimerThread->quit();
