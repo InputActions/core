@@ -133,6 +133,16 @@ QJSValue ScriptingEngine::evaluate(const QString &script)
     return result;
 }
 
+QJSValue ScriptingEngine::importModule(const QString &fileName)
+{
+    const auto result = ensureEngine().importModule(fileName);
+    if (result.isError()) {
+        logError(result);
+    }
+
+    return result;
+}
+
 QJSValue ScriptingEngine::call(const QJSValue &function, const QJSValueList &args) const
 {
     const auto result = function.call(args);
