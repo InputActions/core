@@ -25,7 +25,8 @@
 #include "parsers/containers.h"
 #include "parsers/core.h"
 #include "parsers/utils.h"
-#include <QFile>
+#include <QDir>
+#include <QFileInfo>
 #include <libinputactions/actions/ActionExecutor.h>
 #include <libinputactions/handlers/KeyboardTriggerHandler.h>
 #include <libinputactions/handlers/MouseTriggerHandler.h>
@@ -38,6 +39,7 @@
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>
 #include <libinputactions/scripting/modules/core/CoreModule.h>
+#include <libinputactions/scripting/modules/core/Script.h>
 
 namespace InputActions
 {
@@ -130,14 +132,26 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
                         throw UncaughtScriptErrorConfigException(sourceNode, result);
                     }
                 } else if (const auto *fileNode = scriptNode->at("file", true)) {
-                    const auto file = fileNode->as<QString>();
-                    if (!QFile::exists(file)) {
+                    const QFileInfo file(fileNode->as<QString>());
+                    if (!file.exists()) {
                         throw InvalidValueConfigException(fileNode, "File does not exist.");
                     }
 
-                    const auto result = g_scriptingEngine->importModule(file);
+                    const auto result = g_scriptingEngine->importModule(file.canonicalFilePath());
                     if (result.isError()) {
                         throw UncaughtScriptErrorConfigException(fileNode, result);
+                    }
+
+                    const auto defaultFunc = result.property("default");
+                    if (!defaultFunc.isCallable()) {
+                        continue;
+                    }
+
+                    const auto rootDirectory = file.dir().absolutePath();
+                    const auto defaultFuncResult = g_scriptingEngine->call(defaultFunc,
+                                                                           {g_scriptingEngine->ensureEngine().newQObject(new Script(rootDirectory))});
+                    if (defaultFuncResult.isError()) {
+                        throw UncaughtScriptErrorConfigException(fileNode, defaultFuncResult);
                     }
                 }
             }
