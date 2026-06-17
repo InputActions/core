@@ -59,14 +59,14 @@ private:
         if constexpr (std::is_void_v<TReturn>) {
             function(engine->fromScriptValue<TArgs>(args[I])...);
             return {};
-        }
+        } else {
+            const auto result = function(engine->fromScriptValue<TArgs>(args[I])...);
+            if constexpr (std::is_same_v<TReturn, QJSValue>) {
+                return result;
+            }
 
-        const auto result = function(engine->fromScriptValue<TArgs>(args[I])...);
-        if constexpr (std::is_same_v<TReturn, QJSValue>) {
-            return result;
+            return engine->toScriptValue(std::move(result));
         }
-
-        return engine->toScriptValue(std::move(result));
     }
 
     QJSEngine *m_engine;
