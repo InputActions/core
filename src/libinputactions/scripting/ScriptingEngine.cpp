@@ -88,6 +88,48 @@ void ScriptingEngine::initialize()
 
                                  return m_engine->importModule(module);
                              }));
+
+    // Unhandled promise rejection handling
+    // TODO Maybe perform the check when the promise is garbage collected if possible
+    m_engine->evaluate(R"(
+        const { delay } = require("inputactions/core");
+
+        const patch = (promise) => {
+            promise.__then = promise.then;
+            promise.then = function(onFulfilled, onRejected) {
+                this.__handled = true;
+                return patch(this.__then(onFulfilled, onRejected));
+            };
+
+            promise.__then(undefined, x => {
+                delay(100).__then(() => {
+                    if (!promise.__handled) {
+                        __unhandledPromiseRejection(x);
+                    }
+                })
+            });
+
+            return promise;
+        }
+
+        const _Promise = Promise;
+        Promise = function(executor) {
+            return patch(new _Promise((resolve, reject) => {
+                executor(resolve, reject);
+            }));
+        }
+        Promise.all = _Promise.all;
+        Promise.race = _Promise.race;
+        Promise.reject = _Promise.reject;
+        Promise.resolve = _Promise.resolve;
+    )");
+    globalObject.setProperty("__unhandledPromiseRejection", newFunction<void, QJSValue>([this](QJSValue error) {
+                                 if (error.isError()) {
+                                     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught (in promise) script error\n" << errorToString(error);
+                                 } else {
+                                     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught (in promise) " << error.toString();
+                                 }
+                             }));
 }
 
 void ScriptingEngine::initializeWatchdog()
