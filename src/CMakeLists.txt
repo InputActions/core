@@ -84,6 +84,7 @@ set(libinputactions_SRCS
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/scripting/modules/core/Config.cpp
     libinputactions/scripting/modules/core/CoreModule.cpp
+    libinputactions/scripting/modules/core/Script.cpp
     libinputactions/scripting/modules/fs/File.cpp
     libinputactions/scripting/FunctionWrapper.cpp
     libinputactions/scripting/JSFunctionAction.cpp
