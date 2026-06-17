@@ -61,7 +61,11 @@ public:
             true);
     }
 
+    /**
+     * Thread-safe.
+     */
     void reject(const QString &errorMessage) const;
+    void reject(const QJSValue &error) const;
 
 private:
     ScriptingEngine *m_engine;

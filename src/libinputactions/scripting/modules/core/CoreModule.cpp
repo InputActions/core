@@ -20,19 +20,36 @@
 #include "Config.h"
 #include <QJSEngine>
 #include <libinputactions/input/backends/InputBackend.h>
+#include <libinputactions/scripting/Promise.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
 
-CoreModule::CoreModule(QJSValue globalObject)
-    : m_config(std::make_unique<Config>())
-    , m_globalObject(std::move(globalObject))
+CoreModule::CoreModule(ScriptingEngine *engine)
+    : m_engine(engine)
+    , m_config(std::make_unique<Config>())
+    , m_globalObject(engine->ensureEngine().globalObject())
 {
     QJSEngine::setObjectOwnership(m_config.get(), QJSEngine::CppOwnership);
 }
 
 CoreModule::~CoreModule() = default;
+
+QJSValue CoreModule::delay(double duration)
+{
+    auto promise = g_scriptingEngine->newPromise();
+    if (duration < 1 || duration > INT32_MAX) {
+        promise.reject(m_engine->ensureEngine().newErrorObject(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration))));
+        return promise.promise();
+    }
+
+    QTimer::singleShot(std::floor(duration), Qt::PreciseTimer, this, [promise]() {
+        promise.fulfill();
+    });
+    return promise.promise();
+}
 
 Config *CoreModule::config() const
 {

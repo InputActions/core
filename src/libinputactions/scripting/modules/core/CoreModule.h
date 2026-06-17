@@ -26,6 +26,7 @@ namespace InputActions
 
 class Config;
 class InputBackend;
+class ScriptingEngine;
 class VariableRegistry;
 
 class CoreModule : public QObject
@@ -38,7 +39,7 @@ class CoreModule : public QObject
     Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)
 
 public:
-    CoreModule(QJSValue globalObject);
+    CoreModule(ScriptingEngine *engine);
     ~CoreModule() override;
 
     Config *config() const;
@@ -46,7 +47,10 @@ public:
     InputBackend *input() const;
     VariableRegistry *variableRegistry() const;
 
+    Q_INVOKABLE QJSValue delay(double duration);
+
 private:
+    ScriptingEngine *m_engine;
     std::unique_ptr<Config> m_config;
     QJSValue m_globalObject;
 };
