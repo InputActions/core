@@ -64,11 +64,6 @@ public:
     QString errorToString(const QJSValue &error) const;
     void logError(const QJSValue &error) const;
 
-    /**
-     * Thread-safe.
-     */
-    void throwError(const QString &message) const;
-
     template<typename TReturn, typename... TArgs, typename TFunction>
     QJSValue newFunction(TFunction &&function)
     {

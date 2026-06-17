@@ -46,11 +46,16 @@ void Promise::reject(const QString &errorMessage) const
     QThreadHelpers::runOnThread(
         QThreadHelpers::mainThread(),
         [this, errorMessage]() {
-            if (m_reject.isCallable()) {
-                m_engine->call(m_reject, {m_engine->ensureEngine().newErrorObject(QJSValue::GenericError, errorMessage)});
-            }
+            reject(m_engine->ensureEngine().newErrorObject(QJSValue::GenericError, errorMessage));
         },
         true);
+}
+
+void Promise::reject(const QJSValue &error) const
+{
+    if (m_reject.isCallable()) {
+        m_engine->call(m_reject, {error});
+    }
 }
 
 }
