@@ -16,37 +16,30 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "CoreModule.h"
-#include "Config.h"
-#include <QJSEngine>
-#include <libinputactions/input/backends/InputBackend.h>
-#include <libinputactions/scripting/ScriptingEngine.h>
-#include <libinputactions/variables/VariableRegistry.h>
+#include "MainModule.h"
+#include <libinputactions/scripting/Promise.h>
 
 namespace InputActions
 {
 
-CoreModule::CoreModule()
-    : m_config(std::make_unique<Config>())
+MainModule::MainModule(ScriptingEngine &engine)
+    : m_engine(engine)
+    , m_globalObject(engine.ensureEngine().globalObject())
 {
-    QJSEngine::setObjectOwnership(m_config.get(), QJSEngine::CppOwnership);
 }
 
-CoreModule::~CoreModule() = default;
-
-Config *CoreModule::config() const
+QJSValue MainModule::delay(double duration)
 {
-    return m_config.get();
-}
+    auto promise = g_scriptingEngine->newPromise();
+    if (duration < 1 || duration > INT32_MAX) {
+        promise.reject(m_engine.ensureEngine().newErrorObject(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration))));
+        return promise.promise();
+    }
 
-InputBackend *CoreModule::input() const
-{
-    return g_inputBackend.get();
-}
-
-VariableRegistry *CoreModule::variableRegistry() const
-{
-    return g_variableRegistry.get();
+    QTimer::singleShot(std::floor(duration), Qt::PreciseTimer, this, [promise]() {
+        promise.fulfill();
+    });
+    return promise.promise();
 }
 
 }

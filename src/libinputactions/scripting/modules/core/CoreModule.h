@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <QJSValue>
 #include <QObject>
 
 namespace InputActions
@@ -34,25 +33,20 @@ class CoreModule : public QObject
     Q_OBJECT
 
     Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(QJSValue globalThis READ globalThis)
     Q_PROPERTY(InputBackend *input READ input)
     Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)
 
 public:
-    CoreModule(ScriptingEngine *engine);
+    CoreModule();
     ~CoreModule() override;
 
     Config *config() const;
-    QJSValue globalThis() const { return m_globalObject; }
     InputBackend *input() const;
     VariableRegistry *variableRegistry() const;
-
-    Q_INVOKABLE QJSValue delay(double duration);
 
 private:
     ScriptingEngine *m_engine;
     std::unique_ptr<Config> m_config;
-    QJSValue m_globalObject;
 };
 
 }

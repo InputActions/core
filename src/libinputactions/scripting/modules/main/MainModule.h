@@ -16,37 +16,32 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "CoreModule.h"
-#include "Config.h"
-#include <QJSEngine>
-#include <libinputactions/input/backends/InputBackend.h>
-#include <libinputactions/scripting/ScriptingEngine.h>
-#include <libinputactions/variables/VariableRegistry.h>
+#pragma once
+
+#include <QJSValue>
+#include <QObject>
 
 namespace InputActions
 {
 
-CoreModule::CoreModule()
-    : m_config(std::make_unique<Config>())
-{
-    QJSEngine::setObjectOwnership(m_config.get(), QJSEngine::CppOwnership);
-}
+class ScriptingEngine;
 
-CoreModule::~CoreModule() = default;
-
-Config *CoreModule::config() const
+class MainModule : public QObject
 {
-    return m_config.get();
-}
+    Q_OBJECT
 
-InputBackend *CoreModule::input() const
-{
-    return g_inputBackend.get();
-}
+    Q_PROPERTY(QJSValue globalThis READ globalThis)
 
-VariableRegistry *CoreModule::variableRegistry() const
-{
-    return g_variableRegistry.get();
-}
+public:
+    MainModule(ScriptingEngine &engine);
+
+    QJSValue globalThis() const { return m_globalObject; }
+
+    Q_INVOKABLE QJSValue delay(double duration);
+
+private:
+    ScriptingEngine &m_engine;
+    QJSValue m_globalObject;
+};
 
 }

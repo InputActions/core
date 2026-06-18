@@ -20,6 +20,7 @@
 #include "Promise.h"
 #include "modules/core/CoreModule.h"
 #include "modules/fs/File.h"
+#include "modules/main/MainModule.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/PointF.h>
 #include <libinputactions/config/ConfigIssue.h>
@@ -67,10 +68,9 @@ void ScriptingEngine::initialize()
         }
     )");
 
-    m_coreModule = std::make_unique<CoreModule>(this);
+    m_coreModule = std::make_unique<CoreModule>();
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     auto coreModule = m_engine->newQObject(m_coreModule.get());
-    coreModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));
     registerBuiltinModule("inputactions/core", coreModule);
 
     auto fsModule = m_engine->newObject();
@@ -79,6 +79,10 @@ void ScriptingEngine::initialize()
     file.setProperty("readAllText", newFunction<QJSValue, QString>(&File::readAllText));
     file.setProperty("writeAllText", newFunction<QJSValue, QString, QString>(&File::writeAllText));
     registerBuiltinModule("inputactions/fs", fsModule);
+
+    auto mainModule = m_engine->newQObject(new MainModule(*this));
+    mainModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));
+    registerBuiltinModule("inputactions", mainModule);
 
     auto globalObject = m_engine->globalObject();
     globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
