@@ -96,7 +96,7 @@ void ScriptingEngine::initialize()
     // Unhandled promise rejection handling
     // TODO Maybe perform the check when the promise is garbage collected if possible
     m_engine->evaluate(R"(
-        const { delay } = require("inputactions/core");
+        const { delay } = require("inputactions");
 
         const patch = (promise) => {
             promise.__then = promise.then;
