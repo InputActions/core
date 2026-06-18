@@ -39,7 +39,7 @@
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>
 #include <libinputactions/scripting/modules/core/CoreModule.h>
-#include <libinputactions/scripting/modules/core/Script.h>
+#include <libinputactions/scripting/modules/main/Script.h>
 
 namespace InputActions
 {
