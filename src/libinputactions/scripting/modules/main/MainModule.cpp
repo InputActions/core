@@ -30,12 +30,12 @@ MainModule::MainModule(ScriptingEngine &engine)
 
 QJSValue MainModule::delay(double duration)
 {
-    auto promise = g_scriptingEngine->newPromise();
     if (duration < 1 || duration > INT32_MAX) {
-        promise.reject(m_engine.ensureEngine().newErrorObject(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration))));
-        return promise.promise();
+        m_engine.ensureEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration)));
+        return {};
     }
 
+    auto promise = g_scriptingEngine->newPromise();
     QTimer::singleShot(std::floor(duration), Qt::PreciseTimer, this, [promise]() {
         promise.fulfill();
     });
