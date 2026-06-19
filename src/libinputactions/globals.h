@@ -31,6 +31,51 @@ enum class ComparisonOperator
     Regex
 };
 
+// https://wayland.app/protocols/cursor-shape-v1#wp_cursor_shape_device_v1:enum:shape
+enum class CursorShape
+{
+    Default,
+    ContextMenu,
+    Help,
+    Pointer,
+    Progress,
+    Wait,
+    Cell,
+    Crosshair,
+    Text,
+    VerticalText,
+    Alias,
+    Copy,
+    Move,
+    NoDrop,
+    NotAllowed,
+    Grab,
+    Grabbing,
+    EResize,
+    NResize,
+    NEResize,
+    NWResize,
+    SResize,
+    SEResize,
+    SWResize,
+    WResize,
+    EWResize,
+    NSResize,
+    NESWResize,
+    NWSEResize,
+    ColResize,
+    RowResize,
+    AllScroll,
+    ZoomIn,
+    ZoomOut,
+    DndAsk,
+    AllResize,
+
+    // KWin https://invent.kde.org/plasma/kwin/-/blob/d36646652272d5793eb07498db2d4e45109536fb/src/cursor.cpp#L585
+    UpArrow,
+};
+Q_ENUM_NS(CursorShape)
+
 enum class InputDeviceType
 {
     Unknown = 0,
@@ -41,6 +86,17 @@ enum class InputDeviceType
 };
 Q_DECLARE_FLAGS(InputDeviceTypes, InputDeviceType)
 Q_DECLARE_OPERATORS_FOR_FLAGS(InputDeviceTypes)
+
+// Currently for scripting only
+enum class KeyboardModifier
+{
+    None = Qt::KeyboardModifier::NoModifier,
+    Shift = Qt::KeyboardModifier::ShiftModifier,
+    Control = Qt::KeyboardModifier::ControlModifier,
+    Alt = Qt::KeyboardModifier::AltModifier,
+    Meta = Qt::KeyboardModifier::MetaModifier,
+};
+Q_ENUM_NS(KeyboardModifier)
 
 enum class TriggerSpeed
 {

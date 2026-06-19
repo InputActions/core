@@ -19,54 +19,11 @@
 #pragma once
 
 #include <QString>
+#include <libinputactions/globals.h>
 #include <map>
 
 namespace InputActions
 {
-
-// https://wayland.app/protocols/cursor-shape-v1#wp_cursor_shape_device_v1:enum:shape
-enum class CursorShape
-{
-    Default,
-    ContextMenu,
-    Help,
-    Pointer,
-    Progress,
-    Wait,
-    Cell,
-    Crosshair,
-    Text,
-    VerticalText,
-    Alias,
-    Copy,
-    Move,
-    NoDrop,
-    NotAllowed,
-    Grab,
-    Grabbing,
-    EResize,
-    NResize,
-    NEResize,
-    NWResize,
-    SResize,
-    SEResize,
-    SWResize,
-    WResize,
-    EWResize,
-    NSResize,
-    NESWResize,
-    NWSEResize,
-    ColResize,
-    RowResize,
-    AllScroll,
-    ZoomIn,
-    ZoomOut,
-    DndAsk,
-    AllResize,
-
-    // KWin https://invent.kde.org/plasma/kwin/-/blob/d36646652272d5793eb07498db2d4e45109536fb/src/cursor.cpp#L585
-    UpArrow,
-};
 
 static const std::map<QString, CursorShape> CURSOR_SHAPES = {
     {"default", CursorShape::Default},
