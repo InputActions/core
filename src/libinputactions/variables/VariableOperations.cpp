@@ -22,6 +22,7 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 #include <libinputactions/PointF.h>
+#include <libinputactions/globals.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
 
 Q_LOGGING_CATEGORY(INPUTACTIONS_VARIABLE_OPERATIONS, "inputactions.variable.operations")

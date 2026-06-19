@@ -20,6 +20,7 @@
 
 #include "FunctionWrapper.h"
 #include <QJSEngine>
+#include <QMetaEnum>
 #include <QObject>
 #include <memory>
 
@@ -89,6 +90,13 @@ private:
     void initializeWatchdog();
 
     void registerBuiltinModule(const QString &name, QJSValue value);
+
+    template<typename T>
+    QJSValue newEnum()
+    {
+        return newEnum(QMetaEnum::fromType<T>());
+    }
+    QJSValue newEnum(const QMetaEnum &metaEnum);
 
     std::optional<QJSEngine> m_engine;
 

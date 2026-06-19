@@ -24,6 +24,7 @@
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/PointF.h>
 #include <libinputactions/config/ConfigIssue.h>
+#include <libinputactions/globals.h>
 #include <libinputactions/helpers/QString.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/NotificationManager.h>
@@ -71,7 +72,12 @@ void ScriptingEngine::initialize()
     m_coreModule = std::make_unique<CoreModule>();
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     auto coreModule = m_engine->newQObject(m_coreModule.get());
+    coreModule.setProperty("KeyboardModifier", newEnum<KeyboardModifier>());
     registerBuiltinModule("inputactions/core", coreModule);
+
+    auto desktopModule = m_engine->newObject();
+    desktopModule.setProperty("CursorShape", newEnum<CursorShape>());
+    registerBuiltinModule("inputactions/desktop", desktopModule);
 
     auto fsModule = m_engine->newObject();
     fsModule.setProperty("File", m_engine->newQMetaObject(&File::staticMetaObject));
@@ -164,6 +170,15 @@ void ScriptingEngine::registerBuiltinModule(const QString &name, QJSValue value)
 {
     ensureEngine().registerModule(name, value);
     m_builtinModules[name] = std::move(value);
+}
+
+QJSValue ScriptingEngine::newEnum(const QMetaEnum &metaEnum)
+{
+    auto object = ensureEngine().newObject();
+    for (int i = 0; i < metaEnum.keyCount(); i++) {
+        object.setProperty(metaEnum.key(i), metaEnum.value(i));
+    }
+    return object;
 }
 
 QJSValue ScriptingEngine::evaluate(const QString &script)
