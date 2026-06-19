@@ -20,7 +20,7 @@
 
 #include "Action.h"
 #include <libinputactions/Value.h>
-#include <libinputactions/variables/VariableWrapper.h>
+#include <libinputactions/variables/TypedVariable.h>
 
 namespace InputActions
 {
@@ -35,7 +35,7 @@ protected:
 
 private:
     Value<QString> m_targetWindowId;
-    VariableWrapper<QString> m_previousWindowIdVariable;
+    TypedVariable<QString> m_previousWindowIdVariable;
 };
 
 }

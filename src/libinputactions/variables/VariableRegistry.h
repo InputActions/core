@@ -20,7 +20,7 @@
 
 #include "ComputedVariable.h"
 #include "StoredVariable.h"
-#include "VariableWrapper.h"
+#include "TypedVariable.h"
 #include <QObject>
 #include <QProcess>
 #include <QString>
@@ -82,7 +82,7 @@ public:
     Q_INVOKABLE Variable *variable(const QString &name) const;
 
     template<typename T>
-    std::optional<VariableWrapper<T>> variable(const VariableInfo<T> &info) const
+    std::optional<TypedVariable<T>> variable(const VariableInfo<T> &info) const
     {
         return variable<T>(info.name);
     }
@@ -91,7 +91,7 @@ public:
      * @return A statically-typed wrapper for the specified variable, nullptr if not found or type doesn't match.
      */
     template<typename T>
-    std::optional<VariableWrapper<T>> variable(const QString &name) const
+    std::optional<TypedVariable<T>> variable(const QString &name) const
     {
         auto *result = variable(name);
         if (!result) {
@@ -102,14 +102,14 @@ public:
             return {};
         }
 
-        return VariableWrapper<T>(result);
+        return TypedVariable<T>(result);
     }
 
     bool contains(const QString &name) const;
 
     Variable *registerVariable(const QString &name, std::unique_ptr<Variable> variable, bool hidden = false);
     template<typename T>
-    VariableWrapper<T> registerStored(const QString &name, bool hidden = false)
+    TypedVariable<T> registerStored(const QString &name, bool hidden = false)
     {
         return {registerVariable(name, std::make_unique<StoredVariable>(QMetaType::fromType<T>()), hidden)};
     }

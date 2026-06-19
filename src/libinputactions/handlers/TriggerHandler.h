@@ -20,7 +20,7 @@
 
 #include <QTimer>
 #include <libinputactions/triggers/Trigger.h>
-#include <libinputactions/variables/VariableWrapper.h>
+#include <libinputactions/variables/TypedVariable.h>
 
 namespace InputActions
 {
@@ -147,12 +147,12 @@ private:
     std::vector<std::unique_ptr<Trigger>> m_triggers;
     std::vector<Trigger *> m_activeTriggers;
 
-    VariableWrapper<QString> m_windowIdVariable;
-    VariableWrapper<QString> m_windowUnderFingersIdVariable;
-    VariableWrapper<QString> m_windowUnderPointerIdVariable;
-    VariableWrapper<QString> m_initialWindowIdVariable;
-    VariableWrapper<QString> m_initialWindowUnderFingersIdVariable;
-    VariableWrapper<QString> m_initialWindowUnderPointerIdVariable;
+    TypedVariable<QString> m_windowIdVariable;
+    TypedVariable<QString> m_windowUnderFingersIdVariable;
+    TypedVariable<QString> m_windowUnderPointerIdVariable;
+    TypedVariable<QString> m_initialWindowIdVariable;
+    TypedVariable<QString> m_initialWindowUnderFingersIdVariable;
+    TypedVariable<QString> m_initialWindowUnderPointerIdVariable;
 
     friend class MockInputTriggerHandler;
     friend class MockKeyboardTriggerHandler;

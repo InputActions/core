@@ -24,10 +24,10 @@ namespace InputActions
 {
 
 template<typename T>
-class VariableWrapper
+class TypedVariable
 {
 public:
-    VariableWrapper(Variable *variable)
+    TypedVariable(Variable *variable)
         : m_variable(variable)
     {
     }
