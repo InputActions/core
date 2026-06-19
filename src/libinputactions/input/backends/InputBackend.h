@@ -182,12 +182,12 @@ private:
 
     std::vector<InputDeviceRule> m_deviceRules;
     VariableRegistry m_deviceRulesVariableRegistry;
-    VariableWrapper<QString> m_deviceNameVariable;
-    VariableWrapper<InputDeviceTypes> m_deviceTypesVariable;
-    VariableWrapper<bool> m_deviceKeyboardVariable;
-    VariableWrapper<bool> m_deviceMouseVariable;
-    VariableWrapper<bool> m_deviceTouchpadVariable;
-    VariableWrapper<bool> m_deviceTouchscreenVariable;
+    TypedVariable<QString> m_deviceNameVariable;
+    TypedVariable<InputDeviceTypes> m_deviceTypesVariable;
+    TypedVariable<bool> m_deviceKeyboardVariable;
+    TypedVariable<bool> m_deviceMouseVariable;
+    TypedVariable<bool> m_deviceTouchpadVariable;
+    TypedVariable<bool> m_deviceTouchscreenVariable;
 
     std::unique_ptr<KeyboardTriggerHandler> m_keyboardTriggerHandler;
     std::unique_ptr<MouseTriggerHandler> m_mouseTriggerHandler;

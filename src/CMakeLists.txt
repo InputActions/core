@@ -129,10 +129,10 @@ set(libinputactions_SRCS
     libinputactions/triggers/Trigger.cpp
     libinputactions/variables/ComputedVariable.cpp
     libinputactions/variables/StoredVariable.cpp
+    libinputactions/variables/TypedVariable.h
     libinputactions/variables/Variable.cpp
     libinputactions/variables/VariableOperations.cpp
     libinputactions/variables/VariableRegistry.cpp
-    libinputactions/variables/VariableWrapper.h
     libinputactions/globals.cpp
     libinputactions/InputActionsMain.cpp
     libinputactions/PointF.cpp
