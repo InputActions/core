@@ -133,6 +133,17 @@ Q_ENUM_NS(TriggerType)
 Q_DECLARE_FLAGS(TriggerTypes, TriggerType)
 Q_DECLARE_OPERATORS_FOR_FLAGS(TriggerTypes)
 
+enum class VariableType
+{
+    Boolean,
+    CursorShape,
+    KeyboardModifiers,
+    Number,
+    Point,
+    String,
+};
+Q_ENUM_NS(VariableType)
+
 static inline TriggerType operator~(TriggerType value)
 {
     return TriggerType(~static_cast<uint32_t>(value));

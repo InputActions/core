@@ -16,26 +16,30 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
+#include "StoredVariableWrapper.h"
+#include "VariableRegistryWrapper.h"
 #include <libinputactions/scripting/ScriptingEngine.h>
+#include <libinputactions/variables/StoredVariable.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+StoredVariableWrapper::StoredVariableWrapper(StoredVariable &variable, ScriptingEngine &engine)
+    : VariableWrapper(variable, engine)
+    , m_variable(variable)
+    , m_engine(engine)
 {
 }
 
-const VariableOperationsBase *Variable::operations() const
+void StoredVariableWrapper::setValue(const QJSValue &value) const
 {
-    return m_operations.get();
-}
+    const auto variant = VariableRegistryWrapper::jsValueToVariant(value, type());
+    if (!variant) {
+        m_engine.ensureEngine().throwError(QString("New value does not match the variable's type."));
+        return;
+    }
 
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    m_variable.setValue(variant.value());
 }
 
 }

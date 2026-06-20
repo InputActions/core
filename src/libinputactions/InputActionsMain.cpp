@@ -98,9 +98,12 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_configLoader);
     setMissingImplementation(g_globalConfig);
     setMissingImplementation(g_inputBackend);
-    setMissingImplementation(g_scriptingEngine);
     setMissingImplementation(g_strokeRecorder);
     setMissingImplementation(g_variableRegistry);
+
+    if (!g_scriptingEngine) {
+        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_variableRegistry.get());
+    }
 }
 
 void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistry, std::shared_ptr<PointerPositionGetter> pointerPositionGetter,

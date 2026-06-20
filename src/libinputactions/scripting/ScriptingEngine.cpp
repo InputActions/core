@@ -37,7 +37,10 @@ namespace InputActions
 static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
 static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
 
-ScriptingEngine::ScriptingEngine() = default;
+ScriptingEngine::ScriptingEngine(VariableRegistry &variableRegistry)
+    : m_variableRegistry(variableRegistry)
+{
+}
 
 ScriptingEngine::~ScriptingEngine()
 {
@@ -69,10 +72,11 @@ void ScriptingEngine::initialize()
         }
     )");
 
-    m_coreModule = std::make_unique<CoreModule>();
+    m_coreModule = std::make_unique<CoreModule>(*this, m_variableRegistry);
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     auto coreModule = m_engine->newQObject(m_coreModule.get());
     coreModule.setProperty("KeyboardModifier", newEnum<KeyboardModifier>());
+    coreModule.setProperty("VariableType", newEnum<VariableType>());
     registerBuiltinModule("inputactions/core", coreModule);
 
     auto desktopModule = m_engine->newObject();

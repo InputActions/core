@@ -24,11 +24,14 @@
 #include <QObject>
 #include <memory>
 
+Q_DECLARE_LOGGING_CATEGORY(INPUTACTIONS_SCRIPTING)
+
 namespace InputActions
 {
 
 class CoreModule;
 class Promise;
+class VariableRegistry;
 
 /**
  * Lazily initializated.
@@ -40,7 +43,7 @@ class ScriptingEngine : public QObject
     Q_OBJECT
 
 public:
-    ScriptingEngine();
+    ScriptingEngine(VariableRegistry &variableRegistry);
     ~ScriptingEngine() override;
 
     /**
@@ -98,8 +101,9 @@ private:
     }
     QJSValue newEnum(const QMetaEnum &metaEnum);
 
-    std::optional<QJSEngine> m_engine;
+    VariableRegistry &m_variableRegistry;
 
+    std::optional<QJSEngine> m_engine;
     std::unique_ptr<CoreModule> m_coreModule;
     std::map<QString, QJSValue> m_builtinModules;
 
