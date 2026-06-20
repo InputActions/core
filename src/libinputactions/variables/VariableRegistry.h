@@ -79,7 +79,7 @@ public:
     /**
      * @return The variable with the specified name or nullptr if not found.
      */
-    Q_INVOKABLE Variable *variable(const QString &name) const;
+    Variable *variable(const QString &name) const;
 
     template<typename T>
     std::optional<TypedVariable<T>> variable(const VariableInfo<T> &info) const

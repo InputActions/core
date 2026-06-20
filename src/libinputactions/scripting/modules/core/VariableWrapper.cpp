@@ -16,26 +16,24 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Variable.h"
+#include "VariableWrapper.h"
+#include "VariableRegistryWrapper.h"
 #include <libinputactions/scripting/ScriptingEngine.h>
+#include <libinputactions/variables/Variable.h>
 
 namespace InputActions
 {
 
-Variable::Variable(QMetaType type)
-    : m_type(std::move(type))
-    , m_operations(VariableOperationsBase::create(this))
+VariableWrapper::VariableWrapper(Variable &variable, ScriptingEngine &engine)
+    : m_variable(variable)
+    , m_type(VariableRegistryWrapper::metaTypeToVariableType(variable.type()).value())
+    , m_engine(engine)
 {
 }
 
-const VariableOperationsBase *Variable::operations() const
+QJSValue VariableWrapper::value() const
 {
-    return m_operations.get();
-}
-
-const QMetaType &Variable::type() const
-{
-    return m_type;
+    return m_engine.ensureEngine().toScriptValue(m_variable.value());
 }
 
 }

@@ -17,11 +17,11 @@
 */
 
 #include "ConfigLoader.h"
+#include "ConfigIssue.h"
 #include "ConfigIssueManager.h"
 #include "GlobalConfig.h"
+#include "InputActionsMain.h"
 #include "Node.h"
-#include "config/ConfigIssue.h"
-#include "interfaces/ConfigProvider.h"
 #include "parsers/containers.h"
 #include "parsers/core.h"
 #include "parsers/utils.h"
@@ -35,11 +35,13 @@
 #include <libinputactions/handlers/TouchscreenTriggerHandler.h>
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
+#include <libinputactions/interfaces/ConfigProvider.h>
 #include <libinputactions/interfaces/NotificationManager.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>
 #include <libinputactions/scripting/modules/core/CoreModule.h>
 #include <libinputactions/scripting/modules/main/Script.h>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
@@ -79,18 +81,22 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
     };
 
     auto currentEngine = g_scriptingEngine;
+    auto currentVariableRegistry = g_variableRegistry;
     try {
         qCDebug(INPUTACTIONS, "Reloading config");
         const auto rawConfig = settings.config.value_or(g_configProvider->currentConfig());
 
         g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
-        g_scriptingEngine = std::make_shared<ScriptingEngine>();
+        g_variableRegistry = std::make_shared<VariableRegistry>();
+        g_inputActions->registerGlobalVariables(g_variableRegistry.get());
+        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_variableRegistry.get());
         auto config = createConfig(rawConfig);
         destroyEngine(currentEngine);
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
         destroyEngine(g_scriptingEngine);
         g_scriptingEngine = currentEngine;
+        g_variableRegistry = currentVariableRegistry;
         g_configIssueManager->addIssue(e);
     }
 
@@ -158,6 +164,10 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
         }
     }
 
+    if (auto *coreModule = g_scriptingEngine->coreModule()) {
+        coreModule->variableRegistry()->disableRegistration();
+    }
+
     loadMember(config.autoReload, root->at("autoreload"));
     loadMember(config.allowExternalVariableAccess, root->at("external_variable_access"));
     if (const auto *notificationsNode = root->mapAt("notifications")) {
@@ -195,7 +205,7 @@ void ConfigLoader::activateConfig(ConfigData config, bool initialize)
     g_actionExecutor->clearQueue();
     g_actionExecutor->waitForDone();
 
-    const auto *coreModule = g_scriptingEngine->coreModule();
+    auto *coreModule = g_scriptingEngine->coreModule();
     if (coreModule) {
         Q_EMIT coreModule->config()->aboutToBeActivated();
     }

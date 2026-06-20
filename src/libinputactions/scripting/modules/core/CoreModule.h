@@ -18,15 +18,15 @@
 
 #pragma once
 
+#include "Config.h"
+#include "VariableRegistryWrapper.h"
 #include <QObject>
 
 namespace InputActions
 {
 
-class Config;
 class InputBackend;
 class ScriptingEngine;
-class VariableRegistry;
 
 class CoreModule : public QObject
 {
@@ -34,19 +34,19 @@ class CoreModule : public QObject
 
     Q_PROPERTY(Config *config READ config)
     Q_PROPERTY(InputBackend *input READ input)
-    Q_PROPERTY(VariableRegistry *variableRegistry READ variableRegistry)
+    Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
 
 public:
-    CoreModule();
+    CoreModule(ScriptingEngine &engine, VariableRegistry &variableRegistry);
     ~CoreModule() override;
 
-    Config *config() const;
+    Config *config();
     InputBackend *input() const;
-    VariableRegistry *variableRegistry() const;
+    VariableRegistryWrapper *variableRegistry();
 
 private:
-    ScriptingEngine *m_engine;
-    std::unique_ptr<Config> m_config;
+    Config m_config;
+    VariableRegistryWrapper m_variableRegistry;
 };
 
 }

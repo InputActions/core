@@ -18,25 +18,26 @@
 
 #include "CoreModule.h"
 #include "Config.h"
+#include "VariableRegistryWrapper.h"
 #include <QJSEngine>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
-#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
 {
 
-CoreModule::CoreModule()
-    : m_config(std::make_unique<Config>())
+CoreModule::CoreModule(ScriptingEngine &engine, VariableRegistry &variableRegistry)
+    : m_variableRegistry(variableRegistry, engine)
 {
-    QJSEngine::setObjectOwnership(m_config.get(), QJSEngine::CppOwnership);
+    QJSEngine::setObjectOwnership(&m_config, QJSEngine::CppOwnership);
+    QJSEngine::setObjectOwnership(&m_variableRegistry, QJSEngine::CppOwnership);
 }
 
 CoreModule::~CoreModule() = default;
 
-Config *CoreModule::config() const
+Config *CoreModule::config()
 {
-    return m_config.get();
+    return &m_config;
 }
 
 InputBackend *CoreModule::input() const
@@ -44,9 +45,9 @@ InputBackend *CoreModule::input() const
     return g_inputBackend.get();
 }
 
-VariableRegistry *CoreModule::variableRegistry() const
+VariableRegistryWrapper *CoreModule::variableRegistry()
 {
-    return g_variableRegistry.get();
+    return &m_variableRegistry;
 }
 
 }
