@@ -32,7 +32,7 @@ JSFunctionCondition::JSFunctionCondition(QJSValue function, std::shared_ptr<cons
 
 bool JSFunctionCondition::doEvaluate(const ConditionEvaluationArguments &arguments)
 {
-    const auto result = g_scriptingEngine->call(m_function);
+    const auto result = ScriptingEngine::call(m_function);
     if (result.isError() && m_sourceNode) {
         g_configIssueManager->addIssue(UncaughtScriptErrorConfigIssue(m_sourceNode.get(), result));
         return false;

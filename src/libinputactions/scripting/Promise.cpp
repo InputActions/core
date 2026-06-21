@@ -35,7 +35,7 @@ void Promise::fulfill() const
         QThreadHelpers::mainThread(),
         [this]() {
             if (m_fulfill.isCallable()) {
-                m_engine->call(m_fulfill);
+                ScriptingEngine::call(m_fulfill);
             }
         },
         true);
@@ -54,7 +54,7 @@ void Promise::reject(const QString &errorMessage) const
 void Promise::reject(const QJSValue &error) const
 {
     if (m_reject.isCallable()) {
-        m_engine->call(m_reject, {error});
+        ScriptingEngine::call(m_reject, {error});
     }
 }
 

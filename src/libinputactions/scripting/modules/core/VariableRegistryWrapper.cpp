@@ -80,7 +80,7 @@ VariableWrapper *VariableRegistryWrapper::registerComputedVariable(const QString
     }
 
     const auto getterWrapper = [this, name, type, getter = std::move(getter)](QVariant &value) {
-        const auto returnedValue = m_engine.call(getter);
+        const auto returnedValue = ScriptingEngine::call(getter);
         const auto variant = jsValueToVariant(returnedValue, type);
 
         if (!variant) {
