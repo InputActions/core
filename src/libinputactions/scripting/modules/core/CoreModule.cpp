@@ -27,13 +27,18 @@ namespace InputActions
 {
 
 CoreModule::CoreModule(ScriptingEngine &engine, VariableRegistry &variableRegistry)
-    : m_variableRegistry(variableRegistry, engine)
+    : Module(engine)
+    , m_variableRegistry(variableRegistry, engine)
 {
     QJSEngine::setObjectOwnership(&m_config, QJSEngine::CppOwnership);
     QJSEngine::setObjectOwnership(&m_variableRegistry, QJSEngine::CppOwnership);
 }
 
-CoreModule::~CoreModule() = default;
+void CoreModule::initialize(QJSValue &self)
+{
+    self.setProperty("KeyboardModifier", engine().newEnum<KeyboardModifier>());
+    self.setProperty("VariableType", engine().newEnum<VariableType>());
+}
 
 Config *CoreModule::config()
 {

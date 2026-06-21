@@ -18,15 +18,12 @@
 
 #pragma once
 
-#include <QJSValue>
-#include <QObject>
+#include <libinputactions/scripting/modules/Module.h>
 
 namespace InputActions
 {
 
-class ScriptingEngine;
-
-class MainModule : public QObject
+class MainModule : public Module
 {
     Q_OBJECT
 
@@ -39,8 +36,9 @@ public:
 
     Q_INVOKABLE QJSValue delay(double duration);
 
+    void initialize(QJSValue &self) override;
+
 private:
-    ScriptingEngine &m_engine;
     QJSValue m_globalObject;
 };
 
