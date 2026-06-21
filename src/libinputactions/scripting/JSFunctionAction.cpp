@@ -32,7 +32,7 @@ JSFunctionAction::JSFunctionAction(QJSValue function, std::shared_ptr<const Node
 
 void JSFunctionAction::doExecute(const ActionExecutionArguments &args)
 {
-    const auto result = g_scriptingEngine->call(m_function);
+    const auto result = ScriptingEngine::call(m_function);
     if (result.isError() && m_sourceNode) {
         g_configIssueManager->addIssue(UncaughtScriptErrorConfigIssue(m_sourceNode.get(), result));
     }

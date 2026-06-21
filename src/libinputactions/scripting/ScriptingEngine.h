@@ -61,14 +61,6 @@ public:
      */
     QJSValue importModule(const QString &fileName);
 
-    /**
-     * Same as QJSValue::call but with error logging.
-     */
-    QJSValue call(const QJSValue &function, const QJSValueList &args = {}) const;
-
-    QString errorToString(const QJSValue &error) const;
-    void logError(const QJSValue &error) const;
-
     template<typename TReturn, typename... TArgs, typename TFunction>
     QJSValue newFunction(TFunction &&function)
     {
@@ -90,6 +82,14 @@ public:
      * Returns an instance of the engine. Initializes the engine if it has not been initialized yet.
      */
     QJSEngine &ensureEngine();
+
+    /**
+     * Same as QJSValue::call but with error logging.
+     */
+    static QJSValue call(const QJSValue &function, const QJSValueList &args = {});
+
+    static QString errorToString(const QJSValue &error);
+    static void logError(const QJSValue &error);
 
     static inline bool disabled = false; // temporary
 

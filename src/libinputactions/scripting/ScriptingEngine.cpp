@@ -194,7 +194,7 @@ QJSValue ScriptingEngine::importModule(const QString &fileName)
     return result;
 }
 
-QJSValue ScriptingEngine::call(const QJSValue &function, const QJSValueList &args) const
+QJSValue ScriptingEngine::call(const QJSValue &function, const QJSValueList &args)
 {
     const auto result = function.call(args);
     if (result.isError()) {
@@ -204,7 +204,7 @@ QJSValue ScriptingEngine::call(const QJSValue &function, const QJSValueList &arg
     return result;
 }
 
-QString ScriptingEngine::errorToString(const QJSValue &error) const
+QString ScriptingEngine::errorToString(const QJSValue &error)
 {
     const auto name = error.property("name").toString();
     const auto message = error.property("message").toString();
@@ -218,7 +218,7 @@ QString ScriptingEngine::errorToString(const QJSValue &error) const
     return QString("%1: %2\nFile: %3\nLine: %4\nStack:\n%5\n").arg(name, message, file, QString::number(lineNumber), QStringHelpers::indented(stack, 4));
 }
 
-void ScriptingEngine::logError(const QJSValue &error) const
+void ScriptingEngine::logError(const QJSValue &error)
 {
     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught script error\n" << errorToString(error);
 }

@@ -154,8 +154,8 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
                     }
 
                     const auto rootDirectory = file.dir().absolutePath();
-                    const auto defaultFuncResult = g_scriptingEngine->call(defaultFunc,
-                                                                           {g_scriptingEngine->ensureEngine().newQObject(new Script(rootDirectory))});
+                    const auto defaultFuncResult = ScriptingEngine::call(defaultFunc,
+                                                                         {g_scriptingEngine->ensureEngine().newQObject(new Script(rootDirectory))});
                     if (defaultFuncResult.isError()) {
                         throw UncaughtScriptErrorConfigException(fileNode, defaultFuncResult);
                     }
