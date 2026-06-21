@@ -16,37 +16,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "Config.h"
-#include "VariableRegistryWrapper.h"
-#include <libinputactions/scripting/modules/Module.h>
+#include "DesktopModule.h"
+#include <libinputactions/globals.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-class InputBackend;
-
-class CoreModule : public Module
+DesktopModule::DesktopModule(ScriptingEngine &engine)
+    : Module(engine)
 {
-    Q_OBJECT
+}
 
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackend *input READ input)
-    Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
-
-public:
-    CoreModule(ScriptingEngine &engine, VariableRegistry &variableRegistry);
-
-    Config *config();
-    InputBackend *input() const;
-    VariableRegistryWrapper *variableRegistry();
-
-    void initialize(QJSValue &self) override;
-
-private:
-    Config m_config;
-    VariableRegistryWrapper m_variableRegistry;
-};
+void DesktopModule::initialize(QJSValue &self)
+{
+    self.setProperty("CursorShape", engine().newEnum<CursorShape>());
+}
 
 }

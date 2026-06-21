@@ -18,11 +18,12 @@
 
 #include "ScriptingEngine.h"
 #include "Promise.h"
+#include "modules/Module.h"
 #include "modules/core/CoreModule.h"
-#include "modules/fs/File.h"
+#include "modules/desktop/DesktopModule.h"
+#include "modules/fs/FSModule.h"
 #include "modules/main/MainModule.h"
 #include <libinputactions/InputActionsMain.h>
-#include <libinputactions/PointF.h>
 #include <libinputactions/config/ConfigIssue.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/helpers/QString.h>
@@ -74,25 +75,11 @@ void ScriptingEngine::initialize()
 
     m_coreModule = std::make_unique<CoreModule>(*this, m_variableRegistry);
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
-    auto coreModule = m_engine->newQObject(m_coreModule.get());
-    coreModule.setProperty("KeyboardModifier", newEnum<KeyboardModifier>());
-    coreModule.setProperty("VariableType", newEnum<VariableType>());
-    registerBuiltinModule("inputactions/core", coreModule);
+    registerBuiltinModule("inputactions/core", m_coreModule.get());
 
-    auto desktopModule = m_engine->newObject();
-    desktopModule.setProperty("CursorShape", newEnum<CursorShape>());
-    registerBuiltinModule("inputactions/desktop", desktopModule);
-
-    auto fsModule = m_engine->newObject();
-    fsModule.setProperty("File", m_engine->newQMetaObject(&File::staticMetaObject));
-    auto file = fsModule.property("File");
-    file.setProperty("readAllText", newFunction<QJSValue, QString>(&File::readAllText));
-    file.setProperty("writeAllText", newFunction<QJSValue, QString, QString>(&File::writeAllText));
-    registerBuiltinModule("inputactions/fs", fsModule);
-
-    auto mainModule = m_engine->newQObject(new MainModule(*this));
-    mainModule.setProperty("Point", m_engine->newQMetaObject(&PointF::staticMetaObject));
-    registerBuiltinModule("inputactions", mainModule);
+    registerBuiltinModule("inputactions", new MainModule(*this));
+    registerBuiltinModule("inputactions/desktop", new DesktopModule(*this));
+    registerBuiltinModule("inputactions/fs", new FSModule(*this));
 
     auto globalObject = m_engine->globalObject();
     globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
@@ -170,10 +157,12 @@ void ScriptingEngine::initializeWatchdog()
     onWatchdogRestartTimerTick();
 }
 
-void ScriptingEngine::registerBuiltinModule(const QString &name, QJSValue value)
+void ScriptingEngine::registerBuiltinModule(const QString &name, Module *module)
 {
-    ensureEngine().registerModule(name, value);
-    m_builtinModules[name] = std::move(value);
+    auto object = m_engine->newQObject(module);
+    module->initialize(object);
+    ensureEngine().registerModule(name, object);
+    m_builtinModules[name] = std::move(object);
 }
 
 QJSValue ScriptingEngine::newEnum(const QMetaEnum &metaEnum)

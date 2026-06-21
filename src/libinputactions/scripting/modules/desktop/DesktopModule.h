@@ -18,35 +18,19 @@
 
 #pragma once
 
-#include "Config.h"
-#include "VariableRegistryWrapper.h"
 #include <libinputactions/scripting/modules/Module.h>
 
 namespace InputActions
 {
 
-class InputBackend;
-
-class CoreModule : public Module
+class DesktopModule : public Module
 {
     Q_OBJECT
 
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackend *input READ input)
-    Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
-
 public:
-    CoreModule(ScriptingEngine &engine, VariableRegistry &variableRegistry);
-
-    Config *config();
-    InputBackend *input() const;
-    VariableRegistryWrapper *variableRegistry();
+    DesktopModule(ScriptingEngine &engine);
 
     void initialize(QJSValue &self) override;
-
-private:
-    Config m_config;
-    VariableRegistryWrapper m_variableRegistry;
 };
 
 }

@@ -16,37 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "Config.h"
-#include "VariableRegistryWrapper.h"
-#include <libinputactions/scripting/modules/Module.h>
+#include "Module.h"
 
 namespace InputActions
 {
 
-class InputBackend;
-
-class CoreModule : public Module
+Module::Module(ScriptingEngine &engine)
+    : m_engine(engine)
 {
-    Q_OBJECT
-
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackend *input READ input)
-    Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
-
-public:
-    CoreModule(ScriptingEngine &engine, VariableRegistry &variableRegistry);
-
-    Config *config();
-    InputBackend *input() const;
-    VariableRegistryWrapper *variableRegistry();
-
-    void initialize(QJSValue &self) override;
-
-private:
-    Config m_config;
-    VariableRegistryWrapper m_variableRegistry;
-};
+}
 
 }

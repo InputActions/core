@@ -17,21 +17,27 @@
 */
 
 #include "MainModule.h"
+#include <libinputactions/PointF.h>
 #include <libinputactions/scripting/Promise.h>
 
 namespace InputActions
 {
 
 MainModule::MainModule(ScriptingEngine &engine)
-    : m_engine(engine)
+    : Module(engine)
     , m_globalObject(engine.ensureEngine().globalObject())
 {
+}
+
+void MainModule::initialize(QJSValue &self)
+{
+    self.setProperty("Point", engine().ensureEngine().newQMetaObject(&PointF::staticMetaObject));
 }
 
 QJSValue MainModule::delay(double duration)
 {
     if (duration < 1 || duration > INT32_MAX) {
-        m_engine.ensureEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration)));
+        engine().ensureEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration)));
         return {};
     }
 

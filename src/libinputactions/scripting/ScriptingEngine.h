@@ -30,6 +30,7 @@ namespace InputActions
 {
 
 class CoreModule;
+class Module;
 class Promise;
 class VariableRegistry;
 
@@ -78,6 +79,13 @@ public:
 
     Promise newPromise();
 
+    template<typename T>
+    QJSValue newEnum()
+    {
+        return newEnum(QMetaEnum::fromType<T>());
+    }
+    QJSValue newEnum(const QMetaEnum &metaEnum);
+
     /**
      * Returns an instance of the engine. Initializes the engine if it has not been initialized yet.
      */
@@ -92,14 +100,7 @@ private:
     void initialize();
     void initializeWatchdog();
 
-    void registerBuiltinModule(const QString &name, QJSValue value);
-
-    template<typename T>
-    QJSValue newEnum()
-    {
-        return newEnum(QMetaEnum::fromType<T>());
-    }
-    QJSValue newEnum(const QMetaEnum &metaEnum);
+    void registerBuiltinModule(const QString &name, Module *module);
 
     VariableRegistry &m_variableRegistry;
 

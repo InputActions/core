@@ -87,9 +87,12 @@ set(libinputactions_SRCS
     libinputactions/scripting/modules/core/StoredVariableWrapper.cpp
     libinputactions/scripting/modules/core/VariableRegistryWrapper.cpp
     libinputactions/scripting/modules/core/VariableWrapper.cpp
+    libinputactions/scripting/modules/desktop/DesktopModule.cpp
     libinputactions/scripting/modules/fs/File.cpp
+    libinputactions/scripting/modules/fs/FSModule.cpp
     libinputactions/scripting/modules/main/MainModule.cpp
     libinputactions/scripting/modules/main/Script.cpp
+    libinputactions/scripting/modules/Module.cpp
     libinputactions/scripting/FunctionWrapper.cpp
     libinputactions/scripting/JSFunctionAction.cpp
     libinputactions/scripting/JSFunctionCondition.cpp
