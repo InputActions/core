@@ -19,6 +19,7 @@
 #include "DBusNotificationManager.h"
 #include <QDBusInterface>
 #include <QThreadPool>
+#include <libinputactions/helpers/QDBusConnection.h>
 
 namespace InputActions
 {
@@ -31,7 +32,7 @@ void DBusNotificationManager::sendNotification(const QString &title, const QStri
         QDBusInterface notificationsInterface("org.freedesktop.Notifications",
                                               "/org/freedesktop/Notifications",
                                               "org.freedesktop.Notifications",
-                                              QDBusConnection::sessionBus());
+                                              QDBusConnectionHelpers::sessionBus());
         if (notificationsInterface.isValid()) {
             notificationsInterface.asyncCall("Notify", "InputActions", 0U, "", title, content, QStringList(), QVariantMap(), 5000);
         }

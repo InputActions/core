@@ -16,19 +16,32 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Session.h"
-#include <QFile>
+#include "QDBusConnection.h"
+#include <sys/types.h>
+#include <unistd.h>
 
-namespace InputActions::SessionHelpers
+namespace InputActions::QDBusConnectionHelpers
 {
 
-QString currentTty()
+const QDBusConnection &sessionBus()
 {
-    QFile f("/sys/class/tty/tty0/active");
-    if (f.open(QIODeviceBase::ReadOnly)) {
-        return QString::fromUtf8(f.readAll()).trimmed();
+    static std::optional<QDBusConnection> cached;
+    if (cached) {
+        return cached.value();
     }
-    return "unknown";
+
+    gid_t rgid{};
+    gid_t egid{};
+    gid_t sgid{};
+    if (!getresgid(&rgid, &egid, &sgid) && (rgid != egid || egid != sgid)) {
+        if (const auto address = qEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS"); !address.isEmpty()) {
+            cached = QDBusConnection::connectToBus(address, "sessionBus");
+            return cached.value();
+        }
+    }
+
+    cached = QDBusConnection::sessionBus();
+    return cached.value();
 }
 
 }
