@@ -21,6 +21,7 @@
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/config/ConfigIssueManager.h>
 #include <libinputactions/config/ConfigLoader.h>
+#include <libinputactions/helpers/QDBusConnection.h>
 #include <libinputactions/input/StrokeRecorder.h>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/interfaces/OnScreenMessageManager.h>
@@ -31,7 +32,7 @@ namespace InputActions
 {
 
 IntegratedDBusInterface::IntegratedDBusInterface()
-    : m_bus(QDBusConnection::sessionBus())
+    : m_bus(QDBusConnectionHelpers::sessionBus())
 {
     m_bus.registerService(INPUTACTIONS_DBUS_SERVICE);
     m_bus.registerObject(INPUTACTIONS_DBUS_PATH, this, QDBusConnection::ExportAllSlots);

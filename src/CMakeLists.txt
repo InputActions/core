@@ -47,10 +47,10 @@ set(libinputactions_SRCS
     libinputactions/handlers/TouchscreenTriggerHandler.cpp
     libinputactions/handlers/TriggerHandler.cpp
     libinputactions/helpers/Math.cpp
+    libinputactions/helpers/QDBusConnection.cpp
     libinputactions/helpers/QString.cpp
     libinputactions/helpers/QThread.cpp
     libinputactions/helpers/QVariant.cpp
-    libinputactions/helpers/Session.cpp
     libinputactions/input/backends/InputBackend.cpp
     libinputactions/input/backends/LibevdevComplementaryInputBackend.cpp
     libinputactions/input/backends/LibinputInputBackend.cpp
