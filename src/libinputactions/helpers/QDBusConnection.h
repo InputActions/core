@@ -26,7 +26,7 @@ namespace InputActions::QDBusConnectionHelpers
 /**
  * Same as QDBusConnection::sessionBus, but uses QDBusConnection::connectToBus with the address specified in the DBUS_SESSION_BUS_ADDRESS environment variable
  * for setgid binaries.
- * 
+ *
  * Connection is cached.
  */
 const QDBusConnection &sessionBus();

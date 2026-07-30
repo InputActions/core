@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "DBusInterfaceBase.h"
 #include <QDBusConnection>
 #include <QDBusContext>
 #include <QDBusMessage>
@@ -30,8 +29,10 @@ namespace InputActions
 static const QString INPUTACTIONS_DBUS_SERVICE = "org.inputactions";
 static const QString INPUTACTIONS_DBUS_PATH = "/";
 
-class IntegratedDBusInterface
-    : public DBusInterfaceBase
+class Stroke;
+
+class MainDBusInterface
+    : public QObject
     , protected QDBusContext
 {
     Q_OBJECT
@@ -41,12 +42,17 @@ public:
     /**
      * Registers the interface.
      */
-    IntegratedDBusInterface();
+    MainDBusInterface();
 
     /**
      * Unregisters the interface.
      */
-    ~IntegratedDBusInterface() override;
+    ~MainDBusInterface() override;
+
+    /**
+     * Sets whether loading the config and suspending InputActions through the DBus interface is allowed. This is only used in the standalone implementation.
+     */
+    void setAllowConfigLoading(bool value) { m_allowConfigLoading = value; }
 
 public slots:
     QString deviceList();
@@ -57,8 +63,14 @@ public slots:
     QString variables(QString filter = "");
 
 private:
+    static QString strokeToBase64(const Stroke &stroke);
+
     QDBusConnection m_bus;
     QDBusMessage m_reply;
+
+    bool m_allowConfigLoading = true;
 };
+
+inline std::shared_ptr<MainDBusInterface> g_mainDbusInterface;
 
 }

@@ -6,6 +6,11 @@
 namespace InputActions
 {
 
+Test::~Test()
+{
+    delete g_inputActions;
+}
+
 void Test::initMain()
 {
     int argc = 0;
