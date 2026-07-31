@@ -57,6 +57,12 @@ VariableWrapper *VariableRegistryWrapper::get(const QString &name) const
     return new VariableWrapper(*variable, m_engine);
 }
 
+VariableWrapper *VariableRegistryWrapper::variable(const QString &name) const
+{
+    auto *variable = m_variableRegistry.variable(name);
+    return variable ? new VariableWrapper(*variable, m_engine) : nullptr;
+}
+
 VariableWrapper *VariableRegistryWrapper::registerComputedVariable(const QString &name, VariableType type, QJSValue getter) const
 {
     if (!m_registrationAllowed) {
