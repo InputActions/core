@@ -32,7 +32,7 @@ class VariableWrapper : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QJSValue value READ value VIRTUAL)
+    Q_PROPERTY(QJSValue value READ value)
     Q_PROPERTY(VariableType type READ type)
 
 public:
