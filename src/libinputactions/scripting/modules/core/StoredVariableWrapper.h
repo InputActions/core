@@ -31,7 +31,7 @@ class StoredVariable;
 class StoredVariableWrapper : public VariableWrapper
 {
     Q_OBJECT
-    Q_PROPERTY(QJSValue value READ value WRITE setValue OVERRIDE)
+    Q_PROPERTY(QJSValue value READ value WRITE setValue)
 
 public:
     StoredVariableWrapper(StoredVariable &variable, ScriptingEngine &engine);
