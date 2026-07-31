@@ -47,6 +47,8 @@ class Test : public QObject
     Q_OBJECT
 
 public:
+    ~Test() override;
+
     static void initMain();
 };
 

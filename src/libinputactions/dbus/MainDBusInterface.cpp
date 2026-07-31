@@ -16,14 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "IntegratedDBusInterface.h"
+#include "MainDBusInterface.h"
 #include <QRegularExpression>
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/config/ConfigIssueManager.h>
 #include <libinputactions/config/ConfigLoader.h>
+#include <libinputactions/config/GlobalConfig.h>
 #include <libinputactions/helpers/QDBusConnection.h>
 #include <libinputactions/input/StrokeRecorder.h>
 #include <libinputactions/input/backends/InputBackend.h>
+#include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/interfaces/OnScreenMessageManager.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/variables/VariableRegistry.h>
@@ -31,30 +33,35 @@
 namespace InputActions
 {
 
-IntegratedDBusInterface::IntegratedDBusInterface()
+MainDBusInterface::MainDBusInterface()
     : m_bus(QDBusConnectionHelpers::sessionBus())
 {
     m_bus.registerService(INPUTACTIONS_DBUS_SERVICE);
     m_bus.registerObject(INPUTACTIONS_DBUS_PATH, this, QDBusConnection::ExportAllSlots);
 }
 
-IntegratedDBusInterface::~IntegratedDBusInterface()
+MainDBusInterface::~MainDBusInterface()
 {
     m_bus.unregisterService(INPUTACTIONS_DBUS_SERVICE);
     m_bus.unregisterObject(INPUTACTIONS_DBUS_PATH);
 }
 
-QString IntegratedDBusInterface::deviceList()
+QString MainDBusInterface::deviceList()
 {
-    return DBusInterfaceBase::deviceList();
+    QStringList result;
+    for (const auto *device : g_inputBackend->devices()) {
+        result.push_back(device->toString());
+    }
+    result.sort();
+    return result.join("\n\n");
 }
 
-QString IntegratedDBusInterface::issues()
+QString MainDBusInterface::issues()
 {
-    return DBusInterfaceBase::issues();
+    return g_configIssueManager->issuesToString();
 }
 
-void IntegratedDBusInterface::recordStroke(const QDBusMessage &message)
+void MainDBusInterface::recordStroke(const QDBusMessage &message)
 {
     if (!g_inputBackend->initialized()) {
         sendErrorReply(QDBusError::Failed, "Stroke recording requires a valid configuration to be active.");
@@ -74,23 +81,60 @@ void IntegratedDBusInterface::recordStroke(const QDBusMessage &message)
     });
 }
 
-QString IntegratedDBusInterface::reloadConfig()
+QString MainDBusInterface::reloadConfig()
 {
+    if (!m_allowConfigLoading) {
+        sendErrorReply(QDBusError::Failed, "Loading the configuration is not allowed while the client is inactive.");
+        return {};
+    }
+
     g_configLoader->load({
         .manual = true,
     });
     return g_configIssueManager->issuesToString();
 }
 
-QString IntegratedDBusInterface::suspend()
+QString MainDBusInterface::suspend()
 {
+    if (!m_allowConfigLoading) {
+        sendErrorReply(QDBusError::Failed, "Suspending is not allowed while the client is inactive.");
+        return {};
+    }
+
     g_inputActions->suspend();
     return "success";
 }
 
-QString IntegratedDBusInterface::variables(QString filter)
+QString MainDBusInterface::variables(QString filter)
 {
-    return variableList(g_variableRegistry.get(), filter);
+    if (!g_globalConfig->allowExternalVariableAccess()) {
+        return "External variable access has been disabled. Set 'external_variable_access' to 'true' to enable.";
+    }
+
+    QStringList result;
+    const QRegularExpression filterRegex(filter);
+    for (const auto &[name, variable] : g_variableRegistry->variables()) {
+        if (variable->hidden() || !filterRegex.match(name).hasMatch()) {
+            continue;
+        }
+        result.push_back(QString("%1: %2").arg(name, variable->operations()->toString()));
+    }
+    return result.join('\n');
+}
+
+QString MainDBusInterface::strokeToBase64(const Stroke &stroke)
+{
+    QByteArray bytes;
+    const auto &points = stroke.points();
+    for (size_t i = 0; i < points.size(); i++) {
+        // All values range from -1 to 1
+        bytes.push_back(static_cast<char>(points[i].x * 100));
+        bytes.push_back(static_cast<char>(points[i].y * 100));
+        bytes.push_back(static_cast<char>(points[i].t * 100));
+        bytes.push_back(static_cast<char>(points[i].alpha * 100));
+    }
+
+    return QString("'%1'").arg(bytes.toBase64());
 }
 
 }

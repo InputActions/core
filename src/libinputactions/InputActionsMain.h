@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "dbus/IntegratedDBusInterface.h"
 #include <QObject>
 
 namespace InputActions
@@ -78,8 +77,6 @@ private:
             member = std::make_unique<T>();
         }
     }
-
-    IntegratedDBusInterface m_dbusInterface;
 };
 
 inline InputActionsMain *g_inputActions;
