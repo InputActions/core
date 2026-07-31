@@ -91,8 +91,6 @@ public:
     static QString errorToString(const QJSValue &error);
     static void logError(const QJSValue &error);
 
-    static inline bool disabled = false; // temporary
-
 private slots:
     void onWatchdogRestartTimerTick();
 
