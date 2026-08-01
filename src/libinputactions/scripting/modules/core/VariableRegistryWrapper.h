@@ -39,6 +39,10 @@ public:
 
     Q_INVOKABLE bool contains(const QString &name) const;
     Q_INVOKABLE VariableWrapper *get(const QString &name) const;
+    /**
+     * Deprecated, kept for backwards compatibility. Returns null instead of throwing when variable doesn't exist.
+     */
+    Q_INVOKABLE VariableWrapper *variable(const QString &name) const;
 
     Q_INVOKABLE VariableWrapper *registerComputedVariable(const QString &name, VariableType type, QJSValue getter) const;
     Q_INVOKABLE StoredVariableWrapper *registerStoredVariable(const QString &name, VariableType type) const;
