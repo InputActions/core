@@ -33,7 +33,6 @@
 #include <libinputactions/input/devices/VirtualMouse.h>
 #include <libinputactions/input/events.h>
 #include <libinputactions/interfaces/NotificationManager.h>
-#include <libinputactions/interfaces/SessionLock.h>
 #include <libinputactions/variables/Variable.h>
 #include <libinputactions/variables/VariableRegistry.h>
 #include <ranges>
@@ -228,10 +227,6 @@ bool InputBackend::handleEvent(const InputEvent &event)
         if (event.sender()->physicalState().pressedKeys() == m_emergencyCombination) {
             m_emergencyCombinationTimer.start(EMERGENCY_COMBINATION_HOLD_DURATION);
         }
-    }
-
-    if (g_sessionLock->sessionLocked()) {
-        return false;
     }
 
     if (event.sender()->type() != InputDeviceType::Keyboard) {

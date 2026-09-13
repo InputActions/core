@@ -159,6 +159,9 @@ void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistr
         value = PointF(translatedPosition.x() / windowGeometry->width(), translatedPosition.y() / windowGeometry->height());
     });
     variableRegistry->registerStored(BuiltinVariables::PreviousWindowId);
+    variableRegistry->registerComputed<bool>("session_locked", [](auto &value) {
+        value = g_sessionLock->sessionLocked();
+    });
     variableRegistry->registerStored(BuiltinVariables::ThumbInitialPositionPercentage);
     variableRegistry->registerStored(BuiltinVariables::ThumbPositionPercentage);
     variableRegistry->registerStored(BuiltinVariables::ThumbPresent);
