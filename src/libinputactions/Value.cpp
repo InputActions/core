@@ -61,9 +61,10 @@ Value<T> Value<T>::command(Value<QString> command)
             return {};
         }
 
-        return fromString<T>(QProcessHelpers::commandOutput(commandValue.value(), {
-            .exposeInputActionsVariables = true,
-        }));
+        return fromString<T>(QProcessHelpers::commandOutput(commandValue.value(),
+                                                            {
+                                                                .exposeInputActionsVariables = true,
+                                                            }));
     });
     value.m_expensive = true;
     return value;

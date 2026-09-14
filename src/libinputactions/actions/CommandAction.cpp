@@ -39,10 +39,11 @@ void CommandAction::doExecute(const ActionExecutionArguments &args)
         return;
     }
 
-    QProcessHelpers::command(command, {
-        .exposeInputActionsVariables = true,
-        .waitForFinished = m_wait,
-    });
+    QProcessHelpers::command(command,
+                             {
+                                 .exposeInputActionsVariables = true,
+                                 .waitForFinished = m_wait,
+                             });
 }
 
 }

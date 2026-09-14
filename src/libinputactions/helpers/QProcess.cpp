@@ -17,9 +17,9 @@
 */
 
 #include "QProcess.h"
-#include <libinputactions/variables/VariableRegistry.h>
 #include <QProcess>
 #include <QString>
+#include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions::QProcessHelpers
 {
@@ -76,6 +76,5 @@ QString commandOutput(const QString &command, const CommandOutputArguments &args
     }
     return processOutput("/bin/sh", {"-c", command}, extraEnvironment);
 }
-
 
 }
