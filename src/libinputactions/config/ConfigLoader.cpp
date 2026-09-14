@@ -84,13 +84,13 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
     auto currentVariableRegistry = g_variableRegistry;
     try {
         qCDebug(INPUTACTIONS, "Reloading config");
-        const auto rawConfig = settings.config.value_or(g_configProvider->currentConfig());
+        const auto rawConfig = g_configProvider->currentConfig();
 
         g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
         g_variableRegistry = std::make_shared<VariableRegistry>();
         g_inputActions->registerGlobalVariables(g_variableRegistry.get());
         g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_variableRegistry.get());
-        auto config = createConfig(rawConfig);
+        auto config = createConfig(rawConfig, g_configProvider->currentPath());
         destroyEngine(currentEngine);
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
@@ -117,9 +117,9 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
     return true;
 }
 
-ConfigData ConfigLoader::createConfig(const QString &raw)
+ConfigData ConfigLoader::createConfig(const QString &raw, const QString &file)
 {
-    const auto root = Node::create(raw);
+    const auto root = Node::create(raw, file);
     if (root->isNull()) {
         return {};
     } else if (!root->isMap()) {

@@ -50,7 +50,7 @@ class Node : public std::enable_shared_from_this<Node>
 
 public:
     Node(Private, NodeType type);
-    Node(Private, YAML::Node node);
+    Node(Private, YAML::Node node, std::optional<QString> file = {});
     ~Node();
 
     /**
@@ -60,11 +60,16 @@ public:
     /**
      * @param node Must not have an existing wrapper.
      */
-    static std::shared_ptr<Node> create(YAML::Node node);
+    static std::shared_ptr<Node> create(YAML::Node node, std::optional<QString> file = {});
     /**
      * @throws YamlCppConfigException
      */
-    static std::shared_ptr<Node> create(const QString &s);
+    static std::shared_ptr<Node> create(const QString &s, std::optional<QString> file = {});
+
+    /**
+     * The absolute path to this node's source file or empty if not available.
+     */
+    const std::optional<QString> &file() const { return m_file; }
 
     const TextPosition &position() const { return m_position; }
     void setPosition(TextPosition value) { m_position = value; }
@@ -166,8 +171,10 @@ private:
     YAML::Node m_node;
     NodeType m_type;
     QString m_tag;
-    TextPosition m_position;
     std::optional<QString> m_substringValue;
+
+    std::optional<QString> m_file;
+    TextPosition m_position;
 
     mutable bool m_allowImplicitConversionToSequence = false;
     mutable bool m_used{};
