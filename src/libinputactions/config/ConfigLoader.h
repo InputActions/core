@@ -30,10 +30,6 @@ struct ConfigData;
 struct ConfigLoadSettings
 {
     /**
-     * If not set, the config returned by ConfigProvider will be used.
-     */
-    std::optional<QString> config;
-    /**
      * Whether the reload was manually initiated using the control tool.
      */
     bool manual{};
@@ -53,7 +49,7 @@ public:
     void loadEmpty();
 
 private:
-    ConfigData createConfig(const QString &raw);
+    ConfigData createConfig(const QString &raw, const QString &file);
     void activateConfig(ConfigData config, bool initialize);
 };
 

@@ -30,12 +30,14 @@ namespace InputActions
 ConfigIssue::ConfigIssue(const Node *node)
     : m_isNodeSubstring(node->isSubstring())
     , m_substringNodeValue(node->substring())
+    , m_file(node->file())
     , m_position(node->position())
 {
 }
 
-ConfigIssue::ConfigIssue(TextPosition position)
-    : m_position(position)
+ConfigIssue::ConfigIssue(std::optional<QString> file, TextPosition position)
+    : m_file(std::move(file))
+    , m_position(position)
 {
 }
 
@@ -72,7 +74,7 @@ QString ConfigIssue::toString(bool colors) const
                    .arg(m_substringNodeValue, text.first(1).toLower(), text.mid(1));
     }
 
-    return QString("%1%2: %3").arg(m_position.toString(), severityString, text);
+    return QString("%1:%2%3: %4").arg(m_file.value_or("<unknown file>"), m_position.toString(), severityString, text);
 }
 
 bool ConfigIssue::operator==(const ConfigIssue &other) const
@@ -85,8 +87,8 @@ ConfigException::ConfigException(const Node *node)
 {
 }
 
-ConfigException::ConfigException(TextPosition position)
-    : ConfigIssue(position)
+ConfigException::ConfigException(std::optional<QString> file, TextPosition position)
+    : ConfigIssue(std::move(file), position)
 {
 }
 
@@ -218,8 +220,8 @@ QString UncaughtScriptErrorConfigException::message() const
     return QString("Uncaught script error\n\n%1").arg(m_message);
 }
 
-YamlCppConfigException::YamlCppConfigException(TextPosition position, QString message)
-    : ConfigException(position)
+YamlCppConfigException::YamlCppConfigException(std::optional<QString> file, TextPosition position, QString message)
+    : ConfigException(file, position)
     , m_message(std::move(message))
 {
     m_message.replace(QRegularExpression("yaml-cpp: error at line \\d+, column \\d+: "), "");

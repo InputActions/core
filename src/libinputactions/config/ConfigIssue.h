@@ -60,11 +60,13 @@ public:
 
 protected:
     ConfigIssue(const Node *node);
-    ConfigIssue(TextPosition position);
+    ConfigIssue(std::optional<QString> file, TextPosition position);
 
 private:
     bool m_isNodeSubstring{};
     QString m_substringNodeValue;
+
+    std::optional<QString> m_file;
     TextPosition m_position;
 };
 
@@ -74,7 +76,7 @@ class ConfigException
 {
 public:
     ConfigException(const Node *node);
-    ConfigException(TextPosition position);
+    ConfigException(std::optional<QString> file, TextPosition position);
 
     const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
 
@@ -244,7 +246,7 @@ class YamlCppConfigException
     , public virtual Copyable<YamlCppConfigException, ConfigIssue>
 {
 public:
-    YamlCppConfigException(TextPosition position, QString message);
+    YamlCppConfigException(std::optional<QString> file, TextPosition position, QString message);
 
     QString message() const override { return m_message; }
 
