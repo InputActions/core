@@ -18,28 +18,47 @@
 
 #pragma once
 
-#include <QObject>
+#include <QSocketNotifier>
+#include <QTimer>
 
 namespace InputActions
 {
+
+static const QString INPUTACTIONS_ETC_CONFIG_PATH = "/etc/inputactions/config.yaml";
 
 class ConfigProvider : public QObject
 {
     Q_OBJECT
 
 public:
-    ConfigProvider() = default;
+    ConfigProvider();
+    ~ConfigProvider() override;
 
-    const QString &currentConfig() const;
+    const QString &currentConfig() const { return m_config; }
+    const QString &currentPath() const { return m_path; }
 
 signals:
     void configChanged(const QString &config);
 
-protected:
-    void setConfig(const QString &value);
+private slots:
+    void onReadyRead();
+    void onRetryTimerTimeout();
 
 private:
+    void initWatchers();
+    void tryReadConfig(bool retryIfEmpty = false);
+
+    /**
+     * @return Path to the configuration file.
+     */
+    static QString ensureConfigPath();
+
+    QString m_path;
     QString m_config;
+    int m_inotifyFd;
+    std::vector<int> m_inotifyWds;
+    std::unique_ptr<QSocketNotifier> m_inotifyNotifier;
+    QTimer m_retryTimer;
 };
 
 inline std::shared_ptr<ConfigProvider> g_configProvider;

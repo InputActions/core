@@ -3,10 +3,10 @@
 #include "config/ConfigIssueManager.h"
 #include "config/ConfigLoader.h"
 #include "config/GlobalConfig.h"
+#include "config/ConfigProvider.h"
 #include "dbus/MainDBusInterface.h"
 #include "input/StrokeRecorder.h"
 #include "input/backends/InputBackend.h"
-#include "interfaces/ConfigProvider.h"
 #include "interfaces/CursorShapeProvider.h"
 #include "interfaces/NotificationManager.h"
 #include "interfaces/OnScreenMessageManager.h"
@@ -16,7 +16,6 @@
 #include "interfaces/TextInput.h"
 #include "interfaces/Window.h"
 #include "interfaces/WindowProvider.h"
-#include "interfaces/implementations/FileConfigProvider.h"
 #include "scripting/ScriptingEngine.h"
 #include "variables/VariableRegistry.h"
 #include <QFile>
@@ -78,7 +77,7 @@ void InputActionsMain::onConfigChanged(const QString &config)
 
 void InputActionsMain::setMissingImplementations()
 {
-    setMissingImplementation<ConfigProvider, FileConfigProvider>(g_configProvider);
+    setMissingImplementation(g_configProvider);
     setMissingImplementation(g_cursorShapeProvider);
     setMissingImplementation(g_notificationManager);
     setMissingImplementation(g_onScreenMessageManager);
