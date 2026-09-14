@@ -66,14 +66,12 @@ set(libinputactions_SRCS
     libinputactions/input/StrokeRecorder.cpp
     libinputactions/input/events.cpp
     libinputactions/interfaces/implementations/DBusNotificationManager.cpp
-    libinputactions/interfaces/implementations/DBusPlasmaGlobalShortcutInvoker.cpp
     libinputactions/interfaces/implementations/FileConfigProvider.cpp
     libinputactions/interfaces/implementations/ProcessRunnerImpl.cpp
     libinputactions/interfaces/ConfigProvider.cpp
     libinputactions/interfaces/CursorShapeProvider.h
     libinputactions/interfaces/NotificationManager.h
     libinputactions/interfaces/OnScreenMessageManager.h
-    libinputactions/interfaces/PlasmaGlobalShortcutInvoker.h
     libinputactions/interfaces/PointerPositionGetter.h
     libinputactions/interfaces/PointerPositionSetter.h
     libinputactions/interfaces/ProcessRunner.cpp

@@ -17,7 +17,7 @@
 */
 
 #include "PlasmaGlobalShortcutAction.h"
-#include <libinputactions/interfaces/PlasmaGlobalShortcutInvoker.h>
+#include <QDBusInterface>
 
 namespace InputActions
 {
@@ -30,7 +30,8 @@ PlasmaGlobalShortcutAction::PlasmaGlobalShortcutAction(QString component, QStrin
 
 void PlasmaGlobalShortcutAction::doExecute(const ActionExecutionArguments &args)
 {
-    g_plasmaGlobalShortcutInvoker->invoke(m_component, m_shortcut);
+    QDBusInterface interface("org.kde.kglobalaccel", "/component/" + m_component, "org.kde.kglobalaccel.Component");
+    interface.call("invokeShortcut", m_shortcut);
 }
 
 }
