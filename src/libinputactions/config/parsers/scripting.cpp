@@ -17,7 +17,10 @@
 */
 
 #include "scripting.h"
+#include "utils.h"
+#include <QRegularExpression>
 #include <libinputactions/config/Node.h>
+#include <libinputactions/scripting/ModuleScriptMetadata.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
@@ -34,6 +37,27 @@ QJSValue parseFunction(const Node *node)
     }
 
     return result;
+}
+
+template<>
+void NodeParser<ModuleScriptMetadata>::parse(const Node *node, ModuleScriptMetadata &result)
+{
+    loadSetter(result, &ModuleScriptMetadata::setId, node->at("id", true));
+    loadSetter(result, &ModuleScriptMetadata::setMainModule, node->at("main_module", true));
+
+    // Version will be used in the future
+    const auto *versionNode = node->at("version", true);
+    const auto rawVersion = versionNode->as<QString>();
+
+    static const QRegularExpression versionValidationRegex("^(\\d+)\\.(\\d+)\\.(\\d+)$");
+    const auto match = versionValidationRegex.match(rawVersion);
+    if (!match.hasMatch()) {
+        throw InvalidValueConfigException(versionNode, "Invalid version.");
+    }
+
+    if (match.capturedTexts()[1].toInt() > 255 || match.capturedTexts()[2].toInt() > 255 || match.capturedTexts()[3].toInt() > 255) {
+        throw InvalidValueConfigException(versionNode, "Version out of range.");
+    }
 }
 
 }

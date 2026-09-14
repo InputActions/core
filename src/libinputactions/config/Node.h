@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ConfigIssue.h"
+#include "NodeSourceFile.h"
 #include "TextPosition.h"
 #include "parsers/NodeParser.h"
 #include <QString>
@@ -50,7 +51,7 @@ class Node : public std::enable_shared_from_this<Node>
 
 public:
     Node(Private, NodeType type);
-    Node(Private, YAML::Node node, std::optional<QString> file = {});
+    Node(Private, YAML::Node node, std::shared_ptr<NodeSourceFile> sourceFile = {});
     ~Node();
 
     /**
@@ -60,16 +61,16 @@ public:
     /**
      * @param node Must not have an existing wrapper.
      */
-    static std::shared_ptr<Node> create(YAML::Node node, std::optional<QString> file = {});
+    static std::shared_ptr<Node> create(YAML::Node node, std::shared_ptr<NodeSourceFile> sourceFile = {});
     /**
      * @throws YamlCppConfigException
      */
-    static std::shared_ptr<Node> create(const QString &s, std::optional<QString> file = {});
+    static std::shared_ptr<Node> create(const QString &s, std::shared_ptr<NodeSourceFile> sourceFile = {});
 
     /**
-     * The absolute path to this node's source file or empty if not available.
+     * The node's source file or nullptr if not available.
      */
-    const std::optional<QString> &file() const { return m_file; }
+    const std::shared_ptr<NodeSourceFile> &sourceFile() const { return m_sourceFile; }
 
     const TextPosition &position() const { return m_position; }
     void setPosition(TextPosition value) { m_position = value; }
@@ -173,7 +174,7 @@ private:
     QString m_tag;
     std::optional<QString> m_substringValue;
 
-    std::optional<QString> m_file;
+    std::shared_ptr<NodeSourceFile> m_sourceFile;
     TextPosition m_position;
 
     mutable bool m_allowImplicitConversionToSequence = false;

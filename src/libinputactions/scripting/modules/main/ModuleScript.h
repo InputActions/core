@@ -16,14 +16,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Script.h"
+#pragma once
+
+#include <QObject>
 
 namespace InputActions
 {
 
-Script::Script(QString rootDirectory)
-    : m_rootDirectory(std::move(rootDirectory))
+class ModuleScript : public QObject
 {
-}
+    Q_OBJECT
+
+    Q_PROPERTY(QString packageDirectory READ packageDirectory)
+
+public:
+    ModuleScript(QString packageDirectory);
+
+    const QString &packageDirectory() const { return m_packageDirectory; }
+
+private:
+    QString m_packageDirectory;
+};
 
 }

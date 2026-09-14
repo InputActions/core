@@ -20,6 +20,7 @@
 #include "ConfigIssue.h"
 #include "ConfigIssueManager.h"
 #include "TextPosition.h"
+#include "config/NodeSourceFile.h"
 #include <QLoggingCategory>
 #include <libinputactions/helpers/QString.h>
 
@@ -32,21 +33,21 @@ Node::Node(Private, NodeType type)
 {
 }
 
-Node::Node(Private, YAML::Node node, std::optional<QString> file)
+Node::Node(Private, YAML::Node node, std::shared_ptr<NodeSourceFile> sourceFile)
     : m_node(node)
     , m_tag(QString::fromStdString(node.Tag()))
-    , m_file(file)
+    , m_sourceFile(sourceFile)
     , m_position(node.Mark().line, node.Mark().column)
 {
     if (node.IsMap()) {
         m_type = NodeType::Map;
         for (auto it = m_node.begin(); it != m_node.end(); ++it) {
-            m_mapItems.emplace(Node::create(it->first, file), Node::create(it->second, file));
+            m_mapItems.emplace(Node::create(it->first, sourceFile), Node::create(it->second, sourceFile));
         }
     } else if (node.IsSequence()) {
         m_type = NodeType::Sequence;
         for (const auto &item : m_node) {
-            m_sequenceItems.push_back(Node::create(item, file));
+            m_sequenceItems.push_back(Node::create(item, sourceFile));
         }
     } else if (node.IsScalar()) {
         m_type = NodeType::Scalar;
@@ -65,17 +66,17 @@ std::shared_ptr<Node> Node::create(NodeType type)
     return std::make_shared<Node>(Private(), type);
 }
 
-std::shared_ptr<Node> Node::create(YAML::Node node, std::optional<QString> file)
+std::shared_ptr<Node> Node::create(YAML::Node node, std::shared_ptr<NodeSourceFile> sourceFile)
 {
-    return std::make_shared<Node>(Private(), std::move(node), file);
+    return std::make_shared<Node>(Private(), std::move(node), sourceFile);
 }
 
-std::shared_ptr<Node> Node::create(const QString &s, std::optional<QString> file)
+std::shared_ptr<Node> Node::create(const QString &s, std::shared_ptr<NodeSourceFile> sourceFile)
 {
     try {
-        return Node::create(YAML::Load(s.toStdString()), file);
+        return Node::create(YAML::Load(s.toStdString()), sourceFile);
     } catch (const YAML::Exception &e) {
-        throw YamlCppConfigException(file, {e.mark.line, e.mark.column}, e.what());
+        throw YamlCppConfigException(sourceFile, {e.mark.line, e.mark.column}, e.what());
     }
 }
 
@@ -140,7 +141,7 @@ std::shared_ptr<Node> Node::substringNode(const QString &substring) const
         const auto index = std::max(static_cast<qsizetype>(0), as<QString>().indexOf(substring, 0, Qt::CaseInsensitive));
         raw += QStringHelpers::indented(substring, m_position.column() + index);
 
-        auto node = Node::create(raw, m_file);
+        auto node = Node::create(raw, m_sourceFile);
         node->m_substringValue = substring;
         if (node->m_position == TextPosition(0, 0)) {
             node->m_position = m_position;
@@ -167,7 +168,7 @@ std::shared_ptr<Node> Node::substringNodeQuoted(const QString &substring) const
     try {
         const auto index = std::max(static_cast<qsizetype>(0), as<QString>().indexOf(substring, 0, Qt::CaseInsensitive));
 
-        auto node = Node::create(QStringHelpers::quoted(substring), m_file);
+        auto node = Node::create(QStringHelpers::quoted(substring), m_sourceFile);
         node->setPosition({m_position.line(), m_position.column() + static_cast<int32_t>(index)});
         node->m_substringValue = substring;
 

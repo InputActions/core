@@ -18,41 +18,36 @@
 
 #pragma once
 
-#include <QString>
-#include <memory>
-#include <optional>
+#include <QObject>
 
 namespace InputActions
 {
 
-struct ConfigData;
-
-struct ConfigLoadSettings
+class ModuleScriptMetadata
 {
-    /**
-     * Whether the reload was manually initiated using the control tool.
-     */
-    bool manual{};
-};
+    Q_GADGET
 
-class ConfigLoader
-{
+    Q_PROPERTY(QString id READ id)
+    Q_PROPERTY(QString mainModule READ mainModule)
+
 public:
-    /**
-     * @return Whether the operation was successful. Errors may be obtained from ConfigIssueManager.
-     */
-    bool load(const ConfigLoadSettings &settings = {});
+    ModuleScriptMetadata() = default;
 
     /**
-     * Loads an empty config with default values without initializing any components.
+     * Unique script identifier in reverse domain name notation.
      */
-    void loadEmpty();
+    const QString &id() const { return m_id; }
+    void setId(QString value) { m_id = std::move(value); }
+
+    /**
+     * Path to the main module relative to the metadata file's path.
+     */
+    const QString &mainModule() const { return m_mainModule; }
+    void setMainModule(QString value) { m_mainModule = std::move(value); }
 
 private:
-    ConfigData createConfig(const QString &raw);
-    void activateConfig(ConfigData config, bool initialize);
+    QString m_id;
+    QString m_mainModule;
 };
-
-inline std::shared_ptr<ConfigLoader> g_configLoader;
 
 }

@@ -24,11 +24,6 @@
 namespace InputActions
 {
 
-ConfigIssueManager::ConfigIssueManager(QString config)
-    : m_config(std::move(config))
-{
-}
-
 std::vector<const ConfigIssue *> ConfigIssueManager::issues() const
 {
     std::vector<const ConfigIssue *> result;
@@ -41,11 +36,17 @@ std::vector<const ConfigIssue *> ConfigIssueManager::issues() const
 QString ConfigIssueManager::issuesToString() const
 {
     QString result;
-    const auto configLines = m_config.split("\n");
-    const auto maxLineNumberLength = QString::number(configLines.size() + 1).size();
 
     bool hasError{};
     for (const auto &issue : m_issues) {
+        QString fileContents = "<failed to get file contents>";
+        if (const auto *sourceFile = issue->sourceFile()) {
+            fileContents = sourceFile->contents();
+        }
+
+        const auto lines = fileContents.split("\n");
+        const auto maxLineNumberLength = QString::number(lines.size() + 1).size();
+
         if (issue->severity() == ConfigIssueSeverity::Error) {
             hasError = true;
         } else if (dynamic_cast<UnusedPropertyConfigIssue *>(issue.get()) && hasError) {
@@ -63,14 +64,18 @@ QString ConfigIssueManager::issuesToString() const
         };
 
         if (issue->position().isValid()) {
-            const auto lineIndex = issue->position().line();
+            auto lineIndex = issue->position().line();
+            if (lineIndex >= lines.size()) {
+                lineIndex = std::max(lines.size() - 1, static_cast<qsizetype>(0));
+            }
+
             const auto column = issue->position().column();
-            const auto &line = configLines[lineIndex];
+            const auto &line = lines[lineIndex];
             const auto surroundingLines = 3;
 
             // Lines before offending line
             for (auto i = std::max(lineIndex - surroundingLines, 0); i < lineIndex; i++) {
-                result += QString("%1%2\n").arg(lineNumber(i), configLines[i]);
+                result += QString("%1%2\n").arg(lineNumber(i), lines[i]);
             }
 
             // Offending line
@@ -109,8 +114,8 @@ QString ConfigIssueManager::issuesToString() const
             result += highlight + AnsiEscapeCode::Color::Reset + "\n";
 
             // Lines after offending line
-            for (auto i = lineIndex + 1; i < std::min(configLines.size(), static_cast<qsizetype>(lineIndex + surroundingLines + 1)); i++) {
-                result += QString("%1%2\n").arg(lineNumber(i), configLines[i]);
+            for (auto i = lineIndex + 1; i < std::min(lines.size(), static_cast<qsizetype>(lineIndex + surroundingLines + 1)); i++) {
+                result += QString("%1%2\n").arg(lineNumber(i), lines[i]);
             }
         }
         result += "\n";
@@ -123,6 +128,11 @@ QString ConfigIssueManager::issuesToString() const
         result.chop(2);
     }
     return result;
+}
+
+void ConfigIssueManager::clearIssues()
+{
+    m_issues.clear();
 }
 
 }
