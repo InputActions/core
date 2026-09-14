@@ -17,7 +17,6 @@
 #include "interfaces/TextInput.h"
 #include "interfaces/Window.h"
 #include "interfaces/WindowProvider.h"
-#include "interfaces/implementations/DBusNotificationManager.h"
 #include "interfaces/implementations/FileConfigProvider.h"
 #include "interfaces/implementations/ProcessRunnerImpl.h"
 #include "scripting/ScriptingEngine.h"
@@ -84,7 +83,7 @@ void InputActionsMain::setMissingImplementations()
 {
     setMissingImplementation<ConfigProvider, FileConfigProvider>(g_configProvider);
     setMissingImplementation(g_cursorShapeProvider);
-    setMissingImplementation<NotificationManager, DBusNotificationManager>(g_notificationManager);
+    setMissingImplementation(g_notificationManager);
     setMissingImplementation(g_onScreenMessageManager);
     setMissingImplementation(g_pointerPositionGetter);
     setMissingImplementation(g_pointerPositionSetter);

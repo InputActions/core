@@ -65,12 +65,11 @@ set(libinputactions_SRCS
     libinputactions/input/MouseButton.cpp
     libinputactions/input/StrokeRecorder.cpp
     libinputactions/input/events.cpp
-    libinputactions/interfaces/implementations/DBusNotificationManager.cpp
     libinputactions/interfaces/implementations/FileConfigProvider.cpp
     libinputactions/interfaces/implementations/ProcessRunnerImpl.cpp
     libinputactions/interfaces/ConfigProvider.cpp
     libinputactions/interfaces/CursorShapeProvider.h
-    libinputactions/interfaces/NotificationManager.h
+    libinputactions/interfaces/NotificationManager.cpp
     libinputactions/interfaces/OnScreenMessageManager.h
     libinputactions/interfaces/PointerPositionGetter.h
     libinputactions/interfaces/PointerPositionSetter.h

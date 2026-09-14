@@ -27,9 +27,8 @@ class NotificationManager
 {
 public:
     NotificationManager() = default;
-    virtual ~NotificationManager() = default;
 
-    virtual void sendNotification(const QString &title, const QString &content) {}
+    void sendNotification(const QString &title, const QString &content);
 };
 
 inline std::shared_ptr<NotificationManager> g_notificationManager;
