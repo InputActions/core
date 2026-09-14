@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "FileConfigProvider.h"
+#include "ConfigProvider.h"
 #include <QDir>
 #include <QFile>
 #include <QStandardPaths>
@@ -31,10 +31,10 @@ namespace InputActions
 static const QDir INPUTACTIONS_DIR = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/inputactions";
 static const std::chrono::milliseconds CONFIG_LOAD_RETRY_DELAY{500L};
 
-FileConfigProvider::FileConfigProvider()
+ConfigProvider::ConfigProvider()
     : m_path(ensureConfigPath())
 {
-    connect(&m_retryTimer, &QTimer::timeout, this, &FileConfigProvider::onRetryTimerTimeout);
+    connect(&m_retryTimer, &QTimer::timeout, this, &ConfigProvider::onRetryTimerTimeout);
     m_retryTimer.setSingleShot(true);
 
     m_inotifyFd = inotify_init();
@@ -50,25 +50,20 @@ FileConfigProvider::FileConfigProvider()
     }
 
     m_inotifyNotifier = std::make_unique<QSocketNotifier>(m_inotifyFd, QSocketNotifier::Read);
-    connect(m_inotifyNotifier.get(), &QSocketNotifier::activated, this, &FileConfigProvider::onReadyRead);
+    connect(m_inotifyNotifier.get(), &QSocketNotifier::activated, this, &ConfigProvider::onReadyRead);
 
     initWatchers();
     tryReadConfig();
 }
 
-FileConfigProvider::~FileConfigProvider()
+ConfigProvider::~ConfigProvider()
 {
     if (m_inotifyFd != -1) {
         close(m_inotifyFd);
     }
 }
 
-const QString &FileConfigProvider::currentPath() const
-{
-    return m_path;
-}
-
-void FileConfigProvider::initWatchers()
+void ConfigProvider::initWatchers()
 {
     m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, QFileInfo(m_path).dir().path().toStdString().c_str(), IN_CREATE | IN_CLOSE_WRITE)); // watch dir
     m_inotifyWds.push_back(inotify_add_watch(m_inotifyFd, m_path.toStdString().c_str(), IN_CLOSE_WRITE | IN_DONT_FOLLOW)); // watch file
@@ -77,7 +72,7 @@ void FileConfigProvider::initWatchers()
     }
 }
 
-void FileConfigProvider::onReadyRead()
+void ConfigProvider::onReadyRead()
 {
     std::array<int8_t, 16 * (sizeof(inotify_event) + NAME_MAX + 1)> buffer{};
     auto first = true;
@@ -95,12 +90,12 @@ void FileConfigProvider::onReadyRead()
     }
 }
 
-void FileConfigProvider::onRetryTimerTimeout()
+void ConfigProvider::onRetryTimerTimeout()
 {
     tryReadConfig();
 }
 
-void FileConfigProvider::tryReadConfig(bool retryIfEmpty)
+void ConfigProvider::tryReadConfig(bool retryIfEmpty)
 {
     QFile configFile(m_path);
     if (!configFile.open(QIODevice::ReadOnly)) {
@@ -114,12 +109,13 @@ void FileConfigProvider::tryReadConfig(bool retryIfEmpty)
     }
     m_retryTimer.stop();
 
-    if (config != currentConfig()) {
-        setConfig(config);
+    if (config != m_config) {
+        m_config = config;
+        Q_EMIT configChanged(config);
     }
 }
 
-QString FileConfigProvider::ensureConfigPath()
+QString ConfigProvider::ensureConfigPath()
 {
     if (!INPUTACTIONS_DIR.exists()) {
         INPUTACTIONS_DIR.mkpath(".");

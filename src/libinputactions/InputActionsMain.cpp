@@ -2,25 +2,20 @@
 #include "actions/ActionExecutor.h"
 #include "config/ConfigIssueManager.h"
 #include "config/ConfigLoader.h"
+#include "config/ConfigProvider.h"
 #include "config/GlobalConfig.h"
 #include "dbus/MainDBusInterface.h"
 #include "input/StrokeRecorder.h"
 #include "input/backends/InputBackend.h"
-#include "interfaces/ConfigProvider.h"
 #include "interfaces/CursorShapeProvider.h"
 #include "interfaces/NotificationManager.h"
 #include "interfaces/OnScreenMessageManager.h"
 #include "interfaces/PointerPositionGetter.h"
 #include "interfaces/PointerPositionSetter.h"
-#include "interfaces/ProcessRunner.h"
 #include "interfaces/SessionLock.h"
 #include "interfaces/TextInput.h"
 #include "interfaces/Window.h"
 #include "interfaces/WindowProvider.h"
-#include "interfaces/implementations/DBusNotificationManager.h"
-#include "interfaces/implementations/DBusPlasmaGlobalShortcutInvoker.h"
-#include "interfaces/implementations/FileConfigProvider.h"
-#include "interfaces/implementations/ProcessRunnerImpl.h"
 #include "scripting/ScriptingEngine.h"
 #include "variables/VariableRegistry.h"
 #include <QFile>
@@ -42,7 +37,6 @@ InputActionsMain::~InputActionsMain()
     g_onScreenMessageManager.reset();
     g_pointerPositionGetter.reset();
     g_pointerPositionSetter.reset();
-    g_processRunner.reset();
     g_textInput.reset();
     g_sessionLock.reset();
     g_windowProvider.reset();
@@ -83,14 +77,12 @@ void InputActionsMain::onConfigChanged(const QString &config)
 
 void InputActionsMain::setMissingImplementations()
 {
-    setMissingImplementation<ConfigProvider, FileConfigProvider>(g_configProvider);
+    setMissingImplementation(g_configProvider);
     setMissingImplementation(g_cursorShapeProvider);
-    setMissingImplementation<NotificationManager, DBusNotificationManager>(g_notificationManager);
+    setMissingImplementation(g_notificationManager);
     setMissingImplementation(g_onScreenMessageManager);
     setMissingImplementation(g_pointerPositionGetter);
     setMissingImplementation(g_pointerPositionSetter);
-    setMissingImplementation<PlasmaGlobalShortcutInvoker, DBusPlasmaGlobalShortcutInvoker>(g_plasmaGlobalShortcutInvoker);
-    setMissingImplementation<ProcessRunner, ProcessRunnerImpl>(g_processRunner);
     setMissingImplementation(g_textInput);
     setMissingImplementation(g_sessionLock);
     setMissingImplementation(g_windowProvider);

@@ -27,6 +27,7 @@ set(libinputactions_SRCS
     libinputactions/config/ConfigIssue.cpp
     libinputactions/config/ConfigIssueManager.cpp
     libinputactions/config/ConfigLoader.cpp
+    libinputactions/config/ConfigProvider.cpp
     libinputactions/config/GlobalConfig.cpp
     libinputactions/config/Node.cpp
     libinputactions/config/TextPosition.cpp
@@ -47,6 +48,7 @@ set(libinputactions_SRCS
     libinputactions/handlers/TriggerHandler.cpp
     libinputactions/helpers/Math.cpp
     libinputactions/helpers/QDBusConnection.cpp
+    libinputactions/helpers/QProcess.cpp
     libinputactions/helpers/QString.cpp
     libinputactions/helpers/QThread.cpp
     libinputactions/helpers/QVariant.cpp
@@ -65,18 +67,11 @@ set(libinputactions_SRCS
     libinputactions/input/MouseButton.cpp
     libinputactions/input/StrokeRecorder.cpp
     libinputactions/input/events.cpp
-    libinputactions/interfaces/implementations/DBusNotificationManager.cpp
-    libinputactions/interfaces/implementations/DBusPlasmaGlobalShortcutInvoker.cpp
-    libinputactions/interfaces/implementations/FileConfigProvider.cpp
-    libinputactions/interfaces/implementations/ProcessRunnerImpl.cpp
-    libinputactions/interfaces/ConfigProvider.cpp
     libinputactions/interfaces/CursorShapeProvider.h
-    libinputactions/interfaces/NotificationManager.h
+    libinputactions/interfaces/NotificationManager.cpp
     libinputactions/interfaces/OnScreenMessageManager.h
-    libinputactions/interfaces/PlasmaGlobalShortcutInvoker.h
     libinputactions/interfaces/PointerPositionGetter.h
     libinputactions/interfaces/PointerPositionSetter.h
-    libinputactions/interfaces/ProcessRunner.cpp
     libinputactions/interfaces/SessionLock.h
     libinputactions/interfaces/TextInput.cpp
     libinputactions/interfaces/Window.h

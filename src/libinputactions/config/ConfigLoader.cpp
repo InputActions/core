@@ -19,6 +19,7 @@
 #include "ConfigLoader.h"
 #include "ConfigIssue.h"
 #include "ConfigIssueManager.h"
+#include "ConfigProvider.h"
 #include "GlobalConfig.h"
 #include "InputActionsMain.h"
 #include "Node.h"
@@ -35,7 +36,6 @@
 #include <libinputactions/handlers/TouchscreenTriggerHandler.h>
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
-#include <libinputactions/interfaces/ConfigProvider.h>
 #include <libinputactions/interfaces/NotificationManager.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>

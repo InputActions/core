@@ -18,14 +18,36 @@
 
 #pragma once
 
-#include <libinputactions/interfaces/NotificationManager.h>
+#include <QString>
 
-namespace InputActions
+namespace InputActions::QProcessHelpers
 {
 
-class DBusNotificationManager : public NotificationManager
+struct CommandArguments
 {
-public:
-    void sendNotification(const QString &title, const QString &content) override;
+    /**
+     * Whether to expose InputActions variables referenced in the command as environment variables.
+     */
+    bool exposeInputActionsVariables = false;
+    bool waitForFinished = false;
 };
+
+struct CommandOutputArguments
+{
+    /**
+     * Whether to expose InputActions variables referenced in the command as environment variables.
+     */
+    bool exposeInputActionsVariables = false;
+};
+
+/**
+ * Runs a command in /bin/sh.
+ */
+void command(const QString &command, const CommandArguments &args = {});
+/**
+ * Runs a command in /bin/sh.
+ * @returns The standard output.
+ */
+QString commandOutput(const QString &command, const CommandOutputArguments &args = {});
+
 }

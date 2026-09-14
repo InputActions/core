@@ -20,9 +20,9 @@
 #include "InputActionsMain.h"
 #include <QProcess>
 #include <libinputactions/globals.h>
+#include <libinputactions/helpers/QProcess.h>
 #include <libinputactions/helpers/QThread.h>
 #include <libinputactions/interfaces/CursorShapeProvider.h>
-#include <libinputactions/interfaces/ProcessRunner.h>
 #include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
@@ -61,7 +61,10 @@ Value<T> Value<T>::command(Value<QString> command)
             return {};
         }
 
-        return fromString<T>(g_processRunner->startProcessReadOutput("/bin/sh", {"-c", commandValue.value()}));
+        return fromString<T>(QProcessHelpers::commandOutput(commandValue.value(),
+                                                            {
+                                                                .exposeInputActionsVariables = true,
+                                                            }));
     });
     value.m_expensive = true;
     return value;
