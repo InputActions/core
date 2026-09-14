@@ -17,7 +17,7 @@
 */
 
 #include "CommandAction.h"
-#include <libinputactions/interfaces/ProcessRunner.h>
+#include <libinputactions/helpers/QProcess.h>
 
 namespace InputActions
 {
@@ -39,7 +39,10 @@ void CommandAction::doExecute(const ActionExecutionArguments &args)
         return;
     }
 
-    g_processRunner->startProcess("/bin/sh", {"-c", command}, m_wait);
+    QProcessHelpers::command(command, {
+        .exposeInputActionsVariables = true,
+        .waitForFinished = m_wait,
+    });
 }
 
 }

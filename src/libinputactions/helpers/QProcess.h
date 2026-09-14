@@ -18,27 +18,36 @@
 
 #pragma once
 
-#include <QProcessEnvironment>
 #include <QString>
-#include <map>
 
-namespace InputActions
+namespace InputActions::QProcessHelpers
 {
 
-class ProcessRunner : public QObject
+struct CommandArguments
 {
-    Q_OBJECT
-
-public:
-    ProcessRunner() = default;
-
-    void startProcess(const QString &program, const QStringList &arguments, bool wait = false);
-    QString startProcessReadOutput(const QString &program, const QStringList &arguments);
-
-    virtual void startProcess(const QString &program, const QStringList &arguments, std::map<QString, QString> extraEnvironment, bool wait = false) {}
-    virtual QString startProcessReadOutput(const QString &program, const QStringList &arguments, std::map<QString, QString> extraEnvironment) { return {}; }
+    /**
+     * Whether to expose InputActions variables referenced in the command as environment variables.
+     */
+    bool exposeInputActionsVariables = false;
+    bool waitForFinished = false;
 };
 
-inline std::shared_ptr<ProcessRunner> g_processRunner;
+struct CommandOutputArguments
+{
+    /**
+     * Whether to expose InputActions variables referenced in the command as environment variables.
+     */
+    bool exposeInputActionsVariables = false;
+};
+
+/**
+ * Runs a command in /bin/sh.
+ */
+void command(const QString &command, const CommandArguments &args = {});
+/**
+ * Runs a command in /bin/sh.
+ * @returns The standard output.
+ */
+QString commandOutput(const QString &command, const CommandOutputArguments &args = {});
 
 }
