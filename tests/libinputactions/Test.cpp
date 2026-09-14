@@ -1,7 +1,7 @@
 #include "Test.h"
 #include <libinputactions/InputActionsMain.h>
+#include <libinputactions/config/ConfigProvider.h>
 #include <libinputactions/config/GlobalConfig.h>
-#include <libinputactions/interfaces/ConfigProvider.h>
 
 namespace InputActions
 {
