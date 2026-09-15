@@ -90,7 +90,7 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
         g_configIssueManager->clearIssues();
         g_variableRegistry = std::make_shared<VariableRegistry>();
         g_inputActions->registerGlobalVariables(g_variableRegistry.get());
-        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_variableRegistry.get());
+        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_inputBackend, *g_variableRegistry);
         auto config = createConfig(rawConfig);
         destroyEngine(currentEngine);
         activateConfig(std::move(config), true);

@@ -79,6 +79,8 @@ set(libinputactions_SRCS
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/scripting/modules/core/Config.cpp
     libinputactions/scripting/modules/core/CoreModule.cpp
+    libinputactions/scripting/modules/core/input/InputBackendWrapper.cpp
+    libinputactions/scripting/modules/core/input/VirtualMouseWrapper.cpp
     libinputactions/scripting/modules/core/variables/StoredVariableWrapper.cpp
     libinputactions/scripting/modules/core/variables/VariableRegistryWrapper.cpp
     libinputactions/scripting/modules/core/variables/VariableWrapper.cpp

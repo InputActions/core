@@ -18,37 +18,28 @@
 
 #pragma once
 
-#include "Config.h"
-#include "input/InputBackendWrapper.h"
-#include "variables/VariableRegistryWrapper.h"
-#include <libinputactions/scripting/modules/Module.h>
+#include "VirtualMouseWrapper.h"
+#include <QObject>
 
 namespace InputActions
 {
 
 class InputBackend;
+class ScriptingEngine;
 
-class CoreModule : public Module
+class InputBackendWrapper : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackendWrapper *input READ input)
-    Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
+    Q_PROPERTY(VirtualMouseWrapper *virtualMouse READ virtualMouse)
 
 public:
-    CoreModule(ScriptingEngine &engine, InputBackend &inputBackend, VariableRegistry &variableRegistry);
+    InputBackendWrapper(InputBackend &inputBackend, ScriptingEngine &engine);
 
-    Config *config() { return &m_config; }
-    InputBackendWrapper *input() { return &m_inputBackend; }
-    VariableRegistryWrapper *variableRegistry() { return &m_variableRegistry; }
-
-    void initialize(QJSValue &self) override;
+    VirtualMouseWrapper *virtualMouse() { return &m_virtualMouse; }
 
 private:
-    Config m_config;
-    InputBackendWrapper m_inputBackend;
-    VariableRegistryWrapper m_variableRegistry;
+    VirtualMouseWrapper m_virtualMouse;
 };
 
 }

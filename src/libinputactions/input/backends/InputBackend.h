@@ -60,8 +60,6 @@ class InputBackend : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(VirtualMouse *virtualMouse READ virtualMouse)
-
 public:
     InputBackend();
     virtual ~InputBackend();

@@ -16,27 +16,41 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "CoreModule.h"
-#include <QJSEngine>
+#include "VirtualMouseWrapper.h"
+#include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-CoreModule::CoreModule(ScriptingEngine &engine, InputBackend &inputBackend, VariableRegistry &variableRegistry)
-    : Module(engine)
-    , m_inputBackend(inputBackend, engine)
-    , m_variableRegistry(variableRegistry, engine)
+VirtualMouseWrapper::VirtualMouseWrapper(InputBackend &inputBackend, ScriptingEngine &engine)
+    : m_inputBackend(inputBackend)
+    , m_engine(engine)
 {
-    QJSEngine::setObjectOwnership(&m_config, QJSEngine::CppOwnership);
-    QJSEngine::setObjectOwnership(&m_inputBackend, QJSEngine::CppOwnership);
-    QJSEngine::setObjectOwnership(&m_variableRegistry, QJSEngine::CppOwnership);
 }
 
-void CoreModule::initialize(QJSValue &self)
+void VirtualMouseWrapper::mouseMotion(const PointF &pos)
 {
-    self.setProperty("KeyboardModifier", engine().newEnum<KeyboardModifier>());
-    self.setProperty("VariableType", engine().newEnum<VariableType>());
+    if (auto *device = virtualMouse()) {
+        device->mouseMotion(pos);
+    }
+}
+
+void VirtualMouseWrapper::mouseWheel(const PointF &delta)
+{
+    if (auto *device = virtualMouse()) {
+        device->mouseWheel(delta);
+    }
+}
+
+VirtualMouse *VirtualMouseWrapper::virtualMouse() const
+{
+    if (m_inputBackend.initialized()) {
+        return m_inputBackend.virtualMouse();
+    }
+
+    m_engine.ensureEngine().throwError(QString("The method can only be called after the configuration is activated."));
+    return {};
 }
 
 }

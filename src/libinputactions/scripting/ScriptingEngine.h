@@ -30,6 +30,7 @@ namespace InputActions
 {
 
 class CoreModule;
+class InputBackend;
 class Module;
 class Promise;
 class VariableRegistry;
@@ -44,7 +45,7 @@ class ScriptingEngine : public QObject
     Q_OBJECT
 
 public:
-    ScriptingEngine(VariableRegistry &variableRegistry);
+    ScriptingEngine(InputBackend &inpuBackend, VariableRegistry &variableRegistry);
     ~ScriptingEngine() override;
 
     /**
@@ -100,6 +101,7 @@ private:
 
     void registerBuiltinModule(const QString &name, Module *module);
 
+    InputBackend &m_inputBackend;
     VariableRegistry &m_variableRegistry;
 
     std::optional<QJSEngine> m_engine;
