@@ -17,6 +17,7 @@
 */
 
 #include "MainModule.h"
+#include "Timer.h"
 #include <libinputactions/PointF.h>
 #include <libinputactions/scripting/Promise.h>
 
@@ -32,6 +33,7 @@ MainModule::MainModule(ScriptingEngine &engine)
 void MainModule::initialize(QJSValue &self)
 {
     self.setProperty("Point", engine().ensureEngine().newQMetaObject(&PointF::staticMetaObject));
+    self.setProperty("Timer", engine().ensureEngine().newQMetaObject(&Timer::staticMetaObject));
 }
 
 QJSValue MainModule::delay(double duration)

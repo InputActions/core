@@ -85,6 +85,11 @@ public:
     QJSEngine &ensureEngine();
 
     /**
+     * @returns The engine for the specified object or nullptr.
+     */
+    static ScriptingEngine *engineForObject(const QObject *object);
+
+    /**
      * Same as QJSValue::call but with error logging.
      */
     static QJSValue call(const QJSValue &function, const QJSValueList &args = {});
@@ -113,11 +118,10 @@ private:
     QThread *m_watchdogTimerThread{};
     QTimer *m_watchdogTimer{};
     QTimer m_watchdogRestartTimer;
+
+    inline static std::set<ScriptingEngine *> s_engines;
 };
 
-/**
- * The engine in which code is currently being executed. Safe to use in C++ functions called from JS.
- */
 inline std::shared_ptr<ScriptingEngine> g_scriptingEngine;
 
 }
