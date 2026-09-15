@@ -17,13 +17,20 @@
 */
 
 #include "VirtualKeyboard.h"
-#include <libinputactions/input/KeyboardKey.h>
+#include <libinputactions/input/backends/InputBackend.h>
 
 namespace InputActions
 {
 
 void VirtualKeyboard::keyboardKey(KeyboardKey key, bool state)
 {
+    if ((state && m_pressedKeys.contains(key)) || (!state && !m_pressedKeys.contains(key))) {
+        return;
+    }
+
+    g_inputBackend->setIgnoreEvents(true);
+    doKeyboardKey(key, state);
+    g_inputBackend->setIgnoreEvents(false);
     if (state) {
         m_pressedKeys.insert(key);
     } else {

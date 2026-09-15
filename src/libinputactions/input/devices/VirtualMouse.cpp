@@ -17,17 +17,39 @@
 */
 
 #include "VirtualMouse.h"
+#include <libinputactions/input/backends/InputBackend.h>
 
 namespace InputActions
 {
 
 void VirtualMouse::mouseButton(MouseButton button, bool state)
 {
+    if ((state && m_pressedButtons.contains(button)) || (!state && !m_pressedButtons.contains(button))) {
+        return;
+    }
+
+    g_inputBackend->setIgnoreEvents(true);
+    doMouseButton(button, state);
+    g_inputBackend->setIgnoreEvents(false);
     if (state) {
         m_pressedButtons.insert(button);
     } else {
         m_pressedButtons.erase(button);
     }
+}
+
+void VirtualMouse::mouseMotion(const PointF &pos)
+{
+    g_inputBackend->setIgnoreEvents(true);
+    doMouseMotion(pos);
+    g_inputBackend->setIgnoreEvents(false);
+}
+
+void VirtualMouse::mouseWheel(const PointF &delta)
+{
+    g_inputBackend->setIgnoreEvents(true);
+    doMouseWheel(delta);
+    g_inputBackend->setIgnoreEvents(false);
 }
 
 void VirtualMouse::reset()
