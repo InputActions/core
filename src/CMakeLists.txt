@@ -79,9 +79,9 @@ set(libinputactions_SRCS
     libinputactions/interfaces/WindowProvider.cpp
     libinputactions/scripting/modules/core/Config.cpp
     libinputactions/scripting/modules/core/CoreModule.cpp
-    libinputactions/scripting/modules/core/StoredVariableWrapper.cpp
-    libinputactions/scripting/modules/core/VariableRegistryWrapper.cpp
-    libinputactions/scripting/modules/core/VariableWrapper.cpp
+    libinputactions/scripting/modules/core/variables/StoredVariableWrapper.cpp
+    libinputactions/scripting/modules/core/variables/VariableRegistryWrapper.cpp
+    libinputactions/scripting/modules/core/variables/VariableWrapper.cpp
     libinputactions/scripting/modules/desktop/DesktopModule.cpp
     libinputactions/scripting/modules/fs/File.cpp
     libinputactions/scripting/modules/fs/FSModule.cpp
