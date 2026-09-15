@@ -18,24 +18,22 @@
 
 #pragma once
 
-#include <QObject>
+#include <QString>
 
 namespace InputActions
 {
 
-class Script : public QObject
+class NodeSourceFile
 {
-    Q_OBJECT
-
-    Q_PROPERTY(QString rootDirectory READ rootDirectory)
-
 public:
-    Script(QString rootDirectory);
+    NodeSourceFile(QString path, QString contents);
 
-    const QString &rootDirectory() const { return m_rootDirectory; }
+    const QString &path() const { return m_path; }
+    const QString &contents() const { return m_contents; }
 
 private:
-    QString m_rootDirectory;
+    QString m_path;
+    QString m_contents;
 };
 
 }

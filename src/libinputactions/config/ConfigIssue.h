@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "NodeSourceFile.h"
 #include "TextPosition.h"
 #include <QJSValue>
 #include <QString>
@@ -40,6 +41,8 @@ class ConfigIssue : public virtual CopyableBase<ConfigIssue>
 public:
     virtual ~ConfigIssue() = default;
 
+    const NodeSourceFile *sourceFile() const { return m_sourceFile.get(); }
+
     const TextPosition &position() const { return m_position; }
     void setPosition(TextPosition value) { m_position = value; }
 
@@ -60,13 +63,13 @@ public:
 
 protected:
     ConfigIssue(const Node *node);
-    ConfigIssue(std::optional<QString> file, TextPosition position);
+    ConfigIssue(std::shared_ptr<NodeSourceFile> sourceFile, TextPosition position);
 
 private:
     bool m_isNodeSubstring{};
     QString m_substringNodeValue;
 
-    std::optional<QString> m_file;
+    std::shared_ptr<NodeSourceFile> m_sourceFile;
     TextPosition m_position;
 };
 
@@ -76,7 +79,7 @@ class ConfigException
 {
 public:
     ConfigException(const Node *node);
-    ConfigException(std::optional<QString> file, TextPosition position);
+    ConfigException(std::shared_ptr<NodeSourceFile> sourceFile, TextPosition position);
 
     const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
 
@@ -246,7 +249,7 @@ class YamlCppConfigException
     , public virtual Copyable<YamlCppConfigException, ConfigIssue>
 {
 public:
-    YamlCppConfigException(std::optional<QString> file, TextPosition position, QString message);
+    YamlCppConfigException(std::shared_ptr<NodeSourceFile> sourceFile, TextPosition position, QString message);
 
     QString message() const override { return m_message; }
 

@@ -30,8 +30,6 @@ class Node;
 class ConfigIssueManager
 {
 public:
-    ConfigIssueManager(QString config = "");
-
     void addIssue(const ConfigIssue &issue)
     {
         if (std::ranges::any_of(m_issues, [&issue](const auto &x) {
@@ -67,12 +65,12 @@ public:
     }
 
     std::vector<const ConfigIssue *> issues() const;
+    void clearIssues();
 
     QString issuesToString() const;
 
 private:
     std::vector<std::unique_ptr<ConfigIssue>> m_issues;
-    QString m_config;
 };
 
 inline std::shared_ptr<ConfigIssueManager> g_configIssueManager;

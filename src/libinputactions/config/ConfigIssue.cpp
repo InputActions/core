@@ -30,13 +30,13 @@ namespace InputActions
 ConfigIssue::ConfigIssue(const Node *node)
     : m_isNodeSubstring(node->isSubstring())
     , m_substringNodeValue(node->substring())
-    , m_file(node->file())
+    , m_sourceFile(node->sourceFile())
     , m_position(node->position())
 {
 }
 
-ConfigIssue::ConfigIssue(std::optional<QString> file, TextPosition position)
-    : m_file(std::move(file))
+ConfigIssue::ConfigIssue(std::shared_ptr<NodeSourceFile> sourceFile, TextPosition position)
+    : m_sourceFile(std::move(sourceFile))
     , m_position(position)
 {
 }
@@ -55,6 +55,11 @@ QString ConfigIssue::colorAnsiSequence() const
 
 QString ConfigIssue::toString(bool colors) const
 {
+    QString file = "<unknown file>";
+    if (m_sourceFile) {
+        file = m_sourceFile->path();
+    }
+
     QString severityString;
     switch (severity()) {
         case ConfigIssueSeverity::Warning:
@@ -74,7 +79,7 @@ QString ConfigIssue::toString(bool colors) const
                    .arg(m_substringNodeValue, text.first(1).toLower(), text.mid(1));
     }
 
-    return QString("%1:%2%3: %4").arg(m_file.value_or("<unknown file>"), m_position.toString(), severityString, text);
+    return QString("%1:%2%3: %4").arg(file, m_position.toString(), severityString, text);
 }
 
 bool ConfigIssue::operator==(const ConfigIssue &other) const
@@ -87,8 +92,8 @@ ConfigException::ConfigException(const Node *node)
 {
 }
 
-ConfigException::ConfigException(std::optional<QString> file, TextPosition position)
-    : ConfigIssue(std::move(file), position)
+ConfigException::ConfigException(std::shared_ptr<NodeSourceFile> sourceFile, TextPosition position)
+    : ConfigIssue(std::move(sourceFile), position)
 {
 }
 
@@ -220,8 +225,8 @@ QString UncaughtScriptErrorConfigException::message() const
     return QString("Uncaught script error\n\n%1").arg(m_message);
 }
 
-YamlCppConfigException::YamlCppConfigException(std::optional<QString> file, TextPosition position, QString message)
-    : ConfigException(file, position)
+YamlCppConfigException::YamlCppConfigException(std::shared_ptr<NodeSourceFile> sourceFile, TextPosition position, QString message)
+    : ConfigException(std::move(sourceFile), position)
     , m_message(std::move(message))
 {
     m_message.replace(QRegularExpression("yaml-cpp: error at line \\d+, column \\d+: "), "");

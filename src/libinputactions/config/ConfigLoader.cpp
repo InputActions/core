@@ -37,10 +37,11 @@
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/NotificationManager.h>
+#include <libinputactions/scripting/ModuleScriptMetadata.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>
 #include <libinputactions/scripting/modules/core/CoreModule.h>
-#include <libinputactions/scripting/modules/main/Script.h>
+#include <libinputactions/scripting/modules/main/ModuleScript.h>
 #include <libinputactions/variables/VariableRegistry.h>
 
 namespace InputActions
@@ -86,11 +87,11 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
         qCDebug(INPUTACTIONS, "Reloading config");
         const auto rawConfig = g_configProvider->currentConfig();
 
-        g_configIssueManager = std::make_shared<ConfigIssueManager>(rawConfig);
+        g_configIssueManager->clearIssues();
         g_variableRegistry = std::make_shared<VariableRegistry>();
         g_inputActions->registerGlobalVariables(g_variableRegistry.get());
         g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_variableRegistry.get());
-        auto config = createConfig(rawConfig, g_configProvider->currentPath());
+        auto config = createConfig(rawConfig);
         destroyEngine(currentEngine);
         activateConfig(std::move(config), true);
     } catch (const ConfigException &e) {
@@ -117,9 +118,9 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
     return true;
 }
 
-ConfigData ConfigLoader::createConfig(const QString &raw, const QString &file)
+ConfigData ConfigLoader::createConfig(const QString &raw)
 {
-    const auto root = Node::create(raw, file);
+    const auto root = Node::create(raw, std::make_unique<NodeSourceFile>(g_configProvider->currentPath(), raw));
     if (root->isNull()) {
         return {};
     } else if (!root->isMap()) {
@@ -137,27 +138,47 @@ ConfigData ConfigLoader::createConfig(const QString &raw, const QString &file)
                     if (result.isError()) {
                         throw UncaughtScriptErrorConfigException(sourceNode, result);
                     }
-                } else if (const auto *fileNode = scriptNode->at("file", true)) {
-                    const QFileInfo file(fileNode->as<QString>());
-                    if (!file.exists()) {
-                        throw InvalidValueConfigException(fileNode, "File does not exist.");
+                } else if (const auto *packageNode = scriptNode->at("package", true)) {
+                    const QDir packageDir(packageNode->as<QString>());
+                    if (!packageDir.exists()) {
+                        throw InvalidValueConfigException(packageNode, "The specified script package directory does not exist.");
                     }
 
-                    const auto result = g_scriptingEngine->importModule(file.canonicalFilePath());
-                    if (result.isError()) {
-                        throw UncaughtScriptErrorConfigException(fileNode, result);
+                    const auto metadataFilePath = packageDir.absolutePath() + "/metadata.yaml";
+                    QFile metadataFile(metadataFilePath);
+                    if (!metadataFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text)) {
+                        throw InvalidValueConfigException(packageNode, QString("Failed to open the metadata file: %1.").arg(metadataFile.errorString()));
                     }
 
-                    const auto defaultFunc = result.property("default");
+                    const auto rawMetadata = QString::fromUtf8(metadataFile.readAll());
+                    metadataFile.close();
+
+                    const auto metadataNode = Node::create(rawMetadata, std::make_shared<NodeSourceFile>(metadataFilePath, rawMetadata));
+                    const auto metadata = metadataNode->as<ModuleScriptMetadata>();
+
+                    const QFileInfo mainModuleFileInfo(packageDir.absolutePath() + "/" + metadata.mainModule());
+                    if (!mainModuleFileInfo.absoluteDir().absolutePath().startsWith(packageDir.absolutePath())) {
+                        throw InvalidValueConfigException(metadataNode.get(), "The main module file cannot be located outside of the package directory.");
+                    }
+                    if (!mainModuleFileInfo.exists()) {
+                        throw InvalidValueConfigException(metadataNode.get(), "The specified main module file does not exist.");
+                    }
+
+                    const auto mainModule = g_scriptingEngine->importModule(mainModuleFileInfo.absoluteFilePath());
+                    if (mainModule.isError()) {
+                        throw UncaughtScriptErrorConfigException(metadataNode.get(), mainModule);
+                    }
+
+                    const auto defaultFunc = mainModule.property("default");
                     if (!defaultFunc.isCallable()) {
                         continue;
                     }
 
-                    const auto rootDirectory = file.dir().absolutePath();
                     const auto defaultFuncResult = ScriptingEngine::call(defaultFunc,
-                                                                         {g_scriptingEngine->ensureEngine().newQObject(new Script(rootDirectory))});
+                                                                         {g_scriptingEngine->ensureEngine()
+                                                                              .newQObject(new ModuleScript(packageDir.absolutePath()))});
                     if (defaultFuncResult.isError()) {
-                        throw UncaughtScriptErrorConfigException(fileNode, defaultFuncResult);
+                        throw UncaughtScriptErrorConfigException(packageNode, defaultFuncResult);
                     }
                 }
             }

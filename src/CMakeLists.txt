@@ -30,6 +30,7 @@ set(libinputactions_SRCS
     libinputactions/config/ConfigProvider.cpp
     libinputactions/config/GlobalConfig.cpp
     libinputactions/config/Node.cpp
+    libinputactions/config/NodeSourceFile.cpp
     libinputactions/config/TextPosition.cpp
     libinputactions/conditions/CanReplaceTextCondition.cpp
     libinputactions/conditions/Condition.cpp
@@ -85,11 +86,12 @@ set(libinputactions_SRCS
     libinputactions/scripting/modules/fs/File.cpp
     libinputactions/scripting/modules/fs/FSModule.cpp
     libinputactions/scripting/modules/main/MainModule.cpp
-    libinputactions/scripting/modules/main/Script.cpp
+    libinputactions/scripting/modules/main/ModuleScript.cpp
     libinputactions/scripting/modules/Module.cpp
     libinputactions/scripting/FunctionWrapper.cpp
     libinputactions/scripting/JSFunctionAction.cpp
     libinputactions/scripting/JSFunctionCondition.cpp
+    libinputactions/scripting/ModuleScriptMetadata.cpp
     libinputactions/scripting/Promise.cpp
     libinputactions/scripting/ScriptingEngine.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp

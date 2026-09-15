@@ -16,43 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <QString>
-#include <memory>
-#include <optional>
+#include "NodeSourceFile.h"
 
 namespace InputActions
 {
 
-struct ConfigData;
-
-struct ConfigLoadSettings
+NodeSourceFile::NodeSourceFile(QString path, QString contents)
+    : m_path(std::move(path))
+    , m_contents(std::move(contents))
 {
-    /**
-     * Whether the reload was manually initiated using the control tool.
-     */
-    bool manual{};
-};
-
-class ConfigLoader
-{
-public:
-    /**
-     * @return Whether the operation was successful. Errors may be obtained from ConfigIssueManager.
-     */
-    bool load(const ConfigLoadSettings &settings = {});
-
-    /**
-     * Loads an empty config with default values without initializing any components.
-     */
-    void loadEmpty();
-
-private:
-    ConfigData createConfig(const QString &raw);
-    void activateConfig(ConfigData config, bool initialize);
-};
-
-inline std::shared_ptr<ConfigLoader> g_configLoader;
+}
 
 }
