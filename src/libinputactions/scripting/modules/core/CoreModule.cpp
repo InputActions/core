@@ -18,7 +18,6 @@
 
 #include "CoreModule.h"
 #include "Config.h"
-#include "VariableRegistryWrapper.h"
 #include <QJSEngine>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/scripting/ScriptingEngine.h>

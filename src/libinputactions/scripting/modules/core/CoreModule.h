@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Config.h"
-#include "VariableRegistryWrapper.h"
+#include "variables/VariableRegistryWrapper.h"
 #include <libinputactions/scripting/modules/Module.h>
 
 namespace InputActions
