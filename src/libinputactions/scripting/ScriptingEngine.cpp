@@ -20,7 +20,7 @@
 #include "Promise.h"
 #include "modules/Module.h"
 #include "modules/core/CoreModule.h"
-#include "modules/desktop/DesktopModule.h"
+#include "modules/desktop/generic/DesktopGenericModule.h"
 #include "modules/fs/FSModule.h"
 #include "modules/main/MainModule.h"
 #include <libinputactions/InputActionsMain.h>
@@ -78,7 +78,7 @@ void ScriptingEngine::initialize()
     registerBuiltinModule("inputactions/core", m_coreModule.get());
 
     registerBuiltinModule("inputactions", new MainModule(*this));
-    registerBuiltinModule("inputactions/desktop", new DesktopModule(*this));
+    registerBuiltinModule("inputactions/desktop/generic", new DesktopGenericModule(*this));
     registerBuiltinModule("inputactions/fs", new FSModule(*this));
 
     auto globalObject = m_engine->globalObject();
