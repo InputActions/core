@@ -37,8 +37,9 @@ namespace InputActions
 static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
 static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
 
-ScriptingEngine::ScriptingEngine(VariableRegistry &variableRegistry)
-    : m_variableRegistry(variableRegistry)
+ScriptingEngine::ScriptingEngine(InputBackend &inputBackend, VariableRegistry &variableRegistry)
+    : m_inputBackend(inputBackend)
+    , m_variableRegistry(variableRegistry)
 {
 }
 
@@ -72,7 +73,7 @@ void ScriptingEngine::initialize()
         }
     )");
 
-    m_coreModule = std::make_unique<CoreModule>(*this, m_variableRegistry);
+    m_coreModule = std::make_unique<CoreModule>(*this, m_inputBackend, m_variableRegistry);
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     registerBuiltinModule("inputactions/core", m_coreModule.get());
 

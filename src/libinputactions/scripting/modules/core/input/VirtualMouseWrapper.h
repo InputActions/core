@@ -18,37 +18,34 @@
 
 #pragma once
 
-#include "Config.h"
-#include "input/InputBackendWrapper.h"
-#include "variables/VariableRegistryWrapper.h"
-#include <libinputactions/scripting/modules/Module.h>
+#include <QObject>
+#include <libinputactions/PointF.h>
 
 namespace InputActions
 {
 
 class InputBackend;
+class ScriptingEngine;
+class VirtualMouse;
 
-class CoreModule : public Module
+class VirtualMouseWrapper : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(Config *config READ config)
-    Q_PROPERTY(InputBackendWrapper *input READ input)
-    Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
-
 public:
-    CoreModule(ScriptingEngine &engine, InputBackend &inputBackend, VariableRegistry &variableRegistry);
+    VirtualMouseWrapper(InputBackend &inputBackend, ScriptingEngine &engine);
 
-    Config *config() { return &m_config; }
-    InputBackendWrapper *input() { return &m_inputBackend; }
-    VariableRegistryWrapper *variableRegistry() { return &m_variableRegistry; }
-
-    void initialize(QJSValue &self) override;
+    Q_INVOKABLE void mouseMotion(const PointF &pos);
+    Q_INVOKABLE void mouseWheel(const PointF &delta);
 
 private:
-    Config m_config;
-    InputBackendWrapper m_inputBackend;
-    VariableRegistryWrapper m_variableRegistry;
+    /**
+     * Returns the virtual mouse or throws a JS exception if the backend is uninitialized.
+     */
+    VirtualMouse *virtualMouse() const;
+
+    InputBackend &m_inputBackend;
+    ScriptingEngine &m_engine;
 };
 
 }

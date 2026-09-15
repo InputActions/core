@@ -16,27 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "CoreModule.h"
+#include "InputBackendWrapper.h"
 #include <QJSEngine>
-#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-CoreModule::CoreModule(ScriptingEngine &engine, InputBackend &inputBackend, VariableRegistry &variableRegistry)
-    : Module(engine)
-    , m_inputBackend(inputBackend, engine)
-    , m_variableRegistry(variableRegistry, engine)
+InputBackendWrapper::InputBackendWrapper(InputBackend &inputBackend, ScriptingEngine &engine)
+    : m_virtualMouse(inputBackend, engine)
 {
-    QJSEngine::setObjectOwnership(&m_config, QJSEngine::CppOwnership);
-    QJSEngine::setObjectOwnership(&m_inputBackend, QJSEngine::CppOwnership);
-    QJSEngine::setObjectOwnership(&m_variableRegistry, QJSEngine::CppOwnership);
-}
-
-void CoreModule::initialize(QJSValue &self)
-{
-    self.setProperty("KeyboardModifier", engine().newEnum<KeyboardModifier>());
-    self.setProperty("VariableType", engine().newEnum<VariableType>());
+    QJSEngine::setObjectOwnership(&m_virtualMouse, QJSEngine::CppOwnership);
 }
 
 }

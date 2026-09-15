@@ -95,7 +95,7 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_variableRegistry);
 
     if (!g_scriptingEngine) {
-        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_variableRegistry.get());
+        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_inputBackend, *g_variableRegistry);
     }
 }
 
