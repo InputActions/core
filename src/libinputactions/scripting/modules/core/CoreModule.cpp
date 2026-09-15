@@ -37,6 +37,7 @@ void CoreModule::initialize(QJSValue &self)
 {
     self.setProperty("KeyboardModifier", engine().newEnum<KeyboardModifier>());
     self.setProperty("VariableType", engine().newEnum<VariableType>());
+    self.setProperty("Point", engine().ensureEngine().newQMetaObject(&PointF::staticMetaObject)); // Prevent breaking change
 }
 
 }
