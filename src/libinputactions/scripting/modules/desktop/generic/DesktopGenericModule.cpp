@@ -16,19 +16,19 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "DesktopModule.h"
+#include "DesktopGenericModule.h"
 #include <libinputactions/globals.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-DesktopModule::DesktopModule(ScriptingEngine &engine)
+DesktopGenericModule::DesktopGenericModule(ScriptingEngine &engine)
     : Module(engine)
 {
 }
 
-void DesktopModule::initialize(QJSValue &self)
+void DesktopGenericModule::initialize(QJSValue &self)
 {
     self.setProperty("CursorShape", engine().newEnum<CursorShape>());
 }

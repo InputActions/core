@@ -23,12 +23,12 @@
 namespace InputActions
 {
 
-class DesktopModule : public Module
+class DesktopGenericModule : public Module
 {
     Q_OBJECT
 
 public:
-    DesktopModule(ScriptingEngine &engine);
+    DesktopGenericModule(ScriptingEngine &engine);
 
     void initialize(QJSValue &self) override;
 };
