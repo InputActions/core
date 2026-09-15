@@ -36,16 +36,15 @@ class VirtualKeyboard
 public:
     virtual ~VirtualKeyboard() = default;
 
-    /**
-     * Must be called by the overriding method in order to track pressed keys.
-     */
-    virtual void keyboardKey(KeyboardKey key, bool state);
+    void keyboardKey(KeyboardKey key, bool state);
 
 protected:
     /**
      * Puts the device in a neutral state. Call in the deriving class' destructor.
      */
     void reset();
+
+    virtual void doKeyboardKey(KeyboardKey key, bool state) {}
 
 private:
     std::set<KeyboardKey> m_pressedKeys;

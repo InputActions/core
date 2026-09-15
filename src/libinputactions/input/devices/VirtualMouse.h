@@ -34,18 +34,19 @@ class VirtualMouse : public QObject
     Q_OBJECT
 
 public:
-    /**
-     * Must be called by the overriding method in order to track pressed buttons.
-     */
-    virtual void mouseButton(MouseButton button, bool state);
-    Q_INVOKABLE virtual void mouseMotion(const PointF &pos) {}
-    Q_INVOKABLE virtual void mouseWheel(const PointF &delta) {}
+    void mouseButton(MouseButton button, bool state);
+    Q_INVOKABLE void mouseMotion(const PointF &pos);
+    Q_INVOKABLE void mouseWheel(const PointF &delta);
 
 protected:
     /**
      * Puts the device in a neutral state. Call in the deriving class' destructor.
      */
     void reset();
+
+    virtual void doMouseButton(MouseButton button, bool state) {}
+    virtual void doMouseMotion(const PointF &pos) {}
+    virtual void doMouseWheel(const PointF &delta) {}
 
 private:
     std::set<MouseButton> m_pressedButtons;
