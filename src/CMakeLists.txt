@@ -89,6 +89,7 @@ set(libinputactions_SRCS
     libinputactions/scripting/modules/fs/FSModule.cpp
     libinputactions/scripting/modules/main/MainModule.cpp
     libinputactions/scripting/modules/main/ModuleScript.cpp
+    libinputactions/scripting/modules/main/Timer.cpp
     libinputactions/scripting/modules/Module.cpp
     libinputactions/scripting/FunctionWrapper.cpp
     libinputactions/scripting/JSFunctionAction.cpp

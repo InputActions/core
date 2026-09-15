@@ -48,6 +48,7 @@ ScriptingEngine::~ScriptingEngine()
     if (!m_engine) {
         return;
     }
+    s_engines.erase(this);
 
     QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
     m_watchdogTimerThread->quit();
@@ -60,6 +61,7 @@ ScriptingEngine::~ScriptingEngine()
 void ScriptingEngine::initialize()
 {
     m_engine.emplace();
+    s_engines.insert(this);
     m_engine->installExtensions(QJSEngine::ConsoleExtension);
 
     initializeWatchdog();
@@ -236,6 +238,16 @@ QJSEngine &ScriptingEngine::ensureEngine()
         initialize();
     }
     return m_engine.value();
+}
+
+ScriptingEngine *ScriptingEngine::engineForObject(const QObject *object)
+{
+    for (auto *engine : s_engines) {
+        if (qjsEngine(object) == &engine->ensureEngine()) {
+            return engine;
+        }
+    }
+    return {};
 }
 
 void ScriptingEngine::onWatchdogRestartTimerTick()
