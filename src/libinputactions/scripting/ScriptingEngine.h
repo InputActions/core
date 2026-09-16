@@ -50,10 +50,16 @@ public:
 
     CoreModule &coreModule() const { return *m_coreModule; }
 
+    void disableWatchdog();
+
     /**
      * Same as QJSEngine::evaluate but with error logging.
      */
     QJSValue evaluate(const QString &script);
+    /**
+     * Same as evaluate, but the result is cached and the script is not evaluated on subsequent calls.
+     */
+    QJSValue evaluateOnce(const QString &script);
     /**
      * Same as QJSEngine::importModule but with error logging.
      */
@@ -105,8 +111,7 @@ private:
     QJSEngine m_engine;
     std::unique_ptr<CoreModule> m_coreModule;
     std::map<QString, QJSValue> m_builtinModules;
-
-    QJSValue m_promiseFactory;
+    std::map<QString, QJSValue> m_cachedScripts;
 
     QThread *m_watchdogTimerThread{};
     QTimer *m_watchdogTimer{};

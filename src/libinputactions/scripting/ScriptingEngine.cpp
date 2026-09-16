@@ -63,15 +63,6 @@ void ScriptingEngine::initialize()
 
     initializeWatchdog();
 
-    m_promiseFactory = m_engine.evaluate(R"(
-        holder => {
-            return new Promise((fulfill, reject) => {
-                holder.fulfill = fulfill;
-                holder.reject = reject;
-            });
-        }
-    )");
-
     m_coreModule = std::make_unique<CoreModule>(*this, m_inputBackend, m_variableRegistry);
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     registerBuiltinModule("inputactions/core", m_coreModule.get());
@@ -173,6 +164,12 @@ QJSValue ScriptingEngine::newEnum(const QMetaEnum &metaEnum)
     return object;
 }
 
+void ScriptingEngine::disableWatchdog()
+{
+    QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
+    m_watchdogRestartTimer.stop();
+}
+
 QJSValue ScriptingEngine::evaluate(const QString &script)
 {
     const auto result = m_engine.evaluate(script);
@@ -181,6 +178,14 @@ QJSValue ScriptingEngine::evaluate(const QString &script)
     }
 
     return result;
+}
+
+QJSValue ScriptingEngine::evaluateOnce(const QString &script)
+{
+    if (m_cachedScripts.contains(script)) {
+        return m_cachedScripts.at(script);
+    }
+    return m_cachedScripts[script] = evaluate(script);
 }
 
 QJSValue ScriptingEngine::importModule(const QString &fileName)
@@ -224,8 +229,16 @@ void ScriptingEngine::logError(const QJSValue &error)
 
 Promise ScriptingEngine::newPromise()
 {
+    const auto factory = evaluateOnce(R"(
+        holder => {
+            return new Promise((fulfill, reject) => {
+                holder.fulfill = fulfill;
+                holder.reject = reject;
+            });
+        }
+    )");
     const auto holder = m_engine.newObject();
-    const auto promise = m_promiseFactory.call({holder});
+    const auto promise = factory.call({holder});
     return {this, promise, holder.property("fulfill"), holder.property("reject")};
 }
 
