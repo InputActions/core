@@ -30,10 +30,7 @@ FSModule::FSModule(ScriptingEngine &engine)
 
 void FSModule::initialize(QJSValue &self)
 {
-    auto file = engine().qtEngine().newQMetaObject(&File::staticMetaObject);
-    file.setProperty("readAllText", engine().newFunction<QJSValue, QString>(&File::readAllText));
-    file.setProperty("writeAllText", engine().newFunction<QJSValue, QString, QString>(&File::writeAllText));
-    self.setProperty("File", file);
+    self.setProperty("File", engine().newQMetaObject<File, FileStatic>());
 }
 
 }

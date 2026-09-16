@@ -91,7 +91,6 @@ set(libinputactions_SRCS
     libinputactions/scripting/modules/main/ModuleScript.cpp
     libinputactions/scripting/modules/main/Timer.cpp
     libinputactions/scripting/modules/Module.cpp
-    libinputactions/scripting/FunctionWrapper.cpp
     libinputactions/scripting/JSFunctionAction.cpp
     libinputactions/scripting/JSFunctionCondition.cpp
     libinputactions/scripting/ModuleScriptMetadata.cpp

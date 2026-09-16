@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "FunctionWrapper.h"
 #include <QJSEngine>
 #include <QMetaEnum>
 #include <QObject>
@@ -36,8 +35,6 @@ class Promise;
 class VariableRegistry;
 
 /**
- * Lazily initializated.
- *
  * Q_PROPERTIES exposed to JavaScript of non-primitive types (with the exception of QObject *) must be of type QJSValue to prevent object reuse.
  */
 class ScriptingEngine : public QObject
@@ -47,6 +44,9 @@ class ScriptingEngine : public QObject
 public:
     ScriptingEngine(InputBackend &inpuBackend, VariableRegistry &variableRegistry);
     ~ScriptingEngine() override;
+
+    Q_INVOKABLE QJSValue require(const QString &module);
+    Q_INVOKABLE void unhandledPromiseRejection(const QJSValue &result);
 
     CoreModule &coreModule() const { return *m_coreModule; }
 
@@ -65,11 +65,29 @@ public:
      */
     QJSValue importModule(const QString &fileName);
 
-    template<typename TReturn, typename... TArgs, typename TFunction>
-    QJSValue newFunction(TFunction &&function)
+    /**
+     * Same as QJSEngine::newQMetaObject, but also adds all invokable methods from TStatic to TInstance.
+     */
+    template<typename TInstance, typename TStatic>
+    QJSValue newQMetaObject()
     {
-        auto *wrapper = FunctionWrapper::create<TReturn, TArgs...>(&m_engine, std::forward<TFunction>(function));
-        return evaluate(QString("obj => (...args) => obj.call(args);")).call({m_engine.newQObject(wrapper)});
+        QStringList staticMethodNames;
+        for (int i = 0; i < TStatic::staticMetaObject.methodCount(); i++) {
+            staticMethodNames.push_back(TStatic::staticMetaObject.method(i).name());
+        }
+
+        const auto instanceMetaObject = m_engine.newQMetaObject(&TInstance::staticMetaObject);
+        const auto staticMetaObject = m_engine.newQMetaObject(&TStatic::staticMetaObject);
+        const auto func = evaluateOnce(R"(
+            (instanceMetaObject, staticMetaObject, staticMethodNames) => {
+                const staticInstance = new staticMetaObject();
+                for (let staticMethodName of staticMethodNames) {
+                    instanceMetaObject[staticMethodName] = (...args) => staticInstance[staticMethodName](...args);
+                }
+            }
+        )");
+        call(func, {instanceMetaObject, staticMetaObject, m_engine.toScriptValue(staticMethodNames)});
+        return instanceMetaObject;
     }
 
     Promise newPromise();

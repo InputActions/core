@@ -27,10 +27,17 @@ namespace InputActions
 class File : public QObject
 {
     Q_OBJECT
+};
+
+class FileStatic : public QObject
+{
+    Q_OBJECT
 
 public:
-    static QJSValue readAllText(const QString &path);
-    static QJSValue writeAllText(const QString &path, const QString &text);
+    Q_INVOKABLE FileStatic() = default;
+
+    Q_INVOKABLE QJSValue readAllText(const QString &path);
+    Q_INVOKABLE QJSValue writeAllText(const QString &path, const QString &text);
 };
 
 }
