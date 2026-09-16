@@ -166,11 +166,13 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
 
                     const auto mainModule = g_scriptingEngine->importModule(mainModuleFileInfo.absoluteFilePath());
                     if (mainModule.isError()) {
-                        throw UncaughtScriptErrorConfigException(metadataNode.get(), mainModule);
+                        throw UncaughtScriptErrorConfigException(packageNode, mainModule);
                     }
 
                     const auto defaultFunc = mainModule.property("default");
-                    if (!defaultFunc.isCallable()) {
+                    if (defaultFunc.isError()) {
+                        throw UncaughtScriptErrorConfigException(packageNode, defaultFunc);
+                    } else if (!defaultFunc.isCallable()) {
                         continue;
                     }
 
