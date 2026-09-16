@@ -74,9 +74,7 @@ bool ConfigLoader::load(const ConfigLoadSettings &settings)
     static const auto destroyEngine = [](std::shared_ptr<ScriptingEngine> &engine) {
         auto oldEngine = g_scriptingEngine;
         g_scriptingEngine = engine;
-        if (auto *coreModule = engine->coreModule()) {
-            Q_EMIT coreModule->config()->aboutToBeDestroyed();
-        }
+        Q_EMIT engine->coreModule().config()->aboutToBeDestroyed();
         g_scriptingEngine = oldEngine;
         engine.reset();
     };
@@ -177,7 +175,7 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
                     }
 
                     const auto defaultFuncResult = ScriptingEngine::call(defaultFunc,
-                                                                         {g_scriptingEngine->ensureEngine()
+                                                                         {g_scriptingEngine->qtEngine()
                                                                               .newQObject(new ModuleScript(packageDir.absolutePath()))});
                     if (defaultFuncResult.isError()) {
                         throw UncaughtScriptErrorConfigException(packageNode, defaultFuncResult);
@@ -187,9 +185,7 @@ ConfigData ConfigLoader::createConfig(const QString &raw)
         }
     }
 
-    if (auto *coreModule = g_scriptingEngine->coreModule()) {
-        coreModule->variableRegistry()->disableRegistration();
-    }
+    g_scriptingEngine->coreModule().variableRegistry()->disableRegistration();
 
     loadMember(config.autoReload, root->at("autoreload"));
     loadMember(config.allowExternalVariableAccess, root->at("external_variable_access"));
@@ -228,10 +224,8 @@ void ConfigLoader::activateConfig(ConfigData config, bool initialize)
     g_actionExecutor->clearQueue();
     g_actionExecutor->waitForDone();
 
-    auto *coreModule = g_scriptingEngine->coreModule();
-    if (coreModule) {
-        Q_EMIT coreModule->config()->aboutToBeActivated();
-    }
+    auto *scriptingConfig = g_scriptingEngine->coreModule().config();
+    Q_EMIT scriptingConfig->aboutToBeActivated();
 
     g_globalConfig->setAllowExternalVariableAccess(config.allowExternalVariableAccess);
     g_globalConfig->setAutoReload(config.autoReload);
@@ -253,9 +247,7 @@ void ConfigLoader::activateConfig(ConfigData config, bool initialize)
         g_inputBackend->initialize();
     }
 
-    if (coreModule) {
-        Q_EMIT coreModule->config()->activated();
-    }
+    Q_EMIT scriptingConfig->activated();
 }
 
 }

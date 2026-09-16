@@ -49,7 +49,7 @@ VirtualMouse *VirtualMouseWrapper::virtualMouse() const
         return m_inputBackend.virtualMouse();
     }
 
-    m_engine.ensureEngine().throwError(QString("The method can only be called after the configuration is activated."));
+    m_engine.qtEngine().throwError(QString("The method can only be called after the configuration is activated."));
     return {};
 }
 

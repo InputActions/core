@@ -35,7 +35,7 @@ void StoredVariableWrapper::setValue(const QJSValue &value) const
 {
     const auto variant = VariableRegistryWrapper::jsValueToVariant(value, type());
     if (!variant) {
-        m_engine.ensureEngine().throwError(QString("New value does not match the variable's type."));
+        m_engine.qtEngine().throwError(QString("New value does not match the variable's type."));
         return;
     }
 

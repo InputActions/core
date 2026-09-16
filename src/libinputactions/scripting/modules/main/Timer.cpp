@@ -43,7 +43,7 @@ void Timer::start(qreal interval)
 void Timer::stop()
 {
     if (!m_timer.isActive()) {
-        ScriptingEngine::engineForObject(this)->ensureEngine().throwError(QString("Cannot stop an inactive timer."));
+        ScriptingEngine::engineForObject(this)->qtEngine().throwError(QString("Cannot stop an inactive timer."));
         return;
     }
 
@@ -63,7 +63,7 @@ int Timer::interval() const
 void Timer::setInterval(qreal value)
 {
     if (value < 1 || value > INT32_MAX) {
-        ScriptingEngine::engineForObject(this)->ensureEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(value)));
+        ScriptingEngine::engineForObject(this)->qtEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(value)));
         return;
     }
 

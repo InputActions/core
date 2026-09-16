@@ -50,7 +50,7 @@ VariableWrapper *VariableRegistryWrapper::get(const QString &name) const
 {
     auto *variable = m_variableRegistry.variable(name);
     if (!variable) {
-        m_engine.ensureEngine().throwError(QString("Variable '%1' does not exist.").arg(name));
+        m_engine.qtEngine().throwError(QString("Variable '%1' does not exist.").arg(name));
         return {};
     }
 
@@ -66,22 +66,22 @@ VariableWrapper *VariableRegistryWrapper::variable(const QString &name) const
 VariableWrapper *VariableRegistryWrapper::registerComputedVariable(const QString &name, VariableType type, QJSValue getter) const
 {
     if (!m_registrationAllowed) {
-        m_engine.ensureEngine().throwError(QString("Variables can only be registered before the configuration is loaded."));
+        m_engine.qtEngine().throwError(QString("Variables can only be registered before the configuration is loaded."));
         return {};
     } else if (contains(name)) {
-        m_engine.ensureEngine().throwError(QString("Variable '%1' already exists.").arg(name));
+        m_engine.qtEngine().throwError(QString("Variable '%1' already exists.").arg(name));
         return {};
     } else if (!isVariableNameValid(name)) {
-        m_engine.ensureEngine().throwError(QString("Invalid variable name."));
+        m_engine.qtEngine().throwError(QString("Invalid variable name."));
         return {};
     } else if (!getter.isCallable()) {
-        m_engine.ensureEngine().throwError(QString("Getter is not callable."));
+        m_engine.qtEngine().throwError(QString("Getter is not callable."));
         return {};
     }
 
     const auto metaType = variableTypeToMetaType(type);
     if (!metaType) {
-        m_engine.ensureEngine().throwError(QJSValue::RangeError, "Invalid variable type.");
+        m_engine.qtEngine().throwError(QJSValue::RangeError, "Invalid variable type.");
         return {};
     }
 
@@ -104,19 +104,19 @@ VariableWrapper *VariableRegistryWrapper::registerComputedVariable(const QString
 StoredVariableWrapper *VariableRegistryWrapper::registerStoredVariable(const QString &name, VariableType type) const
 {
     if (!m_registrationAllowed) {
-        m_engine.ensureEngine().throwError(QString("Variables can only be registered before the configuration is loaded."));
+        m_engine.qtEngine().throwError(QString("Variables can only be registered before the configuration is loaded."));
         return {};
     } else if (contains(name)) {
-        m_engine.ensureEngine().throwError(QString("Variable '%1' already exists.").arg(name));
+        m_engine.qtEngine().throwError(QString("Variable '%1' already exists.").arg(name));
         return {};
     } else if (!isVariableNameValid(name)) {
-        m_engine.ensureEngine().throwError(QString("Invalid variable name."));
+        m_engine.qtEngine().throwError(QString("Invalid variable name."));
         return {};
     }
 
     const auto metaType = variableTypeToMetaType(type);
     if (!metaType) {
-        m_engine.ensureEngine().throwError(QJSValue::RangeError, "Invalid variable type.");
+        m_engine.qtEngine().throwError(QJSValue::RangeError, "Invalid variable type.");
         return {};
     }
 
