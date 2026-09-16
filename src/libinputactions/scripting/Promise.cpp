@@ -46,7 +46,7 @@ void Promise::reject(const QString &errorMessage) const
     QThreadHelpers::runOnThread(
         QThreadHelpers::mainThread(),
         [this, errorMessage]() {
-            reject(m_engine->ensureEngine().newErrorObject(QJSValue::GenericError, errorMessage));
+            reject(m_engine->qtEngine().newErrorObject(QJSValue::GenericError, errorMessage));
         },
         true);
 }

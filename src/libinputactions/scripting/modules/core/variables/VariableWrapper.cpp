@@ -34,7 +34,7 @@ VariableWrapper::VariableWrapper(Variable &variable, ScriptingEngine &engine)
 QJSValue VariableWrapper::value() const
 {
     const auto value = m_variable.value();
-    return value.isNull() ? QJSValue::NullValue : m_engine.ensureEngine().toScriptValue(value);
+    return value.isNull() ? QJSValue::NullValue : m_engine.qtEngine().toScriptValue(value);
 }
 
 }

@@ -55,7 +55,7 @@ public:
             QThreadHelpers::mainThread(),
             [this, value = std::move(value)]() {
                 if (m_fulfill.isCallable()) {
-                    ScriptingEngine::call(m_fulfill, {m_engine->ensureEngine().toScriptValue(value)});
+                    ScriptingEngine::call(m_fulfill, {m_engine->qtEngine().toScriptValue(value)});
                 }
             },
             true);

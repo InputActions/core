@@ -41,13 +41,12 @@ ScriptingEngine::ScriptingEngine(InputBackend &inputBackend, VariableRegistry &v
     : m_inputBackend(inputBackend)
     , m_variableRegistry(variableRegistry)
 {
+    s_engines.insert(this);
+    initialize();
 }
 
 ScriptingEngine::~ScriptingEngine()
 {
-    if (!m_engine) {
-        return;
-    }
     s_engines.erase(this);
 
     QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
@@ -60,13 +59,11 @@ ScriptingEngine::~ScriptingEngine()
 
 void ScriptingEngine::initialize()
 {
-    m_engine.emplace();
-    s_engines.insert(this);
-    m_engine->installExtensions(QJSEngine::ConsoleExtension);
+    m_engine.installExtensions(QJSEngine::ConsoleExtension);
 
     initializeWatchdog();
 
-    m_promiseFactory = m_engine->evaluate(R"(
+    m_promiseFactory = m_engine.evaluate(R"(
         holder => {
             return new Promise((fulfill, reject) => {
                 holder.fulfill = fulfill;
@@ -83,18 +80,18 @@ void ScriptingEngine::initialize()
     registerBuiltinModule("inputactions/desktop/generic", new DesktopGenericModule(*this));
     registerBuiltinModule("inputactions/fs", new FSModule(*this));
 
-    auto globalObject = m_engine->globalObject();
+    auto globalObject = m_engine.globalObject();
     globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
                                  if (m_builtinModules.contains(module)) {
                                      return m_builtinModules[module];
                                  }
 
-                                 return m_engine->importModule(module);
+                                 return m_engine.importModule(module);
                              }));
 
     // Unhandled promise rejection handling
     // TODO Maybe perform the check when the promise is garbage collected if possible
-    m_engine->evaluate(R"(
+    m_engine.evaluate(R"(
         const { delay } = require("inputactions");
 
         const patch = (promise) => {
@@ -143,7 +140,7 @@ void ScriptingEngine::initializeWatchdog()
     m_watchdogTimer->setInterval(WATCHDOG_TIMER_TIMEOUT);
     m_watchdogTimer->moveToThread(m_watchdogTimerThread);
     connect(m_watchdogTimer, &QTimer::timeout, [this]() {
-        m_engine->setInterrupted(true);
+        m_engine.setInterrupted(true);
         QThreadHelpers::runOnThread(QThreadHelpers::mainThread(), []() {
             g_notificationManager
                 ->sendNotification("Infinite loop detected",
@@ -161,15 +158,15 @@ void ScriptingEngine::initializeWatchdog()
 
 void ScriptingEngine::registerBuiltinModule(const QString &name, Module *module)
 {
-    auto object = m_engine->newQObject(module);
+    auto object = m_engine.newQObject(module);
     module->initialize(object);
-    ensureEngine().registerModule(name, object);
+    m_engine.registerModule(name, object);
     m_builtinModules[name] = std::move(object);
 }
 
 QJSValue ScriptingEngine::newEnum(const QMetaEnum &metaEnum)
 {
-    auto object = ensureEngine().newObject();
+    auto object = m_engine.newObject();
     for (int i = 0; i < metaEnum.keyCount(); i++) {
         object.setProperty(metaEnum.key(i), metaEnum.value(i));
     }
@@ -178,7 +175,7 @@ QJSValue ScriptingEngine::newEnum(const QMetaEnum &metaEnum)
 
 QJSValue ScriptingEngine::evaluate(const QString &script)
 {
-    const auto result = ensureEngine().evaluate(script);
+    const auto result = m_engine.evaluate(script);
     if (result.isError()) {
         logError(result);
     }
@@ -188,7 +185,7 @@ QJSValue ScriptingEngine::evaluate(const QString &script)
 
 QJSValue ScriptingEngine::importModule(const QString &fileName)
 {
-    const auto result = ensureEngine().importModule(fileName);
+    const auto result = m_engine.importModule(fileName);
     if (result.isError()) {
         logError(result);
     }
@@ -227,23 +224,15 @@ void ScriptingEngine::logError(const QJSValue &error)
 
 Promise ScriptingEngine::newPromise()
 {
-    const auto holder = ensureEngine().newObject();
+    const auto holder = m_engine.newObject();
     const auto promise = m_promiseFactory.call({holder});
     return {this, promise, holder.property("fulfill"), holder.property("reject")};
-}
-
-QJSEngine &ScriptingEngine::ensureEngine()
-{
-    if (!m_engine) {
-        initialize();
-    }
-    return m_engine.value();
 }
 
 ScriptingEngine *ScriptingEngine::engineForObject(const QObject *object)
 {
     for (auto *engine : s_engines) {
-        if (qjsEngine(object) == &engine->ensureEngine()) {
+        if (qjsEngine(object) == &engine->m_engine) {
             return engine;
         }
     }
@@ -253,11 +242,6 @@ ScriptingEngine *ScriptingEngine::engineForObject(const QObject *object)
 void ScriptingEngine::onWatchdogRestartTimerTick()
 {
     QMetaObject::invokeMethod(m_watchdogTimer, "start", Qt::QueuedConnection);
-}
-
-CoreModule *ScriptingEngine::coreModule() const
-{
-    return m_coreModule.get();
 }
 
 }

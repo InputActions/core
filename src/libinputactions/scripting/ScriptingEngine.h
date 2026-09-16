@@ -48,10 +48,7 @@ public:
     ScriptingEngine(InputBackend &inpuBackend, VariableRegistry &variableRegistry);
     ~ScriptingEngine() override;
 
-    /**
-     * Nullptr if engine not initialized.
-     */
-    CoreModule *coreModule() const;
+    CoreModule &coreModule() const { return *m_coreModule; }
 
     /**
      * Same as QJSEngine::evaluate but with error logging.
@@ -65,9 +62,8 @@ public:
     template<typename TReturn, typename... TArgs, typename TFunction>
     QJSValue newFunction(TFunction &&function)
     {
-        auto &engine = ensureEngine();
-        auto *wrapper = FunctionWrapper::create<TReturn, TArgs...>(&engine, std::forward<TFunction>(function));
-        return evaluate(QString("obj => (...args) => obj.call(args);")).call({engine.newQObject(wrapper)});
+        auto *wrapper = FunctionWrapper::create<TReturn, TArgs...>(&m_engine, std::forward<TFunction>(function));
+        return evaluate(QString("obj => (...args) => obj.call(args);")).call({m_engine.newQObject(wrapper)});
     }
 
     Promise newPromise();
@@ -79,10 +75,7 @@ public:
     }
     QJSValue newEnum(const QMetaEnum &metaEnum);
 
-    /**
-     * Returns an instance of the engine. Initializes the engine if it has not been initialized yet.
-     */
-    QJSEngine &ensureEngine();
+    QJSEngine &qtEngine() { return m_engine; }
 
     /**
      * @returns The engine for the specified object or nullptr.
@@ -109,7 +102,7 @@ private:
     InputBackend &m_inputBackend;
     VariableRegistry &m_variableRegistry;
 
-    std::optional<QJSEngine> m_engine;
+    QJSEngine m_engine;
     std::unique_ptr<CoreModule> m_coreModule;
     std::map<QString, QJSValue> m_builtinModules;
 

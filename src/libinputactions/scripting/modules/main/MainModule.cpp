@@ -26,20 +26,20 @@ namespace InputActions
 
 MainModule::MainModule(ScriptingEngine &engine)
     : Module(engine)
-    , m_globalObject(engine.ensureEngine().globalObject())
+    , m_globalObject(engine.qtEngine().globalObject())
 {
 }
 
 void MainModule::initialize(QJSValue &self)
 {
-    self.setProperty("Point", engine().ensureEngine().newQMetaObject(&PointF::staticMetaObject));
-    self.setProperty("Timer", engine().ensureEngine().newQMetaObject(&Timer::staticMetaObject));
+    self.setProperty("Point", engine().qtEngine().newQMetaObject(&PointF::staticMetaObject));
+    self.setProperty("Timer", engine().qtEngine().newQMetaObject(&Timer::staticMetaObject));
 }
 
 QJSValue MainModule::delay(double duration)
 {
     if (duration < 1 || duration > INT32_MAX) {
-        engine().ensureEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration)));
+        engine().qtEngine().throwError(QJSValue::RangeError, QString("Value %1 is out of range.").arg(QString::number(duration)));
         return {};
     }
 
