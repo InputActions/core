@@ -2,6 +2,7 @@
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/config/ConfigProvider.h>
 #include <libinputactions/config/GlobalConfig.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
@@ -21,6 +22,7 @@ void Test::initMain()
     inputActions->setMissingImplementations();
     inputActions->initialize();
     g_globalConfig->setSendNotificationOnError(false);
+    g_scriptingEngine->disableWatchdog();
 }
 
 }
