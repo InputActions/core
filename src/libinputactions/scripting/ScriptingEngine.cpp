@@ -41,6 +41,7 @@ ScriptingEngine::ScriptingEngine(InputBackend &inputBackend, VariableRegistry &v
     : m_inputBackend(inputBackend)
     , m_variableRegistry(variableRegistry)
 {
+    QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
     s_engines.insert(this);
     initialize();
 }
@@ -71,56 +72,44 @@ void ScriptingEngine::initialize()
     registerBuiltinModule("inputactions/desktop/generic", new DesktopGenericModule(*this));
     registerBuiltinModule("inputactions/fs", new FSModule(*this));
 
-    auto globalObject = m_engine.globalObject();
-    globalObject.setProperty("require", newFunction<QJSValue, QString>([this](QString module) {
-                                 if (m_builtinModules.contains(module)) {
-                                     return m_builtinModules[module];
-                                 }
+    // TODO Maybe perform the unhandled promise check after garbage collection if possible
+    const auto initFunc = evaluate(R"(
+        engine => {
+            require = engine.require;
 
-                                 return m_engine.importModule(module);
-                             }));
+            const { delay } = require("inputactions");
 
-    // Unhandled promise rejection handling
-    // TODO Maybe perform the check when the promise is garbage collected if possible
-    m_engine.evaluate(R"(
-        const { delay } = require("inputactions");
+            const patch = (promise) => {
+                promise.__then = promise.then;
+                promise.then = function(onFulfilled, onRejected) {
+                    this.__handled = true;
+                    return patch(this.__then(onFulfilled, onRejected));
+                };
 
-        const patch = (promise) => {
-            promise.__then = promise.then;
-            promise.then = function(onFulfilled, onRejected) {
-                this.__handled = true;
-                return patch(this.__then(onFulfilled, onRejected));
-            };
+                promise.__then(undefined, x => {
+                    delay(100).__then(() => {
+                        if (!promise.__handled) {
+                            engine.unhandledPromiseRejection(x);
+                        }
+                    })
+                });
 
-            promise.__then(undefined, x => {
-                delay(100).__then(() => {
-                    if (!promise.__handled) {
-                        __unhandledPromiseRejection(x);
-                    }
-                })
-            });
+                return promise;
+            }
 
-            return promise;
+            const _Promise = Promise;
+            Promise = function(executor) {
+                return patch(new _Promise((resolve, reject) => {
+                    executor(resolve, reject);
+                }));
+            }
+            Promise.all = _Promise.all;
+            Promise.race = _Promise.race;
+            Promise.reject = _Promise.reject;
+            Promise.resolve = _Promise.resolve;
         }
-
-        const _Promise = Promise;
-        Promise = function(executor) {
-            return patch(new _Promise((resolve, reject) => {
-                executor(resolve, reject);
-            }));
-        }
-        Promise.all = _Promise.all;
-        Promise.race = _Promise.race;
-        Promise.reject = _Promise.reject;
-        Promise.resolve = _Promise.resolve;
     )");
-    globalObject.setProperty("__unhandledPromiseRejection", newFunction<void, QJSValue>([this](QJSValue error) {
-                                 if (error.isError()) {
-                                     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught (in promise) script error\n" << errorToString(error);
-                                 } else {
-                                     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught (in promise) " << error.toString();
-                                 }
-                             }));
+    call(initFunc, {m_engine.newQObject(this)});
 }
 
 void ScriptingEngine::initializeWatchdog()
@@ -145,6 +134,24 @@ void ScriptingEngine::initializeWatchdog()
     m_watchdogRestartTimer.setInterval(WATCHDOG_TIMER_RESET_INTERVAL);
     m_watchdogRestartTimer.start();
     onWatchdogRestartTimerTick();
+}
+
+QJSValue ScriptingEngine::require(const QString &module)
+{
+    if (m_builtinModules.contains(module)) {
+        return m_builtinModules[module];
+    }
+
+    return m_engine.importModule(module);
+}
+
+void ScriptingEngine::unhandledPromiseRejection(const QJSValue &result)
+{
+    if (result.isError()) {
+        qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught (in promise) script error\n" << errorToString(result);
+    } else {
+        qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught (in promise) " << result.toString();
+    }
 }
 
 void ScriptingEngine::registerBuiltinModule(const QString &name, Module *module)

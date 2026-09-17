@@ -26,9 +26,9 @@
 namespace InputActions
 {
 
-QJSValue File::readAllText(const QString &path)
+QJSValue FileStatic::readAllText(const QString &path)
 {
-    auto promise = g_scriptingEngine->newPromise();
+    auto promise = ScriptingEngine::engineForObject(this)->newPromise();
     QThreadPool::globalInstance()->start([path, promise]() {
         QFile file(path);
         if (!file.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text)) {
@@ -42,9 +42,9 @@ QJSValue File::readAllText(const QString &path)
     return promise.promise();
 }
 
-QJSValue File::writeAllText(const QString &path, const QString &text)
+QJSValue FileStatic::writeAllText(const QString &path, const QString &text)
 {
-    auto promise = g_scriptingEngine->newPromise();
+    auto promise = ScriptingEngine::engineForObject(this)->newPromise();
     QThreadPool::globalInstance()->start([path, text, promise]() {
         QFile file(path);
         if (!file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Text)) {
