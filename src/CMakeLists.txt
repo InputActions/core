@@ -163,10 +163,16 @@ target_compile_options(libinputactions PUBLIC -fexceptions -fPIC)
 target_precompile_headers(libinputactions
     PUBLIC
         "$<$<COMPILE_LANGUAGE:CXX>:<QDebug$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QJSEngine$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QJSValue$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QLoggingCategory$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QMetaEnum$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QMetaType$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QObject$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QPoint$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QPointF$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QProcess$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QProcessEnvironment$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QRegularExpression$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QSize$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QSizeF$<ANGLE-R>>"
