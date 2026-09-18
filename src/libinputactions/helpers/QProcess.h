@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <QProcessEnvironment>
 #include <QString>
 
 namespace InputActions::QProcessHelpers
@@ -49,5 +50,7 @@ void command(const QString &command, const CommandArguments &args = {});
  * @returns The standard output.
  */
 QString commandOutput(const QString &command, const CommandOutputArguments &args = {});
+
+const QProcessEnvironment &cachedSystemEnvironment();
 
 }

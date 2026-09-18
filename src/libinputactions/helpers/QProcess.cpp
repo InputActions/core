@@ -77,4 +77,14 @@ QString commandOutput(const QString &command, const CommandOutputArguments &args
     return processOutput("/bin/sh", {"-c", command}, extraEnvironment);
 }
 
+const QProcessEnvironment &cachedSystemEnvironment()
+{
+    static std::optional<QProcessEnvironment> cache;
+    if (!cache.has_value()) {
+        cache = QProcessEnvironment::systemEnvironment();
+    }
+
+    return cache.value();
+}
+
 }

@@ -90,6 +90,25 @@ public:
         return instanceMetaObject;
     }
 
+    /**
+     * Converts a JS object to a default-constructible gadget instance with optional properties.
+     */
+    template<typename T>
+    T objectToGadget(const QJSValue &object)
+    {
+        T result;
+
+        const QMetaObject &metaObject = T::staticMetaObject;
+        for (qsizetype i = 0; i < metaObject.propertyCount(); i++) {
+            const auto metaProperty = metaObject.property(i);
+            if (object.hasOwnProperty(metaProperty.name())) {
+                metaProperty.writeOnGadget(&result, object.property(metaProperty.name()).toVariant());
+            }
+        }
+
+        return result;
+    }
+
     Promise newPromise();
 
     template<typename T>
