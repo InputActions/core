@@ -74,6 +74,9 @@ void ScriptingEngine::initialize()
     }
 
     m_engine.installExtensions(QJSEngine::ConsoleExtension);
+#ifndef NDEBUG
+    m_engine.installExtensions(QJSEngine::GarbageCollectionExtension);
+#endif
 
     initializeWatchdog();
 
