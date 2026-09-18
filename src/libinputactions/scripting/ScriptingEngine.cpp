@@ -23,6 +23,7 @@
 #include "modules/desktop/generic/DesktopGenericModule.h"
 #include "modules/fs/FSModule.h"
 #include "modules/main/MainModule.h"
+#include "modules/os/OSModule.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/helpers/QString.h>
@@ -60,6 +61,18 @@ ScriptingEngine::~ScriptingEngine()
 
 void ScriptingEngine::initialize()
 {
+    static bool registeredConverters{};
+    if (!registeredConverters) {
+        QMetaType::registerConverter<QVariantMap, std::map<QString, QString>>([](const QVariantMap &map) {
+            std::map<QString, QString> result;
+            for (auto it = map.cbegin(); it != map.cend(); ++it) {
+                result[it.key()] = it->value<QString>();
+            }
+            return result;
+        });
+        registeredConverters = true;
+    }
+
     m_engine.installExtensions(QJSEngine::ConsoleExtension);
 
     initializeWatchdog();
@@ -71,6 +84,7 @@ void ScriptingEngine::initialize()
     registerBuiltinModule("inputactions", new MainModule(*this));
     registerBuiltinModule("inputactions/desktop/generic", new DesktopGenericModule(*this));
     registerBuiltinModule("inputactions/fs", new FSModule(*this));
+    registerBuiltinModule("inputactions/os", new OSModule(*this));
 
     // TODO Maybe perform the unhandled promise check after garbage collection if possible
     const auto initFunc = evaluate(R"(
