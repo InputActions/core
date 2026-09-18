@@ -19,7 +19,7 @@
 #include "MainModule.h"
 #include "Timer.h"
 #include <libinputactions/PointF.h>
-#include <libinputactions/scripting/Promise.h>
+#include <libinputactions/scripting/promises/FulfillablePromise.h>
 
 namespace InputActions
 {
@@ -43,11 +43,11 @@ QJSValue MainModule::delay(double duration)
         return {};
     }
 
-    auto promise = g_scriptingEngine->newPromise();
+    const auto promise = engine().newPromise();
     QTimer::singleShot(std::floor(duration), Qt::PreciseTimer, this, [promise]() {
         promise.fulfill();
     });
-    return promise.promise();
+    return promise.jsPromise();
 }
 
 }

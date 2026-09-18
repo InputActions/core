@@ -18,33 +18,24 @@
 
 #pragma once
 
-#include "ScriptingEngine.h"
-#include <QJSValue>
+#include "Promise.h"
 #include <libinputactions/helpers/QThread.h>
+#include <libinputactions/scripting/ScriptingEngine.h>
 
 namespace InputActions
 {
 
-class ScriptingEngine;
-
-/**
- * Wraps a JavaScript Promise.
- */
-class Promise
+class FulfillablePromise
 {
 public:
-    Promise(ScriptingEngine *engine, QJSValue promise, QJSValue fulfill, QJSValue reject);
+    FulfillablePromise(QJSValue promise, QJSValue fulfillFunc, QJSValue rejectFunc, ScriptingEngine &engine);
 
-    /**
-     * The JavaScript Promise object.
-     */
-    const QJSValue &promise() const { return m_promise; }
+    const QJSValue &jsPromise() const { return m_jsPromise; }
 
     /**
      * Thread-safe.
      */
     void fulfill() const;
-
     /**
      * Thread-safe.
      */
@@ -54,8 +45,8 @@ public:
         QThreadHelpers::runOnThread(
             QThreadHelpers::mainThread(),
             [this, value = std::move(value)]() {
-                if (m_fulfill.isCallable()) {
-                    ScriptingEngine::call(m_fulfill, {m_engine->qtEngine().toScriptValue(value)});
+                if (m_fulfillFunc.isCallable()) {
+                    ScriptingEngine::call(m_fulfillFunc, {m_engine.qtEngine().toScriptValue(value)});
                 }
             },
             true);
@@ -65,14 +56,17 @@ public:
      * Thread-safe.
      */
     void reject(const QString &errorMessage) const;
+    /**
+     * Thread-safe.
+     */
     void reject(const QJSValue &error) const;
 
 private:
-    ScriptingEngine *m_engine;
+    QJSValue m_jsPromise;
+    QJSValue m_fulfillFunc;
+    QJSValue m_rejectFunc;
 
-    QJSValue m_promise;
-    QJSValue m_fulfill;
-    QJSValue m_reject;
+    ScriptingEngine &m_engine;
 };
 
 }

@@ -19,8 +19,8 @@
 #include "Process.h"
 #include <QProcess>
 #include <libinputactions/helpers/QProcess.h>
-#include <libinputactions/scripting/Promise.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
+#include <libinputactions/scripting/promises/FulfillablePromise.h>
 
 namespace InputActions
 {
@@ -31,7 +31,7 @@ QJSValue ProcessStatic::run(const QString &program, const QJSValue &argumentsObj
     auto error = engine->qtEngine().newErrorObject(QJSValue::GenericError);
 
     const auto arguments = g_scriptingEngine->objectToGadget<ProcessRunArguments>(argumentsObject);
-    auto promise = engine->newPromise();
+    const auto promise = engine->newPromise();
     auto *process = new QProcess;
     connect(process, &QProcess::errorOccurred, this, [promise, process, error](const auto processError) mutable {
         if (processError == QProcess::ProcessError::FailedToStart) {
@@ -75,7 +75,7 @@ QJSValue ProcessStatic::run(const QString &program, const QJSValue &argumentsObj
     }
 
     process->start();
-    return promise.promise();
+    return promise.jsPromise();
 }
 
 FinishedProcess::FinishedProcess(int exitCode)
