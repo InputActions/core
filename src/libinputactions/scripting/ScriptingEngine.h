@@ -29,6 +29,7 @@ namespace InputActions
 {
 
 class CoreModule;
+class FulfillablePromise;
 class InputBackend;
 class Module;
 class Promise;
@@ -109,7 +110,7 @@ public:
         return result;
     }
 
-    Promise newPromise();
+    FulfillablePromise newPromise();
 
     template<typename T>
     QJSValue newEnum()

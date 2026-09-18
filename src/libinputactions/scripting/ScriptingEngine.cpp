@@ -17,13 +17,13 @@
 */
 
 #include "ScriptingEngine.h"
-#include "Promise.h"
 #include "modules/Module.h"
 #include "modules/core/CoreModule.h"
 #include "modules/desktop/generic/DesktopGenericModule.h"
 #include "modules/fs/FSModule.h"
 #include "modules/main/MainModule.h"
 #include "modules/os/OSModule.h"
+#include "promises/FulfillablePromise.h"
 #include <libinputactions/InputActionsMain.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/helpers/QString.h>
@@ -251,7 +251,7 @@ void ScriptingEngine::logError(const QJSValue &error)
     qCCritical(INPUTACTIONS_SCRIPTING).nospace().noquote() << "Uncaught script error\n" << errorToString(error);
 }
 
-Promise ScriptingEngine::newPromise()
+FulfillablePromise ScriptingEngine::newPromise()
 {
     const auto factory = evaluateOnce(R"(
         holder => {
@@ -263,7 +263,7 @@ Promise ScriptingEngine::newPromise()
     )");
     const auto holder = m_engine.newObject();
     const auto promise = factory.call({holder});
-    return {this, promise, holder.property("fulfill"), holder.property("reject")};
+    return {promise, holder.property("fulfill"), holder.property("reject"), *this};
 }
 
 ScriptingEngine *ScriptingEngine::engineForObject(const QObject *object)

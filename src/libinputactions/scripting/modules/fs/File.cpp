@@ -20,15 +20,15 @@
 #include <QFile>
 #include <QThreadPool>
 #include <libinputactions/helpers/QThread.h>
-#include <libinputactions/scripting/Promise.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
+#include <libinputactions/scripting/promises/FulfillablePromise.h>
 
 namespace InputActions
 {
 
 QJSValue FileStatic::readAllText(const QString &path)
 {
-    auto promise = ScriptingEngine::engineForObject(this)->newPromise();
+    const auto promise = ScriptingEngine::engineForObject(this)->newPromise();
     QThreadPool::globalInstance()->start([path, promise]() {
         QFile file(path);
         if (!file.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text)) {
@@ -39,12 +39,12 @@ QJSValue FileStatic::readAllText(const QString &path)
         QTextStream stream(&file);
         promise.fulfill(stream.readAll());
     });
-    return promise.promise();
+    return promise.jsPromise();
 }
 
 QJSValue FileStatic::writeAllText(const QString &path, const QString &text)
 {
-    auto promise = ScriptingEngine::engineForObject(this)->newPromise();
+    const auto promise = ScriptingEngine::engineForObject(this)->newPromise();
     QThreadPool::globalInstance()->start([path, text, promise]() {
         QFile file(path);
         if (!file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Text)) {
@@ -57,7 +57,7 @@ QJSValue FileStatic::writeAllText(const QString &path, const QString &text)
         stream.flush();
         promise.fulfill();
     });
-    return promise.promise();
+    return promise.jsPromise();
 }
 
 }

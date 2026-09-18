@@ -94,10 +94,12 @@ set(libinputactions_SRCS
     libinputactions/scripting/modules/os/Process.cpp
     libinputactions/scripting/modules/main/Timer.cpp
     libinputactions/scripting/modules/Module.cpp
+    libinputactions/scripting/promises/FulfillablePromise.cpp
+    libinputactions/scripting/promises/Promise.cpp
+    libinputactions/scripting/promises/PromiseException.cpp
     libinputactions/scripting/JSFunctionAction.cpp
     libinputactions/scripting/JSFunctionCondition.cpp
     libinputactions/scripting/ModuleScriptMetadata.cpp
-    libinputactions/scripting/Promise.cpp
     libinputactions/scripting/ScriptingEngine.cpp
     libinputactions/triggers/core/DirectionalMotionTriggerCore.cpp
     libinputactions/triggers/core/MotionTriggerCore.cpp
@@ -163,6 +165,7 @@ target_compile_options(libinputactions PUBLIC -fexceptions -fPIC)
 target_precompile_headers(libinputactions
     PUBLIC
         "$<$<COMPILE_LANGUAGE:CXX>:<QDebug$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QFuture$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QJSEngine$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QJSValue$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QLoggingCategory$<ANGLE-R>>"
@@ -173,6 +176,7 @@ target_precompile_headers(libinputactions
         "$<$<COMPILE_LANGUAGE:CXX>:<QPointF$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QProcess$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QProcessEnvironment$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<QPromise$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QRegularExpression$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QSize$<ANGLE-R>>"
         "$<$<COMPILE_LANGUAGE:CXX>:<QSizeF$<ANGLE-R>>"

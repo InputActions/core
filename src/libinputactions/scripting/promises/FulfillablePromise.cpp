@@ -16,46 +16,51 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Promise.h"
+#include "FulfillablePromise.h"
 
 namespace InputActions
 {
 
-Promise::Promise(ScriptingEngine *engine, QJSValue promise, QJSValue fulfill, QJSValue reject)
-    : m_engine(engine)
-    , m_promise(promise)
-    , m_fulfill(fulfill)
-    , m_reject(reject)
+FulfillablePromise::FulfillablePromise(QJSValue promise, QJSValue fulfillFunc, QJSValue rejectFunc, ScriptingEngine &engine)
+    : m_jsPromise(std::move(promise))
+    , m_fulfillFunc(std::move(fulfillFunc))
+    , m_rejectFunc(std::move(rejectFunc))
+    , m_engine(engine)
 {
 }
 
-void Promise::fulfill() const
+void FulfillablePromise::fulfill() const
 {
     QThreadHelpers::runOnThread(
         QThreadHelpers::mainThread(),
         [this]() {
-            if (m_fulfill.isCallable()) {
-                ScriptingEngine::call(m_fulfill);
+            if (m_fulfillFunc.isCallable()) {
+                ScriptingEngine::call(m_fulfillFunc);
             }
         },
         true);
 }
 
-void Promise::reject(const QString &errorMessage) const
+void FulfillablePromise::reject(const QString &errorMessage) const
 {
     QThreadHelpers::runOnThread(
         QThreadHelpers::mainThread(),
-        [this, errorMessage]() {
-            reject(m_engine->qtEngine().newErrorObject(QJSValue::GenericError, errorMessage));
+        [this, errorMessage = std::move(errorMessage)]() {
+            reject(m_engine.qtEngine().newErrorObject(QJSValue::GenericError, errorMessage));
         },
         true);
 }
 
-void Promise::reject(const QJSValue &error) const
+void FulfillablePromise::reject(const QJSValue &error) const
 {
-    if (m_reject.isCallable()) {
-        ScriptingEngine::call(m_reject, {error});
-    }
+    QThreadHelpers::runOnThread(
+        QThreadHelpers::mainThread(),
+        [this, error = std::move(error)]() {
+            if (m_rejectFunc.isCallable()) {
+                ScriptingEngine::call(m_rejectFunc, {error});
+            }
+        },
+        true);
 }
 
 }
