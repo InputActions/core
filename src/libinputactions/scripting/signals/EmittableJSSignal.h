@@ -18,34 +18,30 @@
 
 #pragma once
 
-#include <QObject>
-#include <libinputactions/PointF.h>
+#include "JSSignal.h"
 
 namespace InputActions
 {
 
-class InputBackend;
-class ScriptingEngine;
-class VirtualMouse;
-
-class VirtualMouseWrapper : public QObject
+class EmittableJSSignal : public JSSignal
 {
     Q_OBJECT
 
 public:
-    VirtualMouseWrapper(std::shared_ptr<InputBackend> inputBackend, ScriptingEngine &engine);
-
-    Q_INVOKABLE void mouseMotion(const PointF &pos);
-    Q_INVOKABLE void mouseWheel(const PointF &delta);
-
-private:
     /**
-     * Returns the virtual mouse or throws a JS exception if the backend is uninitialized.
+     * Only for JavaScript, using this constructor in C++ will result in broken signals.
      */
-    VirtualMouse *virtualMouse() const;
+    Q_INVOKABLE EmittableJSSignal() = default;
 
-    std::shared_ptr<InputBackend> m_inputBackend;
-    ScriptingEngine &m_engine;
+    explicit EmittableJSSignal(ScriptingEngine &engine);
+    explicit EmittableJSSignal(const QObject &object);
+
+    Q_INVOKABLE JSSignal *toNonEmittableSignal();
+
+    Q_INVOKABLE void jsEmit(const QJSValueList &args);
+
+    void emit(const QJSValueList &args);
+    QFuture<void> emitAsync(const QJSValueList &args, bool failOnError);
 };
 
 }

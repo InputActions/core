@@ -97,6 +97,9 @@ set(libinputactions_SRCS
     libinputactions/scripting/promises/FulfillablePromise.cpp
     libinputactions/scripting/promises/Promise.cpp
     libinputactions/scripting/promises/PromiseException.cpp
+    libinputactions/scripting/signals/EmittableJSSignal.cpp
+    libinputactions/scripting/signals/JSSignal.cpp
+    libinputactions/scripting/signals/Signal.h
     libinputactions/scripting/JSFunctionAction.cpp
     libinputactions/scripting/JSFunctionCondition.cpp
     libinputactions/scripting/ModuleScriptMetadata.cpp
@@ -157,7 +160,7 @@ target_link_libraries(libinputactions PUBLIC
     Qt6::Qml
     ${LIBEVDEV_LIBRARIES}
 )
-target_compile_definitions(libinputactions PUBLIC TEST_VIRTUAL=$<IF:$<BOOL:${BUILD_TESTS}>,virtual,>)
+target_compile_definitions(libinputactions PUBLIC QT_NO_EMIT TEST_VIRTUAL=$<IF:$<BOOL:${BUILD_TESTS}>,virtual,>)
 target_include_directories(libinputactions PRIVATE libinputactions libinputactions/. ${LIBEVDEV_INCLUDE_DIRS})
 set_target_properties(libinputactions PROPERTIES PREFIX "")
 target_link_libraries(libinputactions PRIVATE yaml-cpp)

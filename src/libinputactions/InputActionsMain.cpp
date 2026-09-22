@@ -2,7 +2,6 @@
 #include "actions/ActionExecutor.h"
 #include "config/ConfigIssueManager.h"
 #include "config/ConfigLoader.h"
-#include "config/ConfigProvider.h"
 #include "config/GlobalConfig.h"
 #include "dbus/MainDBusInterface.h"
 #include "input/StrokeRecorder.h"
@@ -45,7 +44,6 @@ InputActionsMain::~InputActionsMain()
     g_configIssueManager.reset();
     g_configLoader.reset();
     g_globalConfig.reset();
-    g_configProvider.reset();
     g_inputBackend.reset();
     g_mainDbusInterface.reset();
     g_scriptingEngine.reset();
@@ -53,29 +51,16 @@ InputActionsMain::~InputActionsMain()
     g_variableRegistry.reset();
 }
 
-void InputActionsMain::suspend()
-{
-    g_inputBackend->reset();
-}
-
 void InputActionsMain::initialize()
 {
-    connect(g_configProvider.get(), &ConfigProvider::configChanged, this, &InputActionsMain::onConfigChanged);
     registerGlobalVariables(g_variableRegistry.get());
-
-    g_configLoader->loadEmpty(); // Initialize default values
-}
-
-void InputActionsMain::onConfigChanged(const QString &config)
-{
-    if (g_globalConfig->autoReload()) {
-        g_configLoader->load();
-    }
+    g_configLoader->load({
+        .empty = true,
+    });
 }
 
 void InputActionsMain::setMissingImplementations()
 {
-    setMissingImplementation(g_configProvider);
     setMissingImplementation(g_cursorShapeProvider);
     setMissingImplementation(g_notificationManager);
     setMissingImplementation(g_onScreenMessageManager);
@@ -94,9 +79,7 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_strokeRecorder);
     setMissingImplementation(g_variableRegistry);
 
-    if (!g_scriptingEngine) {
-        g_scriptingEngine = std::make_shared<ScriptingEngine>(*g_inputBackend, *g_variableRegistry);
-    }
+    g_scriptingEngine = std::make_unique<ScriptingEngine>(g_inputBackend, g_variableRegistry);
 }
 
 void InputActionsMain::registerGlobalVariables(VariableRegistry *variableRegistry, std::shared_ptr<PointerPositionGetter> pointerPositionGetter,

@@ -20,4 +20,13 @@
 
 namespace InputActions
 {
+
+Config::Config(ScriptingEngine &engine)
+    : m_aboutToBeActivated(engine)
+    , m_aboutToBeDestroyed(engine)
+    , m_aboutToBeLoaded(engine)
+    , m_activated(engine)
+{
+}
+
 }

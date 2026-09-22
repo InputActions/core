@@ -196,6 +196,6 @@ private:
     std::set<KeyboardKey> m_emergencyCombination; // Default value defined in Config
 };
 
-inline std::unique_ptr<InputBackend> g_inputBackend;
+inline std::shared_ptr<InputBackend> g_inputBackend;
 
 }

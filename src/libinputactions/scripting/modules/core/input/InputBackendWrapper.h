@@ -34,7 +34,7 @@ class InputBackendWrapper : public QObject
     Q_PROPERTY(VirtualMouseWrapper *virtualMouse READ virtualMouse)
 
 public:
-    InputBackendWrapper(InputBackend &inputBackend, ScriptingEngine &engine);
+    InputBackendWrapper(std::shared_ptr<InputBackend> inputBackend, ScriptingEngine &engine);
 
     VirtualMouseWrapper *virtualMouse() { return &m_virtualMouse; }
 

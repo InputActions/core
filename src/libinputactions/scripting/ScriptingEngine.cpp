@@ -25,6 +25,7 @@
 #include "modules/os/OSModule.h"
 #include "promises/FulfillablePromise.h"
 #include <libinputactions/InputActionsMain.h>
+#include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/helpers/QString.h>
 #include <libinputactions/helpers/QThread.h>
@@ -38,9 +39,9 @@ namespace InputActions
 static const std::chrono::milliseconds WATCHDOG_TIMER_TIMEOUT{2000};
 static const std::chrono::milliseconds WATCHDOG_TIMER_RESET_INTERVAL{1000};
 
-ScriptingEngine::ScriptingEngine(InputBackend &inputBackend, VariableRegistry &variableRegistry)
-    : m_inputBackend(inputBackend)
-    , m_variableRegistry(variableRegistry)
+ScriptingEngine::ScriptingEngine(std::shared_ptr<InputBackend> inputBackend, std::shared_ptr<VariableRegistry> variableRegistry)
+    : m_inputBackend(std::move(inputBackend))
+    , m_variableRegistry(std::move(variableRegistry))
 {
     QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
     s_engines.insert(this);
@@ -51,12 +52,14 @@ ScriptingEngine::~ScriptingEngine()
 {
     s_engines.erase(this);
 
-    QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
-    m_watchdogTimerThread->quit();
-    m_watchdogTimerThread->wait();
+    if (m_watchdogTimer) {
+        QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
+        m_watchdogTimerThread->quit();
+        m_watchdogTimerThread->wait();
 
-    m_watchdogTimer->deleteLater();
-    m_watchdogTimerThread->deleteLater();
+        m_watchdogTimer->deleteLater();
+        m_watchdogTimerThread->deleteLater();
+    }
 }
 
 void ScriptingEngine::initialize()
@@ -78,9 +81,11 @@ void ScriptingEngine::initialize()
     m_engine.installExtensions(QJSEngine::GarbageCollectionExtension);
 #endif
 
-    initializeWatchdog();
+    if (!g_inputActions->inTestEnvironment()) {
+        initializeWatchdog();
+    }
 
-    m_coreModule = std::make_unique<CoreModule>(*this, m_inputBackend, m_variableRegistry);
+    m_coreModule = std::make_unique<CoreModule>(m_inputBackend, m_variableRegistry, *this);
     QJSEngine::setObjectOwnership(m_coreModule.get(), QJSEngine::CppOwnership);
     registerBuiltinModule("inputactions/core", m_coreModule.get());
 
@@ -142,7 +147,9 @@ void ScriptingEngine::initializeWatchdog()
             g_notificationManager
                 ->sendNotification("Infinite loop detected",
                                    "A script has likely entered an infinite loop and frozen the main thread. InputActions has been suspended.");
-            g_inputActions->suspend();
+            g_configLoader->load({
+                .empty = true,
+            });
         });
     });
     m_watchdogTimerThread->start();
@@ -188,10 +195,13 @@ QJSValue ScriptingEngine::newEnum(const QMetaEnum &metaEnum)
     return object;
 }
 
-void ScriptingEngine::disableWatchdog()
+bool ScriptingEngine::validateFunction(const QString &argName, const QJSValue &value)
 {
-    QMetaObject::invokeMethod(m_watchdogTimer, "stop", Qt::BlockingQueuedConnection);
-    m_watchdogRestartTimer.stop();
+    if (!value.isCallable()) {
+        m_engine.throwError(QString("Argument '%1' must be a function.").arg(argName));
+        return false;
+    }
+    return true;
 }
 
 QJSValue ScriptingEngine::evaluate(const QString &script)
@@ -266,6 +276,16 @@ FulfillablePromise ScriptingEngine::newPromise()
     return {promise, holder.property("fulfill"), holder.property("reject"), *this};
 }
 
+std::shared_ptr<Promise> ScriptingEngine::newPromise(const QJSValue &promise)
+{
+    const auto isPromiseFunc = evaluateOnce("x => x?.then != undefined");
+    if (!call(isPromiseFunc, {promise}).toBool()) {
+        return {};
+    }
+
+    return std::make_shared<Promise>(promise, *this);
+}
+
 ScriptingEngine *ScriptingEngine::engineForObject(const QObject *object)
 {
     for (auto *engine : s_engines) {
@@ -273,6 +293,8 @@ ScriptingEngine *ScriptingEngine::engineForObject(const QObject *object)
             return engine;
         }
     }
+
+    qCCritical(INPUTACTIONS_SCRIPTING).noquote().nospace() << "Failed to get engine for object " << object;
     return {};
 }
 

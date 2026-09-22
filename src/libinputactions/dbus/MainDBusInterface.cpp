@@ -18,7 +18,6 @@
 
 #include "MainDBusInterface.h"
 #include <QRegularExpression>
-#include <libinputactions/InputActionsMain.h>
 #include <libinputactions/config/ConfigIssueManager.h>
 #include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/config/GlobalConfig.h>
@@ -81,28 +80,33 @@ void MainDBusInterface::recordStroke(const QDBusMessage &message)
     });
 }
 
-QString MainDBusInterface::reloadConfig()
+void MainDBusInterface::reloadConfig(const QDBusMessage &message)
 {
-    if (!m_allowConfigLoading) {
-        sendErrorReply(QDBusError::Failed, "Loading the configuration is not allowed while the client is inactive.");
-        return {};
-    }
+    message.setDelayedReply(true);
 
-    g_configLoader->load({
-        .manual = true,
-    });
-    return g_configIssueManager->issuesToString();
+    const auto handler = [this, reply = message.createReply()]() mutable {
+        reply << g_configIssueManager->issuesToString();
+        m_bus.send(reply);
+    };
+    g_configLoader
+        ->load({
+            .manual = true,
+        })
+        .then(handler)
+        .onFailed(handler);
 }
 
-QString MainDBusInterface::suspend()
+void MainDBusInterface::suspend(const QDBusMessage &message)
 {
-    if (!m_allowConfigLoading) {
-        sendErrorReply(QDBusError::Failed, "Suspending is not allowed while the client is inactive.");
-        return {};
-    }
-
-    g_inputActions->suspend();
-    return "success";
+    message.setDelayedReply(true);
+    g_configLoader
+        ->load({
+            .empty = true,
+            .manual = true,
+        })
+        .then([this, reply = message.createReply()]() mutable {
+            m_bus.send(reply);
+        });
 }
 
 QString MainDBusInterface::variables(QString filter)

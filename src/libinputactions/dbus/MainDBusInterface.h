@@ -49,17 +49,12 @@ public:
      */
     ~MainDBusInterface() override;
 
-    /**
-     * Sets whether loading the config and suspending InputActions through the DBus interface is allowed. This is only used in the standalone implementation.
-     */
-    void setAllowConfigLoading(bool value) { m_allowConfigLoading = value; }
-
 public slots:
     QString deviceList();
     QString issues();
     Q_NOREPLY void recordStroke(const QDBusMessage &message);
-    QString reloadConfig();
-    QString suspend();
+    Q_NOREPLY void reloadConfig(const QDBusMessage &message);
+    Q_NOREPLY void suspend(const QDBusMessage &message);
     QString variables(QString filter = "");
 
 private:
@@ -67,8 +62,6 @@ private:
 
     QDBusConnection m_bus;
     QDBusMessage m_reply;
-
-    bool m_allowConfigLoading = true;
 };
 
 inline std::shared_ptr<MainDBusInterface> g_mainDbusInterface;

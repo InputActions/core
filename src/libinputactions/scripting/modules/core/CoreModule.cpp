@@ -23,10 +23,11 @@
 namespace InputActions
 {
 
-CoreModule::CoreModule(ScriptingEngine &engine, InputBackend &inputBackend, VariableRegistry &variableRegistry)
+CoreModule::CoreModule(std::shared_ptr<InputBackend> inputBackend, std::shared_ptr<VariableRegistry> variableRegistry, ScriptingEngine &engine)
     : Module(engine)
-    , m_inputBackend(inputBackend, engine)
-    , m_variableRegistry(variableRegistry, engine)
+    , m_config(engine)
+    , m_inputBackend(std::move(inputBackend), engine)
+    , m_variableRegistry(std::move(variableRegistry), engine)
 {
     QJSEngine::setObjectOwnership(&m_config, QJSEngine::CppOwnership);
     QJSEngine::setObjectOwnership(&m_inputBackend, QJSEngine::CppOwnership);

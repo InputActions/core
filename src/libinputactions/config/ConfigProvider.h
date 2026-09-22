@@ -38,7 +38,7 @@ public:
     const QString &currentPath() const { return m_path; }
 
 signals:
-    void configChanged(const QString &config);
+    void configChanged();
 
 private slots:
     void onReadyRead();
@@ -60,7 +60,5 @@ private:
     std::unique_ptr<QSocketNotifier> m_inotifyNotifier;
     QTimer m_retryTimer;
 };
-
-inline std::shared_ptr<ConfigProvider> g_configProvider;
 
 }

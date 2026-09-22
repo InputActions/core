@@ -35,20 +35,20 @@ static const std::map<VariableType, QMetaType> VARIABLE_TYPES{
     {VariableType::String, QMetaType::fromType<QString>()},
 };
 
-VariableRegistryWrapper::VariableRegistryWrapper(VariableRegistry &variableRegistry, ScriptingEngine &engine)
-    : m_variableRegistry(variableRegistry)
+VariableRegistryWrapper::VariableRegistryWrapper(std::shared_ptr<VariableRegistry> variableRegistry, ScriptingEngine &engine)
+    : m_variableRegistry(std::move(variableRegistry))
     , m_engine(engine)
 {
 }
 
 bool VariableRegistryWrapper::contains(const QString &name) const
 {
-    return m_variableRegistry.variable(name);
+    return m_variableRegistry->variable(name);
 }
 
 VariableWrapper *VariableRegistryWrapper::get(const QString &name) const
 {
-    auto *variable = m_variableRegistry.variable(name);
+    auto *variable = m_variableRegistry->variable(name);
     if (!variable) {
         m_engine.qtEngine().throwError(QString("Variable '%1' does not exist.").arg(name));
         return {};
@@ -59,7 +59,7 @@ VariableWrapper *VariableRegistryWrapper::get(const QString &name) const
 
 VariableWrapper *VariableRegistryWrapper::variable(const QString &name) const
 {
-    auto *variable = m_variableRegistry.variable(name);
+    auto *variable = m_variableRegistry->variable(name);
     return variable ? new VariableWrapper(*variable, m_engine) : nullptr;
 }
 
@@ -97,7 +97,7 @@ VariableWrapper *VariableRegistryWrapper::registerComputedVariable(const QString
     };
     auto variable = std::make_unique<ComputedVariable>(metaType.value(), getterWrapper);
     auto *variableWrapper = new VariableWrapper(*variable.get(), m_engine);
-    m_variableRegistry.registerVariable(name, std::move(variable));
+    m_variableRegistry->registerVariable(name, std::move(variable));
     return variableWrapper;
 }
 
@@ -122,7 +122,7 @@ StoredVariableWrapper *VariableRegistryWrapper::registerStoredVariable(const QSt
 
     auto variable = std::make_unique<StoredVariable>(metaType.value());
     auto *variableWrapper = new StoredVariableWrapper(*variable.get(), m_engine);
-    m_variableRegistry.registerVariable(name, std::move(variable));
+    m_variableRegistry->registerVariable(name, std::move(variable));
     return variableWrapper;
 }
 

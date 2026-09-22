@@ -18,34 +18,43 @@
 
 #pragma once
 
+#include <QJSValue>
 #include <QObject>
-#include <libinputactions/PointF.h>
 
 namespace InputActions
 {
 
-class InputBackend;
+class EmittableJSSignal;
 class ScriptingEngine;
-class VirtualMouse;
 
-class VirtualMouseWrapper : public QObject
+using EngineSourceVariant = std::variant<ScriptingEngine *, const QObject *, std::monostate>;
+
+class JSSignal : public QObject
 {
     Q_OBJECT
 
 public:
-    VirtualMouseWrapper(std::shared_ptr<InputBackend> inputBackend, ScriptingEngine &engine);
-
-    Q_INVOKABLE void mouseMotion(const PointF &pos);
-    Q_INVOKABLE void mouseWheel(const PointF &delta);
-
-private:
+    explicit JSSignal(ScriptingEngine &engine);
+    explicit JSSignal(const QObject &object);
     /**
-     * Returns the virtual mouse or throws a JS exception if the backend is uninitialized.
+     * Constructs a non-emittable signal from the specified emittable signal. Both object share the same list of handlers.
      */
-    VirtualMouse *virtualMouse() const;
+    explicit JSSignal(EmittableJSSignal &emittableSignal);
 
-    std::shared_ptr<InputBackend> m_inputBackend;
-    ScriptingEngine &m_engine;
+    Q_INVOKABLE void connect(const QJSValue &func);
+    Q_INVOKABLE void disconnect(const QJSValue &func);
+
+    bool hasHandlers() const;
+    /**
+     * The engine associated with the signal or nullptr if not available.
+     */
+    ScriptingEngine *getEngine() const;
+
+protected:
+    JSSignal();
+
+    std::shared_ptr<std::vector<QJSValue>> m_handlers;
+    EngineSourceVariant m_engineSource;
 };
 
 }

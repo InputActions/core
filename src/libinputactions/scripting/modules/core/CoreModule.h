@@ -37,7 +37,7 @@ class CoreModule : public Module
     Q_PROPERTY(VariableRegistryWrapper *variableRegistry READ variableRegistry)
 
 public:
-    CoreModule(ScriptingEngine &engine, InputBackend &inputBackend, VariableRegistry &variableRegistry);
+    CoreModule(std::shared_ptr<InputBackend> inputBackend, std::shared_ptr<VariableRegistry> variableRegistry, ScriptingEngine &engine);
 
     Config *config() { return &m_config; }
     InputBackendWrapper *input() { return &m_inputBackend; }

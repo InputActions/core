@@ -20,6 +20,7 @@
 #include "Timer.h"
 #include <libinputactions/PointF.h>
 #include <libinputactions/scripting/promises/FulfillablePromise.h>
+#include <libinputactions/scripting/signals/EmittableJSSignal.h>
 
 namespace InputActions
 {
@@ -32,6 +33,15 @@ MainModule::MainModule(ScriptingEngine &engine)
 
 void MainModule::initialize(QJSValue &self)
 {
+    const auto emittableSignal = engine().qtEngine().newQMetaObject(&EmittableJSSignal::staticMetaObject);
+    const auto initFunc = engine().evaluate(R"(
+        emittableSignalMetaObject => {
+            emittableSignalMetaObject.emit = function(...args) { return this.jsEmit([...args]); }
+        }
+    )");
+    ScriptingEngine::call(initFunc, {emittableSignal});
+
+    self.setProperty("EmittableSignal", emittableSignal);
     self.setProperty("Point", engine().qtEngine().newQMetaObject(&PointF::staticMetaObject));
     self.setProperty("Timer", engine().qtEngine().newQMetaObject(&Timer::staticMetaObject));
 }

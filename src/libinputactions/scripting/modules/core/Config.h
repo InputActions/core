@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QObject>
+#include <libinputactions/scripting/signals/Signal.h>
 
 namespace InputActions
 {
@@ -27,10 +28,29 @@ class Config : public QObject
 {
     Q_OBJECT
 
-signals:
-    void aboutToBeActivated();
-    void activated();
-    void aboutToBeDestroyed();
+    Q_PROPERTY(JSSignal *aboutToBeActivated READ aboutToBeActivated)
+    Q_PROPERTY(JSSignal *aboutToBeDestroyed READ aboutToBeDestroyed)
+    Q_PROPERTY(JSSignal *aboutToBeLoaded READ aboutToBeLoaded)
+    Q_PROPERTY(JSSignal *activated READ activated)
+
+public:
+    Config(ScriptingEngine &engine);
+
+    Signal<> &aboutToBeActivatedSignal() { return m_aboutToBeActivated; }
+    Signal<> &aboutToBeDestroyedSignal() { return m_aboutToBeDestroyed; }
+    Signal<> &aboutToBeLoadedSignal() { return m_aboutToBeLoaded; }
+    Signal<> &activatedSignal() { return m_activated; }
+
+private:
+    JSSignal *aboutToBeActivated() { return m_aboutToBeActivated.jsSignal(); }
+    JSSignal *aboutToBeDestroyed() { return m_aboutToBeDestroyed.jsSignal(); }
+    JSSignal *aboutToBeLoaded() { return m_aboutToBeLoaded.jsSignal(); }
+    JSSignal *activated() { return m_activated.jsSignal(); }
+
+    Signal<> m_aboutToBeActivated;
+    Signal<> m_aboutToBeDestroyed;
+    Signal<> m_aboutToBeLoaded;
+    Signal<> m_activated;
 };
 
 }

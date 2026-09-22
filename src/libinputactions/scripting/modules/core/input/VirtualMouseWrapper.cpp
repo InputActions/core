@@ -23,8 +23,8 @@
 namespace InputActions
 {
 
-VirtualMouseWrapper::VirtualMouseWrapper(InputBackend &inputBackend, ScriptingEngine &engine)
-    : m_inputBackend(inputBackend)
+VirtualMouseWrapper::VirtualMouseWrapper(std::shared_ptr<InputBackend> inputBackend, ScriptingEngine &engine)
+    : m_inputBackend(std::move(inputBackend))
     , m_engine(engine)
 {
 }
@@ -45,8 +45,8 @@ void VirtualMouseWrapper::mouseWheel(const PointF &delta)
 
 VirtualMouse *VirtualMouseWrapper::virtualMouse() const
 {
-    if (m_inputBackend.initialized()) {
-        return m_inputBackend.virtualMouse();
+    if (m_inputBackend->initialized()) {
+        return m_inputBackend->virtualMouse();
     }
 
     m_engine.qtEngine().throwError(QString("The method can only be called after the configuration is activated."));
