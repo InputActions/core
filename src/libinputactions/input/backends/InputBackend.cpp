@@ -18,7 +18,7 @@
 
 #include "InputBackend.h"
 #include <QObject>
-#include <libinputactions/InputActionsMain.h>
+#include <libinputactions/config/ConfigLoader.h>
 #include <libinputactions/globals.h>
 #include <libinputactions/handlers/KeyboardTriggerHandler.h>
 #include <libinputactions/handlers/MotionTriggerHandler.h>
@@ -246,7 +246,10 @@ bool InputBackend::handleEvent(const InputEvent &event)
 void InputBackend::onEmergencyCombinationTimerTimeout()
 {
     g_notificationManager->sendNotification("Emergency combination", "Emergency combination triggered, suspending may take up to a few seconds");
-    g_inputActions->suspend();
+    g_configLoader->load({
+        .empty = true,
+        .manual = true,
+    });
 }
 
 void InputBackend::setDeviceRules(std::vector<InputDeviceRule> rules)

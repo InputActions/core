@@ -111,7 +111,7 @@ void ConfigProvider::tryReadConfig(bool retryIfEmpty)
 
     if (config != m_config) {
         m_config = config;
-        Q_EMIT configChanged(config);
+        Q_EMIT configChanged();
     }
 }
 

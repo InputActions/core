@@ -23,6 +23,7 @@ namespace InputActions
 {
 
 Timer::Timer()
+    : m_tick(*this)
 {
     m_timer.setInterval(1);
     m_timer.setTimerType(Qt::TimerType::PreciseTimer);
@@ -72,7 +73,7 @@ void Timer::setInterval(qreal value)
 
 void Timer::onTimerTimeout()
 {
-    Q_EMIT tick();
+    m_tick.emit();
 }
 
 }

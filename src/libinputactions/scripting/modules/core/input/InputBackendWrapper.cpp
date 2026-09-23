@@ -22,8 +22,8 @@
 namespace InputActions
 {
 
-InputBackendWrapper::InputBackendWrapper(InputBackend &inputBackend, ScriptingEngine &engine)
-    : m_virtualMouse(inputBackend, engine)
+InputBackendWrapper::InputBackendWrapper(std::shared_ptr<InputBackend> inputBackend, ScriptingEngine &engine)
+    : m_virtualMouse(std::move(inputBackend), engine)
 {
     QJSEngine::setObjectOwnership(&m_virtualMouse, QJSEngine::CppOwnership);
 }

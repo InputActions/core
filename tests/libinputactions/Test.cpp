@@ -18,11 +18,9 @@ void Test::initMain()
     QCoreApplication app(argc, nullptr);
 
     auto *inputActions = new InputActionsMain;
-    g_configProvider = std::make_shared<ConfigProvider>(); // don't watch config
+    inputActions->setInTestEnvironment(true);
     inputActions->setMissingImplementations();
     inputActions->initialize();
-    g_globalConfig->setSendNotificationOnError(false);
-    g_scriptingEngine->disableWatchdog();
 }
 
 }

@@ -43,15 +43,13 @@ class ScriptingEngine : public QObject
     Q_OBJECT
 
 public:
-    ScriptingEngine(InputBackend &inpuBackend, VariableRegistry &variableRegistry);
+    ScriptingEngine(std::shared_ptr<InputBackend> inputBackend, std::shared_ptr<VariableRegistry> variableRegistry);
     ~ScriptingEngine() override;
 
     Q_INVOKABLE QJSValue require(const QString &module);
     Q_INVOKABLE void unhandledPromiseRejection(const QJSValue &result);
 
     CoreModule &coreModule() const { return *m_coreModule; }
-
-    void disableWatchdog();
 
     /**
      * Same as QJSEngine::evaluate but with error logging.
@@ -111,6 +109,10 @@ public:
     }
 
     FulfillablePromise newPromise();
+    /**
+     * @returns Nullptr if the specified value is not a promise.
+     */
+    std::shared_ptr<Promise> newPromise(const QJSValue &promise);
 
     template<typename T>
     QJSValue newEnum()
@@ -118,6 +120,12 @@ public:
         return newEnum(QMetaEnum::fromType<T>());
     }
     QJSValue newEnum(const QMetaEnum &metaEnum);
+
+    /**
+     * Throws a JS error if the specified value is not a function.
+     * @returns Whether the specified value is a function.
+     */
+    bool validateFunction(const QString &argName, const QJSValue &value);
 
     QJSEngine &qtEngine() { return m_engine; }
 
@@ -143,8 +151,8 @@ private:
 
     void registerBuiltinModule(const QString &name, Module *module);
 
-    InputBackend &m_inputBackend;
-    VariableRegistry &m_variableRegistry;
+    std::shared_ptr<InputBackend> m_inputBackend;
+    std::shared_ptr<VariableRegistry> m_variableRegistry;
 
     QJSEngine m_engine;
     std::unique_ptr<CoreModule> m_coreModule;
@@ -158,6 +166,6 @@ private:
     inline static std::set<ScriptingEngine *> s_engines;
 };
 
-inline std::shared_ptr<ScriptingEngine> g_scriptingEngine;
+inline std::unique_ptr<ScriptingEngine> g_scriptingEngine;
 
 }

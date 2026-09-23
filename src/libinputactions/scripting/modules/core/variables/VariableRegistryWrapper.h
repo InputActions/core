@@ -35,7 +35,7 @@ class VariableRegistryWrapper : public QObject
     Q_OBJECT
 
 public:
-    VariableRegistryWrapper(VariableRegistry &variableRegistry, ScriptingEngine &engine);
+    VariableRegistryWrapper(std::shared_ptr<VariableRegistry> variableRegistry, ScriptingEngine &engine);
 
     Q_INVOKABLE bool contains(const QString &name) const;
     Q_INVOKABLE VariableWrapper *get(const QString &name) const;
@@ -59,7 +59,7 @@ public:
 private:
     static bool isVariableNameValid(const QString &name);
 
-    VariableRegistry &m_variableRegistry;
+    std::shared_ptr<VariableRegistry> m_variableRegistry;
     ScriptingEngine &m_engine;
     bool m_registrationAllowed = true;
 };

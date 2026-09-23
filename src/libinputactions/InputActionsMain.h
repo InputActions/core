@@ -37,13 +37,12 @@ public:
 
     void setMissingImplementations();
     void initialize();
-    void suspend();
+
+    bool inTestEnvironment() const { return m_inTestEnvironment; }
+    void setInTestEnvironment(bool value) { m_inTestEnvironment = value; }
 
     virtual void registerGlobalVariables(VariableRegistry *variableRegistry, std::shared_ptr<PointerPositionGetter> pointerPositionGetter = {},
                                          std::shared_ptr<WindowProvider> windowProvider = {});
-
-private slots:
-    void onConfigChanged(const QString &config);
 
 private:
     template<typename T1, typename T2>
@@ -77,6 +76,8 @@ private:
             member = std::make_unique<T>();
         }
     }
+
+    bool m_inTestEnvironment{};
 };
 
 inline InputActionsMain *g_inputActions;

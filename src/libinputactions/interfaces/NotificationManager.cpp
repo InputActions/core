@@ -19,6 +19,7 @@
 #include "NotificationManager.h"
 #include <QDBusInterface>
 #include <QThreadPool>
+#include <libinputactions/InputActionsMain.h>
 #include <libinputactions/helpers/QDBusConnection.h>
 
 namespace InputActions
@@ -26,6 +27,10 @@ namespace InputActions
 
 void NotificationManager::sendNotification(const QString &title, const QString &content)
 {
+    if (g_inputActions->inTestEnvironment()) {
+        return;
+    }
+
     // Run in another thread because QDBusInterface's constructor can freeze the compositor if a notification is sent as soon as the plugin loads. Good enough
     // for now.
     QThreadPool::globalInstance()->start([title = std::move(title), content = std::move(content)] {

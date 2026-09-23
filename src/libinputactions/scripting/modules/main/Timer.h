@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QObject>
+#include <libinputactions/scripting/signals/Signal.h>
 
 namespace InputActions
 {
@@ -30,7 +31,12 @@ class Timer : public QObject
     Q_PROPERTY(bool active READ active)
     Q_PROPERTY(qreal interval READ interval WRITE setInterval)
 
+    Q_PROPERTY(JSSignal *tick READ tick)
+
 public:
+    /**
+     * Only for JavaScript, using this constructor in C++ will result in broken signals.
+     */
     Q_INVOKABLE Timer();
 
     bool active() const;
@@ -42,14 +48,15 @@ public:
     Q_INVOKABLE void start(qreal interval);
     Q_INVOKABLE void stop();
 
-signals:
-    void tick();
-
 private slots:
     void onTimerTimeout();
 
 private:
+    JSSignal *tick() { return m_tick.jsSignal(); }
+
     QTimer m_timer;
+
+    Signal<> m_tick;
 };
 
 }

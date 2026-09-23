@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "ConfigProvider.h"
+#include <QObject>
 #include <QString>
 #include <memory>
 #include <optional>
@@ -30,27 +32,44 @@ struct ConfigData;
 struct ConfigLoadSettings
 {
     /**
+     * Whether to load an empty configuration. If no configuration has been loaded previously, this is an instant operation.
+     */
+    bool empty{};
+    /**
      * Whether the reload was manually initiated using the control tool.
      */
     bool manual{};
 };
 
-class ConfigLoader
+class ConfigLoader : public QObject
 {
+    Q_OBJECT
+
 public:
-    /**
-     * @return Whether the operation was successful. Errors may be obtained from ConfigIssueManager.
-     */
-    bool load(const ConfigLoadSettings &settings = {});
+    ConfigLoader();
 
     /**
-     * Loads an empty config with default values without initializing any components.
+     * The returned future never fails. Errors may be obtained from ConfigIssueManager.
      */
-    void loadEmpty();
+    QFuture<void> load(const ConfigLoadSettings &settings = {});
+
+    /**
+     * Whether loading non-empty configurations should be permitted. This is only used in the standalone implementation.
+     */
+    void setAllowNonEmptyConfigs(bool value) { m_allowNonEmptyConfigs = value; }
+
+private slots:
+    void onConfigChanged();
 
 private:
-    ConfigData createConfig(const QString &raw);
-    void activateConfig(ConfigData config, bool initialize);
+    QFuture<void> doLoad(const ConfigLoadSettings &settings);
+    QFuture<std::shared_ptr<ConfigData>> createConfig(const QString &raw);
+    QFuture<void> activateConfig(std::shared_ptr<ConfigData> config, bool initialize);
+
+    QFuture<void> m_currentFuture;
+
+    ConfigProvider m_configProvider;
+    bool m_allowNonEmptyConfigs = true;
 };
 
 inline std::shared_ptr<ConfigLoader> g_configLoader;
