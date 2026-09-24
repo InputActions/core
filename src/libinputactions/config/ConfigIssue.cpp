@@ -214,6 +214,16 @@ QString MissingRequiredPropertyConfigException::message() const
     return QString("Required property '%1' was not specified.").arg(m_property);
 }
 
+OverlayProgramDoesNotExistConfigException::OverlayProgramDoesNotExistConfigException(const Node *node)
+    : ConfigException(node)
+{
+}
+
+QString OverlayProgramDoesNotExistConfigException::message() const
+{
+    return QString("Failed to find the inputactions-overlay program. It must be installed in one of the directories specified in the PATH environment variable.");
+}
+
 UncaughtScriptErrorConfigException::UncaughtScriptErrorConfigException(const Node *node, QJSValue error)
     : ConfigException(node)
     , m_message(ScriptingEngine::errorToString(error))

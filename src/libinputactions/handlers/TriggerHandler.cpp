@@ -61,6 +61,7 @@ TriggerManagementOperationResult TriggerHandler::activateTriggers(TriggerTypes t
     for (auto &trigger : triggers(types, event)) {
         triggerActivated(trigger);
         m_activeTriggers.push_back(trigger);
+        activeTriggersChanged();
 
         result.success = true;
         result.block = result.block || trigger->blockEvents();
@@ -117,6 +118,7 @@ TriggerManagementOperationResult TriggerHandler::updateTriggers(const std::map<T
                 trigger->cancel();
             }
             it = m_activeTriggers.erase(it);
+            activeTriggersChanged();
             continue;
         }
 
@@ -169,6 +171,7 @@ TriggerManagementOperationResult TriggerHandler::doEndTriggers(TriggerTypes type
         result.block = result.block || trigger->blockEvents();
 
         it = m_activeTriggers.erase(it);
+        activeTriggersChanged();
         if (!trigger->canEnd()) {
             trigger->cancel();
             continue;
@@ -215,6 +218,7 @@ TriggerManagementOperationResult TriggerHandler::doCancelTriggers(TriggerTypes t
 
         trigger->cancel();
         it = m_activeTriggers.erase(it);
+        activeTriggersChanged();
     }
     return result;
 }
@@ -226,6 +230,7 @@ void TriggerHandler::cancelTriggers(Trigger *except)
         if (gesture != except) {
             gesture->cancel();
             it = m_activeTriggers.erase(it);
+            activeTriggersChanged();
             continue;
         }
         it++;

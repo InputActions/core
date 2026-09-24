@@ -49,6 +49,7 @@ protected:
     std::unique_ptr<TriggerActivationEvent> createActivationEvent() const override;
 
     void triggerActivated(const Trigger *trigger) override;
+    void activeTriggersChanged() override;
 
 private:
     /**

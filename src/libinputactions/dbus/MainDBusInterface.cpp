@@ -26,6 +26,7 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/interfaces/OnScreenMessageManager.h>
+#include <libinputactions/interfaces/OverlayManager.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/variables/VariableRegistry.h>
 
@@ -67,6 +68,7 @@ void MainDBusInterface::recordStroke(const QDBusMessage &message)
         return;
     }
 
+    g_overlayManager->showMouseStrokeOverlay();
     g_onScreenMessageManager->showMessage("InputActions is recording input. Perform a stroke gesture by moving the mouse or any amount of fingers all in the "
                                           "same direction on a touchpad or a touchscreen. Recording will end after 250 ms of inactivity.");
 
@@ -74,9 +76,11 @@ void MainDBusInterface::recordStroke(const QDBusMessage &message)
     m_reply = message.createReply();
 
     g_strokeRecorder->recordStroke([this](const auto &stroke) {
+        g_overlayManager->hideMouseStrokeOverlay();
+        g_onScreenMessageManager->hideMessage();
+
         m_reply << strokeToBase64(stroke);
         m_bus.send(m_reply);
-        g_onScreenMessageManager->hideMessage();
     });
 }
 

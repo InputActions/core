@@ -119,6 +119,7 @@ protected:
 
     virtual void triggerActivated(const Trigger *trigger) {}
     virtual void activatingTriggers(TriggerTypes types) {}
+    virtual void activeTriggersChanged() {}
     virtual TriggerManagementOperationResult endTriggersCustom(TriggerTypes types) { return {}; }
 
     /**

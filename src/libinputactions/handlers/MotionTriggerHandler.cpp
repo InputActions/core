@@ -27,6 +27,7 @@
 #include <libinputactions/helpers/Math.h>
 #include <libinputactions/input/Delta.h>
 #include <libinputactions/input/devices/InputDevice.h>
+#include <libinputactions/interfaces/OverlayManager.h>
 #include <libinputactions/triggers/core/StrokeTriggerCore.h>
 #include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
@@ -259,6 +260,8 @@ TriggerManagementOperationResult MotionTriggerHandler::endTriggersCustom(Trigger
     if (m_deltas.empty() || !(types & TriggerType::Stroke)) {
         return result;
     }
+
+    g_overlayManager->hideMouseStrokeOverlay();
 
     const Stroke stroke(m_deltas);
     Trigger *best = nullptr;

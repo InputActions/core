@@ -231,6 +231,16 @@ private:
     QString m_property;
 };
 
+class OverlayProgramDoesNotExistConfigException
+    : public ConfigException
+    , public virtual Copyable<OverlayProgramDoesNotExistConfigException, ConfigIssue>
+{
+public:
+    OverlayProgramDoesNotExistConfigException(const Node *node);
+
+    QString message() const override;
+};
+
 class UncaughtScriptErrorConfigException
     : public ConfigException
     , public virtual Copyable<UncaughtScriptErrorConfigException, ConfigIssue>
