@@ -71,6 +71,7 @@ set(libinputactions_SRCS
     libinputactions/interfaces/CursorShapeProvider.h
     libinputactions/interfaces/NotificationManager.cpp
     libinputactions/interfaces/OnScreenMessageManager.h
+    libinputactions/interfaces/OverlayManager.cpp
     libinputactions/interfaces/PointerPositionGetter.h
     libinputactions/interfaces/PointerPositionSetter.h
     libinputactions/interfaces/SessionLock.h

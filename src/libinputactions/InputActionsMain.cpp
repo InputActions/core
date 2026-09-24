@@ -9,6 +9,7 @@
 #include "interfaces/CursorShapeProvider.h"
 #include "interfaces/NotificationManager.h"
 #include "interfaces/OnScreenMessageManager.h"
+#include "interfaces/OverlayManager.h"
 #include "interfaces/PointerPositionGetter.h"
 #include "interfaces/PointerPositionSetter.h"
 #include "interfaces/SessionLock.h"
@@ -34,6 +35,7 @@ InputActionsMain::~InputActionsMain()
     g_cursorShapeProvider.reset();
     g_notificationManager.reset();
     g_onScreenMessageManager.reset();
+    g_overlayManager.reset();
     g_pointerPositionGetter.reset();
     g_pointerPositionSetter.reset();
     g_textInput.reset();
@@ -64,6 +66,7 @@ void InputActionsMain::setMissingImplementations()
     setMissingImplementation(g_cursorShapeProvider);
     setMissingImplementation(g_notificationManager);
     setMissingImplementation(g_onScreenMessageManager);
+    setMissingImplementation(g_overlayManager);
     setMissingImplementation(g_pointerPositionGetter);
     setMissingImplementation(g_pointerPositionSetter);
     setMissingImplementation(g_textInput);

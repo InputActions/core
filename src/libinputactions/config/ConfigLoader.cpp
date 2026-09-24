@@ -39,6 +39,7 @@
 #include <libinputactions/input/backends/LibevdevComplementaryInputBackend.h>
 #include <libinputactions/input/devices/InputDeviceRule.h>
 #include <libinputactions/interfaces/NotificationManager.h>
+#include <libinputactions/interfaces/OverlayManager.h>
 #include <libinputactions/scripting/ModuleScriptMetadata.h>
 #include <libinputactions/scripting/ScriptingEngine.h>
 #include <libinputactions/scripting/modules/core/Config.h>
@@ -65,6 +66,8 @@ struct ConfigData
 
     std::vector<InputDeviceRule> deviceRules;
     std::set<KeyboardKey> emergencyCombination = {KEY_BACKSPACE, KEY_SPACE, KEY_ENTER};
+
+    bool enableMouseStrokeOverlay{};
 };
 
 ConfigLoader::ConfigLoader()
@@ -256,6 +259,15 @@ QFuture<std::shared_ptr<ConfigData>> ConfigLoader::createConfig(const QString &r
                         config->touchscreenTriggerHandlerFactory(nullptr);
                     }
 
+                    if (const auto *overlayNode = root->mapAt("overlay")) {
+                        if (const auto *mouseStrokeNode = overlayNode->mapAt("mouse_stroke")) {
+                            loadMember(config->enableMouseStrokeOverlay, mouseStrokeNode->at("enable"));
+                            if (config->enableMouseStrokeOverlay && !g_overlayManager->overlayProgramExists()) {
+                                throw OverlayProgramDoesNotExistConfigException(overlayNode);
+                            }
+                        }
+                    }
+
                     root->at("anchors"); // Allow users to define anchors somewhere without unused property issues
                     root->addUnusedMapPropertyIssues();
                     return config;
@@ -273,6 +285,9 @@ QFuture<void> ConfigLoader::activateConfig(std::shared_ptr<ConfigData> config, b
     auto *scriptingConfig = g_scriptingEngine->coreModule().config();
 
     return scriptingConfig->aboutToBeActivatedSignal().emitAsync(false).then([initialize, scriptingConfig, config]() {
+        g_overlayManager->setEnabled(config->enableMouseStrokeOverlay);
+        g_overlayManager->setMouseStrokeOverlayEnabled(config->enableMouseStrokeOverlay);
+
         g_globalConfig->setAllowExternalVariableAccess(config->allowExternalVariableAccess);
         g_globalConfig->setAutoReload(config->autoReload);
         g_globalConfig->setSendNotificationOnError(config->sendNotificationOnError);

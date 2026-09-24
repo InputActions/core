@@ -20,6 +20,7 @@
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/input/devices/InputDevice.h>
 #include <libinputactions/input/events.h>
+#include <libinputactions/interfaces/OverlayManager.h>
 #include <libinputactions/triggers/mouse/MousePressTrigger.h>
 #include <libinputactions/triggers/mouse/MouseWheelTrigger.h>
 #include <ranges>
@@ -218,6 +219,16 @@ void MouseTriggerHandler::triggerActivated(const Trigger *trigger)
 {
     m_hadTriggerSincePress = true;
     MotionTriggerHandler::triggerActivated(trigger);
+}
+
+void MouseTriggerHandler::activeTriggersChanged()
+{
+    const auto hasActiveStrokeTriggers = hasActiveTriggers(TriggerType::Stroke);
+    if (!hasActiveStrokeTriggers && g_overlayManager->mouseStrokeOverlayVisible()) {
+        g_overlayManager->hideMouseStrokeOverlay();
+    } else if (hasActiveStrokeTriggers && !g_overlayManager->mouseStrokeOverlayVisible()) {
+        g_overlayManager->showMouseStrokeOverlay();
+    }
 }
 
 std::unique_ptr<TriggerActivationEvent> MouseTriggerHandler::createActivationEvent() const
