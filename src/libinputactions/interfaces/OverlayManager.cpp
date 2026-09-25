@@ -60,7 +60,7 @@ bool OverlayManager::overlayProgramExists() const
 void OverlayManager::showMouseStrokeOverlay()
 {
     if (auto *interface = mouseStrokeOverlayInterface()) {
-        interface->call("show");
+        interface->asyncCall("show");
         m_mouseStrokeOverlayVisible = true;
     }
 }
@@ -68,7 +68,7 @@ void OverlayManager::showMouseStrokeOverlay()
 void OverlayManager::hideMouseStrokeOverlay()
 {
     if (auto *interface = mouseStrokeOverlayInterface()) {
-        interface->call("hide");
+        interface->asyncCall("hide");
         m_mouseStrokeOverlayVisible = false;
     }
 }
