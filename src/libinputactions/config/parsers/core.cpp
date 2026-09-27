@@ -30,6 +30,7 @@
 #include <libinputactions/Value.h>
 #include <libinputactions/actions/ActionGroup.h>
 #include <libinputactions/actions/CommandAction.h>
+#include <libinputactions/actions/ContextMenuAction.h>
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/actions/PlasmaGlobalShortcutAction.h>
 #include <libinputactions/actions/ReplaceTextAction.h>
@@ -158,6 +159,9 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
         auto action = std::make_unique<CommandAction>(commandNode->as<Value<QString>>());
         loadSetter(action, &CommandAction::setWait, node->at("wait"));
         result = std::move(action);
+    } else if (const auto *contextMenuNode = node->at("context_menu")) {
+        g_configLoader->requestOverlay(contextMenuNode);
+        result = std::make_unique<ContextMenuAction>(contextMenuNode->as<std::vector<std::unique_ptr<MenuItem>>>());
     } else if (const auto *functionNode = node->at("function")) {
         result = std::make_unique<JSFunctionAction>(parseFunction(functionNode), functionNode->shared_from_this());
     } else if (const auto *inputNode = node->at("input")) {
@@ -564,6 +568,36 @@ void NodeParser<KeyboardKey>::parse(const Node *node, KeyboardKey &result)
 }
 
 template<>
+void NodeParser<KeyboardShortcut>::parse(const Node *node, KeyboardShortcut &result)
+{
+    loadMember(result.keys, node);
+}
+
+template<>
+void NodeParser<std::unique_ptr<MenuItem>>::parse(const Node *node, std::unique_ptr<MenuItem> &result)
+{
+    if (const auto *actionsNode = node->at("actions")) {
+        auto actionItem = std::make_unique<ActionMenuItem>(actionsNode->as<std::vector<std::unique_ptr<Action>>>());
+        loadSetter(actionItem, &ActionMenuItem::setIcon, node->at("icon"));
+        loadSetter(actionItem, &ActionMenuItem::setText, node->at("text"));
+        result = std::move(actionItem);
+    } else if (const auto *menuNode = node->at("menu")) {
+        auto subMenuItem = std::make_unique<SubMenuMenuItem>(menuNode->as<std::vector<std::unique_ptr<MenuItem>>>());
+        loadSetter(subMenuItem, &SubMenuMenuItem::setIcon, node->at("icon"));
+        loadSetter(subMenuItem, &SubMenuMenuItem::setText, node->at("text"));
+        result = std::move(subMenuItem);
+    } else if (const auto *sectionNode = node->at("section")) {
+        auto sectionItem = std::make_unique<SectionMenuItem>();
+        loadSetter(sectionItem, &SectionMenuItem::setText, sectionNode);
+        result = std::move(sectionItem);
+    } else if (node->at("separator")) {
+        result = std::make_unique<SectionMenuItem>();
+    } else {
+        throw InvalidValueConfigException(node, "Invalid menu item.");
+    }
+}
+
+template<>
 void NodeParser<MouseButton>::parse(const Node *node, MouseButton &result)
 {
     const auto raw = node->as<QString>();
@@ -573,12 +607,6 @@ void NodeParser<MouseButton>::parse(const Node *node, MouseButton &result)
     }
 
     throw InvalidValueConfigException(node, QString("Invalid mouse button '%1'.").arg(raw));
-}
-
-template<>
-void NodeParser<KeyboardShortcut>::parse(const Node *node, KeyboardShortcut &result)
-{
-    loadMember(result.keys, node);
 }
 
 template<>

@@ -5,6 +5,7 @@ set(libinputactions_SRCS
     libinputactions/actions/ActionExecutor.cpp
     libinputactions/actions/ActionGroup.cpp
     libinputactions/actions/CommandAction.cpp
+    libinputactions/actions/ContextMenuAction.cpp
     libinputactions/actions/CustomAction.cpp
     libinputactions/actions/InputAction.cpp
     libinputactions/actions/PlasmaGlobalShortcutAction.cpp
@@ -49,6 +50,7 @@ set(libinputactions_SRCS
     libinputactions/handlers/TriggerHandler.cpp
     libinputactions/helpers/Math.cpp
     libinputactions/helpers/QDBusConnection.cpp
+    libinputactions/helpers/QDBusInterface.cpp
     libinputactions/helpers/QProcess.cpp
     libinputactions/helpers/QString.cpp
     libinputactions/helpers/QThread.cpp

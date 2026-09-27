@@ -28,6 +28,7 @@ namespace InputActions
 {
 
 struct ConfigData;
+class Node;
 
 struct ConfigLoadSettings
 {
@@ -58,6 +59,12 @@ public:
      */
     void setAllowNonEmptyConfigs(bool value) { m_allowNonEmptyConfigs = value; }
 
+    /**
+     * Requests that the overlay be enabled.
+     * @throws OverlayProgramDoesNotExistConfigException
+     */
+    void requestOverlay(const Node *node);
+
 private slots:
     void onConfigChanged();
 
@@ -67,6 +74,7 @@ private:
     QFuture<void> activateConfig(std::shared_ptr<ConfigData> config, bool initialize);
 
     QFuture<void> m_currentFuture;
+    bool m_overlayRequested{};
 
     ConfigProvider m_configProvider;
     bool m_allowNonEmptyConfigs = true;

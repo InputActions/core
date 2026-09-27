@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QDBusInterface>
+#include <QFuture>
 #include <QObject>
 #include <QProcess>
 
@@ -42,7 +43,16 @@ public:
     void hideMouseStrokeOverlay();
     bool mouseStrokeOverlayVisible() const { return m_mouseStrokeOverlayVisible; }
 
+    /**
+     * @returns A future finished with the ID of the triggered action or an empty string.
+     */
+    QFuture<QString> showContextMenu(const QString &json);
+
 private:
+    /**
+     * Nullptr if not available.
+     */
+    QDBusInterface *contextMenuOverlayInterface();
     /**
      * Nullptr if not available.
      */
@@ -50,6 +60,7 @@ private:
 
     QProcess *m_process;
 
+    std::optional<QDBusInterface> m_contextMenuOverlayInterface;
     std::optional<QDBusInterface> m_mouseStrokeOverlayInterface;
     bool m_mouseStrokeOverlayVisible{};
     bool m_mouseStrokeOverlayEnabled{};
