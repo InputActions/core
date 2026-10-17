@@ -221,7 +221,8 @@ OverlayProgramDoesNotExistConfigException::OverlayProgramDoesNotExistConfigExcep
 
 QString OverlayProgramDoesNotExistConfigException::message() const
 {
-    return QString("Failed to find the inputactions-overlay program. It must be installed in one of the directories specified in the PATH environment variable.");
+    return QString("This feature requires the overlay, which appears to not be installed. Ensure 'inputactions-overlay' is present in one of the directories"
+                   " specified in the PATH environment variable.");
 }
 
 UncaughtScriptErrorConfigException::UncaughtScriptErrorConfigException(const Node *node, QJSValue error)

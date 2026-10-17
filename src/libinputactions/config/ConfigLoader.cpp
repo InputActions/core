@@ -117,6 +117,7 @@ QFuture<void> ConfigLoader::doLoad(const ConfigLoadSettings &settings)
     qCDebug(INPUTACTIONS, "Reloading config");
     const auto rawConfig = settings.empty ? "" : m_configProvider.currentConfig();
 
+    m_overlayRequested = false;
     g_configIssueManager->clearIssues();
     g_variableRegistry = std::make_shared<VariableRegistry>();
     g_inputActions->registerGlobalVariables(g_variableRegistry.get());
@@ -229,7 +230,7 @@ QFuture<std::shared_ptr<ConfigData>> ConfigLoader::createConfig(const QString &r
                 .onFailed([root](const PromiseException &error) {
                     throw UncaughtScriptErrorConfigException(root.get(), error.value()); // TODO correct node
                 })
-                .then([root]() {
+                .then([this, root]() {
                     g_scriptingEngine->coreModule().variableRegistry()->disableRegistration();
 
                     auto config = std::make_shared<ConfigData>();
@@ -261,9 +262,10 @@ QFuture<std::shared_ptr<ConfigData>> ConfigLoader::createConfig(const QString &r
 
                     if (const auto *overlayNode = root->mapAt("overlay")) {
                         if (const auto *mouseStrokeNode = overlayNode->mapAt("mouse_stroke")) {
-                            loadMember(config->enableMouseStrokeOverlay, mouseStrokeNode->at("enable"));
-                            if (config->enableMouseStrokeOverlay && !g_overlayManager->overlayProgramExists()) {
-                                throw OverlayProgramDoesNotExistConfigException(overlayNode);
+                            const auto *enableNode = mouseStrokeNode->at("enable");
+                            loadMember(config->enableMouseStrokeOverlay, enableNode);
+                            if (config->enableMouseStrokeOverlay) {
+                                requestOverlay(enableNode);
                             }
                         }
                     }
@@ -284,8 +286,8 @@ QFuture<void> ConfigLoader::activateConfig(std::shared_ptr<ConfigData> config, b
 
     auto *scriptingConfig = g_scriptingEngine->coreModule().config();
 
-    return scriptingConfig->aboutToBeActivatedSignal().emitAsync(false).then([initialize, scriptingConfig, config]() {
-        g_overlayManager->setEnabled(config->enableMouseStrokeOverlay);
+    return scriptingConfig->aboutToBeActivatedSignal().emitAsync(false).then([this, initialize, scriptingConfig, config]() {
+        g_overlayManager->setEnabled(m_overlayRequested);
         g_overlayManager->setMouseStrokeOverlayEnabled(config->enableMouseStrokeOverlay);
 
         g_globalConfig->setAllowExternalVariableAccess(config->allowExternalVariableAccess);
@@ -310,6 +312,14 @@ QFuture<void> ConfigLoader::activateConfig(std::shared_ptr<ConfigData> config, b
 
         scriptingConfig->activatedSignal().emit();
     });
+}
+
+void ConfigLoader::requestOverlay(const Node *node)
+{
+    if (!g_overlayManager->overlayProgramExists()) {
+        throw OverlayProgramDoesNotExistConfigException(node);
+    }
+    m_overlayRequested = true;
 }
 
 void ConfigLoader::onConfigChanged()

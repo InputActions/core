@@ -17,8 +17,11 @@
 */
 
 #include "OverlayManager.h"
+#include <QFuture>
 #include <QStandardPaths>
 #include <libinputactions/helpers/QDBusConnection.h>
+#include <libinputactions/helpers/QDBusInterface.h>
+#include <libinputactions/input/backends/InputBackend.h>
 
 namespace InputActions
 {
@@ -71,6 +74,50 @@ void OverlayManager::hideMouseStrokeOverlay()
         interface->asyncCall("hide");
         m_mouseStrokeOverlayVisible = false;
     }
+}
+
+QFuture<QString> OverlayManager::showContextMenu(const QString &json)
+{
+    if (auto *interface = contextMenuOverlayInterface()) {
+        return QDBusInterfaceHelpers::asyncCall<bool>(*interface, "showOverlay")
+            .then([](const bool overlayAlreadyVisible) {
+                if (!overlayAlreadyVisible) {
+                    // The compositor will not grant pointer focus to a window that opens under a stationary pointer, so we move the pointer. Scrolling doesn't
+                    // work on Hyprland and buttons can have side effects.
+                    g_inputBackend->virtualMouse()->mouseMotion({-2, -2});
+                    QTimer::singleShot(10, []() {
+                        g_inputBackend->virtualMouse()->mouseMotion({2, 2});
+                    });
+                }
+            })
+            .then([interface, json]() {
+                return QDBusInterfaceHelpers::asyncCall<QString>(*interface, "showMenu", json);
+            })
+            .unwrap()
+            .onFailed([]() {
+                return QString("");
+            });
+    } else {
+        return QtFuture::makeReadyValueFuture(QString(""));
+    }
+}
+
+QDBusInterface *OverlayManager::contextMenuOverlayInterface()
+{
+    if (m_contextMenuOverlayInterface) {
+        return &m_contextMenuOverlayInterface.value();
+    }
+
+    m_contextMenuOverlayInterface.emplace("org.inputactions.overlay",
+                                          "/org/inputactions/overlay/ContextMenuOverlay",
+                                          "org.inputactions.overlay.ContextMenuOverlay",
+                                          QDBusConnectionHelpers::sessionBus());
+    if (m_contextMenuOverlayInterface->isValid()) {
+        return &m_contextMenuOverlayInterface.value();
+    }
+
+    m_contextMenuOverlayInterface.reset();
+    return {};
 }
 
 QDBusInterface *OverlayManager::mouseStrokeOverlayInterface()
