@@ -1,4 +1,6 @@
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../lib/libevdev-cpp ${CMAKE_CURRENT_BINARY_DIR}/../lib/libevdev-cpp)
+if (NOT INPUTACTIONS_OVERRIDE_LIBEVDEV_CPP)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../lib/libevdev-cpp ${CMAKE_CURRENT_BINARY_DIR}/../lib/libevdev-cpp)
+endif()
 
 set(libinputactions_SRCS
     libinputactions/actions/Action.cpp
