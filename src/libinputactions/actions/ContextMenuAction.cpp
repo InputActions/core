@@ -18,6 +18,7 @@
 
 #include "ContextMenuAction.h"
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
 #include <libinputactions/actions/ActionExecutor.h>
