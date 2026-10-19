@@ -57,6 +57,7 @@ NODEPARSER_ENUM(On, "action event",
                     {"cancel", On::Cancel},
                     {"end", On::End},
                     {"end_cancel", On::EndCancel},
+                    {"motion_timeout", On::MotionTimeout},
                     {"tick", On::Tick},
                     {"update", On::Update},
                 }))

@@ -125,6 +125,13 @@ void Trigger::cancel()
     reset();
 }
 
+void Trigger::motionTimeout()
+{
+    for (const auto &action : m_actions) {
+        action->triggerMotionTimeout();
+    }
+}
+
 bool Trigger::overridesOtherTriggersOnEnd()
 {
     if (!m_withinThreshold) {
@@ -144,6 +151,17 @@ bool Trigger::overridesOtherTriggersOnUpdate()
 
     return std::ranges::any_of(m_actions, [](const auto &action) {
         return action->conflicting() && (action->action()->executions() || (action->on() == On::Update && action->canExecute()));
+    });
+}
+
+bool Trigger::overridesOtherTriggersOnMotionTimeout()
+{
+    if (!m_withinThreshold) {
+        return false;
+    }
+
+    return std::ranges::any_of(m_actions, [](const auto &action) {
+        return action->conflicting() && action->on() == On::MotionTimeout && action->canExecute();
     });
 }
 

@@ -46,6 +46,32 @@ MotionTriggerHandler::MotionTriggerHandler()
     setSpeedThreshold(TriggerType::Swipe, 20);
 
     connect(&m_circleCoastingTimer, &QTimer::timeout, this, &MotionTriggerHandler::onCircleCoastingTimerTick);
+
+    m_motionTimeoutTimer.setSingleShot(false);
+    connect(&m_motionTimeoutTimer, &QTimer::timeout, this, [this]() {
+        if (m_totalMotionTimeoutDelta.hypot() < m_currentMotionThreshold) {
+            if (hasActiveTriggers(TriggerType::Stroke)) {
+                m_isMotionTimeout = true;
+                endTriggers(TriggerType::Stroke);
+                m_isMotionTimeout = false;
+            }
+
+            for (auto *trigger : activeTriggers(TriggerType::SinglePointMotion)) {
+                if (!dynamic_cast<const MotionTriggerCore &>(trigger->core()).motionTimeout().count()) {
+                    continue;
+                }
+
+                trigger->motionTimeout();
+                if (trigger->overridesOtherTriggersOnMotionTimeout()) {
+                    cancelTriggers(trigger);
+                    break;
+                }
+            }
+            cancelTriggers(TriggerType::SinglePointMotion);
+        }
+
+        m_totalMotionTimeoutDelta = {};
+    });
 }
 
 void MotionTriggerHandler::setSpeedThreshold(TriggerType type, qreal threshold, TriggerDirection directions)
@@ -84,6 +110,25 @@ bool MotionTriggerHandler::handleMotion(const InputDevice *device, const PointDe
     TriggerSpeed speed{};
     if (!determineSpeed(TriggerType::Swipe, delta.unacceleratedHypot(), speed)) {
         return true;
+    }
+
+    std::vector<std::chrono::milliseconds> motionTimeouts;
+    for (const auto *trigger : activeTriggers(TriggerType::SinglePointMotion)) {
+        motionTimeouts.push_back(dynamic_cast<const MotionTriggerCore &>(trigger->core()).motionTimeout());
+    }
+    if (!motionTimeouts.empty()) { // Can be empty when mocking methods during testing
+        if (const auto &maxMotionTimeout = std::ranges::max(motionTimeouts); maxMotionTimeout.count()) {
+            m_currentMotionThreshold = currentMotionThreshold(device);
+            if (!m_motionTimeoutTimer.isActive()) {
+                m_motionTimeoutTimer.start(maxMotionTimeout.count());
+            }
+
+            m_totalMotionTimeoutDelta += delta.unaccelerated();
+            if (m_totalMotionTimeoutDelta.hypot() >= m_currentMotionThreshold) {
+                m_totalMotionTimeoutDelta = {};
+                m_motionTimeoutTimer.start(maxMotionTimeout.count());
+            }
+        }
     }
 
     std::map<TriggerType, const TriggerUpdateEvent *> events;
@@ -270,7 +315,7 @@ TriggerManagementOperationResult MotionTriggerHandler::endTriggersCustom(Trigger
         result.success = true;
         result.block = result.block || trigger->blockEvents();
 
-        if (!trigger->canEnd()) {
+        if (!trigger->canEnd() || (m_isMotionTimeout && !dynamic_cast<const StrokeTriggerCore &>(trigger->core()).motionTimeout().count())) {
             continue;
         }
 
@@ -285,7 +330,12 @@ TriggerManagementOperationResult MotionTriggerHandler::endTriggersCustom(Trigger
 
     if (best) {
         cancelTriggers(best);
-        best->end();
+        if (m_isMotionTimeout) {
+            best->motionTimeout();
+            best->cancel();
+        } else {
+            best->end();
+        }
     }
     cancelTriggers(TriggerType::Stroke); // TODO Double cancellation
     return result;
@@ -303,6 +353,7 @@ void MotionTriggerHandler::reset()
     m_circleCoastingTimer.stop();
     m_swipeDeltas.clear();
     m_swipeUpdates = 0;
+    m_motionTimeoutTimer.stop();
 }
 
 void MotionTriggerHandler::onCircleCoastingTimerTick()

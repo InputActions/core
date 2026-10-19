@@ -64,6 +64,13 @@ void TriggerAction::triggerTick(qreal delta)
     }
 }
 
+void TriggerAction::triggerMotionTimeout()
+{
+    if (m_on == On::MotionTimeout) {
+        tryExecute();
+    }
+}
+
 void TriggerAction::triggerEnded()
 {
     if (m_on == On::End || m_on == On::EndCancel) {

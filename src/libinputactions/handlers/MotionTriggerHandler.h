@@ -113,6 +113,11 @@ private:
     qreal m_swipeDeltaMultiplier = 1.0;
     uint8_t m_inputEventsToSample = 3;
 
+    QTimer m_motionTimeoutTimer;
+    PointF m_totalMotionTimeoutDelta;
+    qreal m_currentMotionThreshold;
+    bool m_isMotionTimeout{};
+
     friend class MockTouchpadTriggerHandler;
     friend class TestMotionTriggerHandler;
 };

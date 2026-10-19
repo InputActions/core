@@ -40,6 +40,7 @@ enum class On
     Cancel,
     End,
     EndCancel,
+    MotionTimeout,
     Tick,
     Update
 };
@@ -105,6 +106,10 @@ public:
      * Called by the trigger.
      */
     void triggerUpdated(const TriggerUpdateEvent &event);
+    /**
+     * Called by the trigger.
+     */
+    void triggerMotionTimeout();
     /**
      * Called by the trigger.
      */

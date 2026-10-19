@@ -19,6 +19,7 @@
 #pragma once
 
 #include "TriggerCore.h"
+#include <chrono>
 #include <libinputactions/triggers/Trigger.h>
 
 namespace InputActions
@@ -51,6 +52,9 @@ private:
 class MotionTriggerCore : public TriggerCore
 {
 public:
+    const std::chrono::milliseconds &motionTimeout() const { return m_motionTimeout; }
+    void setMotionTimeout(std::chrono::milliseconds value) { m_motionTimeout = std::move(value); }
+
     bool hasSpeed() const;
     TriggerSpeed speed() const { return m_speed; }
     void setSpeed(TriggerSpeed value) { m_speed = value; }
@@ -58,6 +62,7 @@ public:
     bool canUpdate(const TriggerUpdateEvent &event) const override;
 
 private:
+    std::chrono::milliseconds m_motionTimeout;
     TriggerSpeed m_speed = TriggerSpeed::Any;
 };
 

@@ -109,6 +109,8 @@ public:
      */
     void cancel();
 
+    void motionTimeout();
+
     /**
      * The trigger handler calls this method before ending a trigger. If true is returned, that trigger is ended and
      * all others are cancelled.
@@ -121,6 +123,7 @@ public:
      * @return Whether the trigger has any action that has been executed or is an update action and can be executed.
      */
     bool overridesOtherTriggersOnUpdate();
+    bool overridesOtherTriggersOnMotionTimeout();
 
     bool isResumeTimeoutTimerActive();
     void stopResumeTimeoutTimer();

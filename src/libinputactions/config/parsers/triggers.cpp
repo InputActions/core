@@ -116,6 +116,7 @@ void finalizeTrigger(const Node *node, Trigger *trigger)
     loadSetter(trigger, &Trigger::setSetLastTrigger, node->at("set_last_trigger"));
     loadSetter(trigger, &Trigger::setThreshold, node->at("threshold"));
     if (auto *motionTriggerCore = dynamic_cast<MotionTriggerCore *>(&trigger->core())) {
+        loadSetter(motionTriggerCore, &MotionTriggerCore::setMotionTimeout, node->at("motion_timeout"));
         loadSetter(motionTriggerCore, &MotionTriggerCore::setSpeed, node->at("speed"));
     }
 
@@ -170,8 +171,8 @@ void finalizeTrigger(const Node *node, Trigger *trigger)
     if (const auto *actionsNode = node->at("actions")) {
         for (const auto *actionNode : actionsNode->sequenceItems()) {
             auto action = actionNode->as<std::unique_ptr<TriggerAction>>();
-            if (dynamic_cast<StrokeTriggerCore *>(&trigger->core()) && action->on() != On::End && action->conflicting()) {
-                throw InvalidValueContextConfigException(actionNode, "Stroke triggers only support 'on: end' conflicting actions.");
+            if (dynamic_cast<StrokeTriggerCore *>(&trigger->core()) && action->on() != On::End && action->on() != On::MotionTimeout && action->conflicting()) {
+                throw InvalidValueContextConfigException(actionNode, "Stroke triggers only support 'on: end' and 'on: motion_timeout' conflicting actions.");
             }
 
             action->setAccelerated(accelerated);
