@@ -54,7 +54,7 @@ bool Trigger::canActivate(const TriggerActivationEvent &event) const
 
 bool Trigger::canUpdate(const TriggerUpdateEvent &event) const
 {
-    return m_core->canUpdate(event);
+    return m_updatedDuringGesture ? m_core->canContinue(event) : m_core->canUpdate(event);
 }
 
 bool Trigger::endIfCannotUpdate() const
@@ -84,6 +84,7 @@ void Trigger::update(const TriggerUpdateEvent &event)
         }
     }
 
+    m_updatedDuringGesture = true;
     setLastTrigger();
     m_core->updateActions(m_actions, event);
 }
@@ -101,6 +102,7 @@ void Trigger::end(bool allowResuming)
     }
 
     if (allowResuming && m_resumeTimeout.count()) {
+        m_updatedDuringGesture = false;
         m_resumeTimeoutTimer.start(m_resumeTimeout.count());
         return;
     }
@@ -198,6 +200,7 @@ void Trigger::setLastTrigger()
 void Trigger::reset()
 {
     m_started = false;
+    m_updatedDuringGesture = false;
     m_absoluteAccumulatedDelta = 0;
     m_withinThreshold = false;
     m_tickTimer.stop();

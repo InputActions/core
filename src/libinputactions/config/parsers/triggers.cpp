@@ -104,6 +104,7 @@ void NodeParser<std::unique_ptr<SwipeTriggerCore>>::parse(const Node *node, std:
         loadSetter(swipeTriggerCore.get(), &SwipeTriggerCore::setBidirectional, node->at("bidirectional"));
         result = std::move(swipeTriggerCore);
     }
+    loadSetter(result.get(), &SwipeTriggerCore::setLockDirection, node->at("lock_direction"));
 }
 
 void finalizeTrigger(const Node *node, Trigger *trigger)

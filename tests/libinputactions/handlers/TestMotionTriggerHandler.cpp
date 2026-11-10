@@ -1,5 +1,7 @@
 #include "Test.h"
 #include "mocks/MockMotionTriggerHandler.h"
+#include <libinputactions/actions/CustomAction.h>
+#include <libinputactions/actions/TriggerAction.h>
 #include <libinputactions/handlers/TriggerHandler.h>
 #include <libinputactions/helpers/Math.h>
 #include <libinputactions/input/devices/InputDevice.h>
@@ -20,6 +22,76 @@ private slots:
         m_handler = std::make_unique<MockMotionTriggerHandler>();
         m_mouse = std::make_unique<InputDevice>(InputDeviceType::Mouse);
         m_mouse->properties().setMotionThreshold(10);
+        m_rightBegins = 0;
+        m_leftBegins = 0;
+    }
+
+    void handleMotion_swipe_directionChanged__chainsUnlessLocked_data()
+    {
+        QTest::addColumn<bool>("lockDirection");
+        QTest::addColumn<uint32_t>("rightBegins");
+        QTest::addColumn<uint32_t>("leftBegins");
+
+        QTest::newRow("not locked") << false << 2u << 1u;
+        QTest::newRow("locked") << true << 1u << 0u;
+    }
+
+    void handleMotion_swipe_directionChanged__chainsUnlessLocked()
+    {
+        QFETCH(bool, lockDirection);
+        QFETCH(uint32_t, rightBegins);
+        QFETCH(uint32_t, leftBegins);
+
+        addSwipeTrigger(SwipeDirection::Right, lockDirection, m_rightBegins);
+        addSwipeTrigger(SwipeDirection::Left, false, m_leftBegins);
+
+        m_handler->activateTriggers(TriggerType::Swipe, TriggerActivationEvent{});
+        m_handler->handleMotion(m_mouse.get(), PointDelta({20, 0}));
+        m_handler->handleMotion(m_mouse.get(), PointDelta({-20, 0}));
+        m_handler->handleMotion(m_mouse.get(), PointDelta({20, 0}));
+
+        QCOMPARE(m_rightBegins, rightBegins);
+        QCOMPARE(m_leftBegins, leftBegins);
+        m_handler->cancelTriggers(TriggerType::Swipe);
+    }
+
+    void handleMotion_swipe_lockDirection_belowThreshold_directionChanged__activatesMatchingTrigger()
+    {
+        addSwipeTrigger(SwipeDirection::Right, true, m_rightBegins, {}, Range<qreal>(30, {}));
+        addSwipeTrigger(SwipeDirection::Left, false, m_leftBegins, {}, Range<qreal>(30, {}));
+
+        m_handler->activateTriggers(TriggerType::Swipe, TriggerActivationEvent{});
+        m_handler->handleMotion(m_mouse.get(), PointDelta({20, 0}));
+        m_handler->handleMotion(m_mouse.get(), PointDelta({-40, 0}));
+
+        QCOMPARE(m_rightBegins, 0u);
+        QCOMPARE(m_leftBegins, 1u);
+        m_handler->cancelTriggers(TriggerType::Swipe);
+    }
+
+    void handleMotion_swipe_lockDirection_nextGestureInOppositeDirection__activatesOtherTrigger_data()
+    {
+        QTest::addColumn<std::chrono::milliseconds>("resumeTimeout");
+
+        QTest::newRow("new gesture") << std::chrono::milliseconds(0);
+        QTest::newRow("resumed gesture") << std::chrono::milliseconds(30000);
+    }
+
+    void handleMotion_swipe_lockDirection_nextGestureInOppositeDirection__activatesOtherTrigger()
+    {
+        QFETCH(std::chrono::milliseconds, resumeTimeout);
+        addSwipeTrigger(SwipeDirection::Right, true, m_rightBegins, resumeTimeout);
+        addSwipeTrigger(SwipeDirection::Left, false, m_leftBegins);
+
+        m_handler->activateTriggers(TriggerType::Swipe, TriggerActivationEvent{});
+        m_handler->handleMotion(m_mouse.get(), PointDelta({20, 0}));
+        m_handler->endTriggers(TriggerType::Swipe);
+        m_handler->activateTriggers(TriggerType::Swipe, TriggerActivationEvent{});
+        m_handler->handleMotion(m_mouse.get(), PointDelta({-20, 0}));
+
+        QCOMPARE(m_rightBegins, 1u);
+        QCOMPARE(m_leftBegins, 1u);
+        m_handler->cancelTriggers(TriggerType::Swipe);
     }
 
     void handleMotion_swipe__calculatesAnglesCorrectly_data()
@@ -153,8 +225,32 @@ private slots:
     }
 
 private:
+    /**
+     * Adds a swipe trigger whose begin action increments the counter.
+     */
+    void addSwipeTrigger(SwipeDirection direction, bool lockDirection, uint32_t &begins, std::chrono::milliseconds resumeTimeout = {},
+                         std::optional<Range<qreal>> threshold = {})
+    {
+        auto core = std::make_unique<SwipeTriggerCore>(direction);
+        core->setLockDirection(lockDirection);
+        auto trigger = std::make_unique<Trigger>(TriggerType::Swipe, std::move(core));
+        trigger->setResumeTimeout(resumeTimeout);
+        if (threshold) {
+            trigger->setThreshold(*threshold);
+        }
+
+        auto action = std::make_unique<TriggerAction>(std::make_unique<CustomAction>([&begins](const auto &) {
+            begins++;
+        }));
+        action->setOn(On::Begin);
+        trigger->addAction(std::move(action));
+        m_handler->addTrigger(std::move(trigger));
+    }
+
     std::unique_ptr<MockMotionTriggerHandler> m_handler;
     std::unique_ptr<InputDevice> m_mouse;
+    uint32_t m_rightBegins{};
+    uint32_t m_leftBegins{};
 };
 
 }

@@ -19,6 +19,18 @@ private slots:
         QCOMPARE(core->minAngle(), 30);
         QCOMPARE(core->maxAngle(), 60);
         QCOMPARE(core->bidirectional(), false);
+        QCOMPARE(core->lockDirection(), false);
+    }
+
+    void angle_lockDirection__parsesNodeCorrectly()
+    {
+        const auto node = Node::create(R"(
+            angle: 30-60
+            lock_direction: true
+        )");
+
+        const auto core = node->as<std::unique_ptr<SwipeTriggerCore>>();
+        QCOMPARE(core->lockDirection(), true);
     }
 
     void angle_bidirectional__parsesNodeCorrectly()

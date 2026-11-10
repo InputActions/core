@@ -28,6 +28,11 @@ bool TriggerCore::canUpdate(const TriggerUpdateEvent &event) const
     return true;
 }
 
+bool TriggerCore::canContinue(const TriggerUpdateEvent &event) const
+{
+    return canUpdate(event);
+}
+
 void TriggerCore::updateActions(const std::vector<std::unique_ptr<TriggerAction>> &actions, const TriggerUpdateEvent &event) const
 {
     doUpdateActions(actions, event);

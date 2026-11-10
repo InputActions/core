@@ -56,6 +56,11 @@ bool SwipeTriggerCore::canUpdate(const TriggerUpdateEvent &event) const
     return matchesAngleRange(angle, range.min, range.max) || (m_bidirectional && matchesOppositeAngleRange(angle, range.min, range.max));
 }
 
+bool SwipeTriggerCore::canContinue(const TriggerUpdateEvent &event) const
+{
+    return m_lockDirection ? MotionTriggerCore::canUpdate(event) : canUpdate(event);
+}
+
 void SwipeTriggerCore::updateActions(const std::vector<std::unique_ptr<TriggerAction>> &actions, const TriggerUpdateEvent &event) const
 {
     auto newEvent = dynamic_cast<const SwipeTriggerUpdateEvent &>(event);
