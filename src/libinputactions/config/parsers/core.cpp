@@ -31,6 +31,7 @@
 #include <libinputactions/actions/ActionGroup.h>
 #include <libinputactions/actions/CommandAction.h>
 #include <libinputactions/actions/ContextMenuAction.h>
+#include <libinputactions/actions/DirectionalAction.h>
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/actions/PlasmaGlobalShortcutAction.h>
 #include <libinputactions/actions/ReplaceTextAction.h>
@@ -162,6 +163,31 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
     } else if (const auto *contextMenuNode = node->at("context_menu")) {
         g_configLoader->requestOverlay(contextMenuNode);
         result = std::make_unique<ContextMenuAction>(contextMenuNode->as<std::vector<std::unique_ptr<MenuItem>>>());
+    } else if (const auto *directionalNode = node->mapAt("directional")) {
+        qreal distance = 75;
+        if (const auto *distanceNode = directionalNode->at("distance")) {
+            distance = distanceNode->as<qreal>();
+            if (distance <= 0) {
+                throw InvalidValueConfigException(distanceNode, "Distance must be greater than zero.");
+            }
+        }
+        const auto parseBindings = [](const Node *bindings) {
+            DirectionalAction::Bindings result;
+            if (bindings) {
+                const std::array<const char *, 4> names = {"left", "right", "up", "down"};
+                for (size_t i = 0; i < names.size(); ++i) {
+                    if (const auto *binding = bindings->at(names[i])) {
+                        result[i] = binding->as<std::unique_ptr<Action>>();
+                    }
+                }
+            }
+            return result;
+        };
+        auto action = std::make_unique<DirectionalAction>(distance,
+                                                          parseBindings(directionalNode->mapAt("actions", true)),
+                                                          parseBindings(directionalNode->mapAt("initial")));
+        loadSetter(action, &DirectionalAction::setRepeatCondition, directionalNode->at("repeat_conditions"));
+        result = std::move(action);
     } else if (const auto *functionNode = node->at("function")) {
         result = std::make_unique<JSFunctionAction>(parseFunction(functionNode), functionNode->shared_from_this());
     } else if (const auto *inputNode = node->at("input")) {
@@ -178,13 +204,25 @@ void NodeParser<std::unique_ptr<Action>>::parse(const Node *node, std::unique_pt
     } else if (const auto *oneNode = node->at("one")) {
         auto action = std::make_unique<ActionGroup>(ActionGroupExecutionMode::First);
         loadSetter(action.get(), &ActionGroup::setActions, oneNode);
+        // Directional actions must be the action of a trigger action, which checks that it executes them on update.
+        if (std::ranges::any_of(action->actions(), [](const auto &child) {
+                return dynamic_cast<const DirectionalAction *>(child);
+            })) {
+            throw InvalidValueContextConfigException(oneNode, "Directional actions cannot be in groups.");
+        }
         result = std::move(action);
     } else {
         throw InvalidValueConfigException(node, "Action is missing a required property that determines its type.");
     }
 
     loadSetter(result, &Action::setCondition, node->at("conditions"));
-    loadSetter(result, &Action::setExecutionLimit, node->at("limit"));
+    if (const auto *limitNode = node->at("limit")) {
+        // An ignored update would count towards the limit.
+        if (dynamic_cast<const DirectionalAction *>(result.get())) {
+            throw InvalidValueContextConfigException(limitNode, "Limits cannot be set on directional actions, only on the actions of each direction.");
+        }
+        loadSetter(result, &Action::setExecutionLimit, limitNode);
+    }
     loadSetter(result, &Action::setId, node->at("id"));
 }
 
@@ -650,9 +688,19 @@ void NodeParser<std::unique_ptr<TriggerAction>>::parse(const Node *node, std::un
     loadSetter(result, &TriggerAction::setConflicting, node->at("conflicting"));
     loadSetter(result, &TriggerAction::setOn, node->at("on"));
 
+    // Directional actions process the motion of each update, and use their own distance instead of an interval.
+    const auto directional = dynamic_cast<const DirectionalAction *>(result->action()) != nullptr;
+    if (directional && result->on() != On::Update) {
+        const auto *onNode = node->at("on");
+        throw InvalidValueContextConfigException(onNode ? onNode : node, "Directional actions can only be set on update actions.");
+    }
+
     if (const auto *intervalNode = node->at("interval")) {
         if (result->on() != On::Update && result->on() != On::Tick) {
             throw InvalidValueContextConfigException(intervalNode, "Intervals can only be set on update and tick actions.");
+        }
+        if (directional) {
+            throw InvalidValueContextConfigException(intervalNode, "Intervals cannot be set on directional actions, which use their own distance.");
         }
         loadSetter(result, &TriggerAction::setInterval, intervalNode);
     }

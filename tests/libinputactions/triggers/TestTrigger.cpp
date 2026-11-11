@@ -1,6 +1,9 @@
 #include "Test.h"
 #include "mocks/MockTrigger.h"
 #include <libinputactions/actions/Action.h>
+#include <libinputactions/actions/CustomAction.h>
+#include <libinputactions/actions/DirectionalAction.h>
+#include <libinputactions/actions/InputAction.h>
 #include <libinputactions/actions/TriggerAction.h>
 
 namespace InputActions
@@ -47,6 +50,39 @@ private slots:
             trigger.update(event);
         }
         QCOMPARE(actionRaw->action()->executions(), actionExecuted);
+    }
+
+    void addAction_directionalInput__clearsModifiers_data()
+    {
+        QTest::addColumn<bool>("initial");
+
+        QTest::newRow("actions") << false;
+        QTest::newRow("initial") << true;
+    }
+
+    void addAction_directionalInput__clearsModifiers()
+    {
+        QFETCH(bool, initial);
+        DirectionalAction::Bindings actions;
+        DirectionalAction::Bindings initialActions;
+        auto &bindings = initial ? initialActions : actions;
+        bindings[0] = std::make_unique<InputAction>(std::vector<InputActionItem>{});
+
+        MockTrigger trigger;
+        trigger.addAction(std::make_unique<TriggerAction>(std::make_unique<DirectionalAction>(75, std::move(actions), std::move(initialActions))));
+
+        QCOMPARE(trigger.m_clearModifiers, std::optional<bool>(true));
+    }
+
+    void addAction_directionalWithoutInput__doesNotClearModifiers()
+    {
+        DirectionalAction::Bindings actions;
+        actions[0] = std::make_unique<CustomAction>([](const auto &) {});
+
+        MockTrigger trigger;
+        trigger.addAction(std::make_unique<TriggerAction>(std::make_unique<DirectionalAction>(75, std::move(actions))));
+
+        QVERIFY(!trigger.m_clearModifiers);
     }
 };
 
