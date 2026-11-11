@@ -38,6 +38,10 @@ public:
 
     virtual bool canUpdate(const TriggerUpdateEvent &event) const;
     /**
+     * Called instead of canUpdate once the trigger has been updated during the current gesture. A resumed gesture is checked by canUpdate again.
+     */
+    virtual bool canContinue(const TriggerUpdateEvent &event) const;
+    /**
      * Override to modify the event before passing it to actions. Must be called by the overriding method.
      */
     virtual void updateActions(const std::vector<std::unique_ptr<TriggerAction>> &actions, const TriggerUpdateEvent &event) const;

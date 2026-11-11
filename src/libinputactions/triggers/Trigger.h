@@ -198,6 +198,11 @@ private:
 
     std::vector<std::unique_ptr<TriggerAction>> m_actions;
     bool m_started = false;
+    /**
+     * Whether the trigger has been updated during the current gesture. Unlike m_started, cleared while waiting for the gesture to be resumed, so that the
+     * resumed gesture is checked by canUpdate as if it were new.
+     */
+    bool m_updatedDuringGesture = false;
     QTimer m_tickTimer;
 
     bool m_withinThreshold = false;

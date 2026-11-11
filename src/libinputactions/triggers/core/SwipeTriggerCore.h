@@ -93,7 +93,7 @@ enum class SwipeDirection
  * in DeviceProperties. Touchpads have 3 different thresholds, depending on the finger count.
  *
  * If swipe triggers are active and the motion angle changes, but none of the active triggers acccept it, they are cancelled and all swipe triggers are
- * activated again, allowing for chaining multiple triggers together.
+ * activated again, allowing for chaining multiple triggers together. Started triggers with lockDirection set are not cancelled by angle changes.
  */
 class SwipeTriggerCore : public MotionTriggerCore
 {
@@ -115,7 +115,15 @@ public:
     bool bidirectional() const { return m_bidirectional; }
     void setBidirectional(bool value) { m_bidirectional = value; }
 
+    /**
+     * Whether the angle is only checked until the trigger starts. A started trigger then stays active regardless of direction changes, preventing chaining.
+     * Other conditions, such as speed, are still checked. A resumed gesture must match the angle again.
+     */
+    bool lockDirection() const { return m_lockDirection; }
+    void setLockDirection(bool value) { m_lockDirection = value; }
+
     bool canUpdate(const TriggerUpdateEvent &event) const override;
+    bool canContinue(const TriggerUpdateEvent &event) const override;
     void updateActions(const std::vector<std::unique_ptr<TriggerAction>> &actions, const TriggerUpdateEvent &event) const override;
 
 private:
@@ -139,6 +147,7 @@ private:
     qreal m_minAngle{};
     qreal m_maxAngle{};
     bool m_bidirectional{};
+    bool m_lockDirection{};
 
     friend class TestSwipeTriggerCore;
 };
