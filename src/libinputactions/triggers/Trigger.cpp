@@ -18,6 +18,8 @@
 
 #include "Trigger.h"
 #include "core/TriggerCore.h"
+#include <algorithm>
+#include <libinputactions/actions/DirectionalAction.h>
 #include <libinputactions/actions/InputAction.h>
 #include <libinputactions/input/backends/InputBackend.h>
 #include <libinputactions/variables/VariableRegistry.h>
@@ -157,9 +159,28 @@ void Trigger::stopResumeTimeoutTimer()
     m_resumeTimeoutTimer.stop();
 }
 
+/**
+ * @return Whether the action is a directional action with an input action for any direction.
+ */
+static bool directionalExecutesInput(const Action *action)
+{
+    const auto *directionalAction = dynamic_cast<const DirectionalAction *>(action);
+    if (!directionalAction) {
+        return false;
+    }
+    for (const auto *bindings : {&directionalAction->actions(), &directionalAction->initial()}) {
+        if (std::ranges::any_of(*bindings, [](const auto &binding) {
+                return dynamic_cast<const InputAction *>(binding.get());
+            })) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Trigger::actionAdded(TriggerAction *action)
 {
-    if (dynamic_cast<const InputAction *>(action->action())) {
+    if (dynamic_cast<const InputAction *>(action->action()) || directionalExecutesInput(action->action())) {
         if (!m_clearModifiers) {
             m_clearModifiers = true;
         }

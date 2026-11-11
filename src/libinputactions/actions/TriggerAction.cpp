@@ -20,6 +20,7 @@
 #include "ActionExecutor.h"
 #include <libinputactions/input/Delta.h>
 #include <libinputactions/triggers/core/MotionTriggerCore.h>
+#include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
 namespace InputActions
 {
@@ -53,6 +54,9 @@ void TriggerAction::triggerUpdated(const TriggerUpdateEvent &event)
     if (const auto *motionEvent = dynamic_cast<const MotionTriggerUpdateEvent *>(&event)) {
         const auto &pointDelta = motionEvent->pointDelta();
         m_currentMotionPointDelta = m_accelerated ? pointDelta.accelerated() : pointDelta.unaccelerated();
+    }
+    if (const auto *swipeEvent = dynamic_cast<const SwipeTriggerUpdateEvent *>(&event)) {
+        m_currentMotionAngle = swipeEvent->averageAngle();
     }
     update(event.delta());
 }
@@ -88,6 +92,7 @@ void TriggerAction::tryExecute(uint32_t executions)
                 .executions = executions,
                 .inputActionArgs = {
                     .motionPointDelta = m_currentMotionPointDelta,
+                    .motionAngle = m_currentMotionAngle,
                 },
             }});
     }

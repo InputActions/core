@@ -187,6 +187,7 @@ private:
     qreal m_absoluteAccumulatedDelta{};
 
     PointF m_currentMotionPointDelta;
+    std::optional<qreal> m_currentMotionAngle;
 
     friend class TestTrigger;
 };

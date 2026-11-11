@@ -4,6 +4,7 @@
 #include <libinputactions/actions/TriggerAction.h>
 #include <libinputactions/input/Delta.h>
 #include <libinputactions/triggers/core/MotionTriggerCore.h>
+#include <libinputactions/triggers/core/SwipeTriggerCore.h>
 
 namespace InputActions
 {
@@ -104,6 +105,23 @@ private slots:
         action.triggerStarted();
         MotionTriggerUpdateEvent event;
         event.setPointDelta({{20, 20}, {10, 10}});
+        action.triggerUpdated(event);
+
+        action.tryExecute();
+        QCOMPARE(assertAction->executions(), 1);
+    }
+
+    void tryExecute_swipe__passesMotionAngleToAction()
+    {
+        auto *assertAction = new CustomAction([](const auto &args) {
+            QCOMPARE(args.inputActionArgs.motionAngle.value_or(-1), 180);
+        });
+
+        TriggerAction action{std::unique_ptr<Action>(assertAction)};
+
+        action.triggerStarted();
+        SwipeTriggerUpdateEvent event;
+        event.setAverageAngle(180);
         action.triggerUpdated(event);
 
         action.tryExecute();

@@ -9,6 +9,7 @@ set(libinputactions_SRCS
     libinputactions/actions/CommandAction.cpp
     libinputactions/actions/ContextMenuAction.cpp
     libinputactions/actions/CustomAction.cpp
+    libinputactions/actions/DirectionalAction.cpp
     libinputactions/actions/InputAction.cpp
     libinputactions/actions/PlasmaGlobalShortcutAction.cpp
     libinputactions/actions/ReplaceTextAction.cpp
